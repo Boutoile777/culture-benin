@@ -1,0 +1,51 @@
+<!DOCTYPE html><html><head><style>body{margin:0;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;font:9px monospace}figure{margin:0}img{width:100%;height:100px;object-fit:cover;background:#fdd}figcaption{overflow:hidden;white-space:nowrap}</style></head><body>
+<script>
+const files = [
+"Amazone benin.jpg",
+"Statue de Bio Guera.jpg",
+"Place de l'Amazone.jpg",
+"Statue Amazone Cotonou.jpg",
+"Benin Amazone monument.jpg",
+"Cotonou monument Amazone.jpg",
+"Tata Somba.jpg",
+"Pendjari National Park.jpg",
+"Pendjari.jpg",
+"Elephants Pendjari.jpg",
+"Zangbeto Ouidah.jpg",
+"Egungun.jpg",
+"Egungun Benin.jpg",
+"Egungun masquerade.jpg",
+"Fête du vodoun à Ouidah.jpg",
+"Vodun festival Ouidah.jpg",
+"Route des esclaves Ouidah.jpg",
+"Statue roi Béhanzin.jpg",
+"Behanzin statue.jpg",
+"Porto-Novo mosque.jpg",
+"Musée Honmè Porto-Novo.jpg",
+"Pirogue Ganvié.jpg",
+"Ganvie market.jpg",
+"Ganvie stilt houses.jpg",
+"Lake Nokoué.jpg",
+"Abomey bas-relief.jpg",
+"Bas-reliefs Abomey.jpg",
+"Royal Palaces of Abomey.jpg",
+"Palais royal Abomey.jpg",
+"Temple des Pythons de Ouidah.jpg",
+"Basilique de Ouidah.jpg",
+"Forêt sacrée de Kpassè.jpg",
+"Kpasse sacred forest.jpg",
+"Artisanat béninois.jpg",
+"Tissage Benin.jpg",
+"Marché Dantokpa.jpg"
+];
+files.forEach((f,i)=>{
+  const fig=document.createElement('figure');
+  const img=document.createElement('img');
+  img.src='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=300';
+  img.onload=()=>{fig.querySelector('figcaption').style.background='#9f9'};
+  img.onerror=()=>{fig.querySelector('figcaption').style.background='#f99'};
+  const cap=document.createElement('figcaption');
+  cap.textContent=i+' '+f;
+  fig.append(img,cap);document.body.append(fig);
+});
+</script></body></html>

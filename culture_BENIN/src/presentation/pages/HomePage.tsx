@@ -1,0 +1,145 @@
+import { useMemo, useRef, useState } from "react";
+import { MainLayout } from "@/presentation/layouts/MainLayout";
+import { useHomeContent } from "@/presentation/hooks/useHomeContent";
+import { HeroCarousel } from "@/presentation/components/home/HeroCarousel";
+import { SectionHeading } from "@/presentation/components/common/SectionHeading";
+import { CityCard } from "@/presentation/components/ui/CityCard";
+import { StoryCard } from "@/presentation/components/ui/StoryCard";
+import { QuickLinkCard } from "@/presentation/components/ui/QuickLinkCard";
+import { StatTile } from "@/presentation/components/ui/StatTile";
+import { ContributionRow } from "@/presentation/components/ui/ContributionRow";
+import {
+  QUICK_LINKS,
+  COLLECTION_STATS,
+} from "@/shared/constants/homeStaticContent";
+
+export function HomePage() {
+  const { content, isLoading } = useHomeContent();
+  const [searchValue, setSearchValue] = useState("");
+  const [favoriteCityIds, setFavoriteCityIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const citiesSectionRef = useRef<HTMLDivElement>(null);
+
+  const filteredCities = useMemo(() => {
+    if (!content) return [];
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return content.cities;
+    return content.cities.filter((city) =>
+      city.name.toLowerCase().includes(query),
+    );
+  }, [content, searchValue]);
+
+  const cityNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    content?.cities.forEach((city) => map.set(city.id, city.name));
+    return map;
+  }, [content]);
+
+  const toggleFavorite = (cityId: string) => {
+    setFavoriteCityIds((current) => {
+      const next = new Set(current);
+      if (next.has(cityId)) next.delete(cityId);
+      else next.add(cityId);
+      return next;
+    });
+  };
+
+  if (isLoading || !content) {
+    return (
+      <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+        <div className="flex h-[400px] items-center justify-center text-gray-400">
+          Chargement du patrimoine béninois…
+        </div>
+      </MainLayout>
+    );
+  }
+
+  return (
+    <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+      <main className="animate-[fadeUp_0.4s_ease_both]">
+        <HeroCarousel
+          slides={content.heroSlides}
+          onExploreClick={() =>
+            citiesSectionRef.current?.scrollIntoView({ behavior: "smooth" })
+          }
+        />
+
+        <section className="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6 lg:pt-14">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {QUICK_LINKS.map((link) => (
+              <QuickLinkCard key={link.title} link={link} />
+            ))}
+          </div>
+        </section>
+
+        <section ref={citiesSectionRef} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+          <div className="mb-6">
+            <SectionHeading
+              kicker="Découvrez le Bénin autrement"
+              title="Lieux culturels à explorer"
+            />
+          </div>
+          {filteredCities.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              Aucune ville ne correspond à « {searchValue} ».
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredCities.map((city) => (
+                <CityCard
+                  key={city.id}
+                  city={city}
+                  isFavorite={favoriteCityIds.has(city.id)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="border-y border-gray-200 bg-[#fafaf8] py-10 lg:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-7">
+              <SectionHeading kicker="Récits & transmission" title="Histoires remarquables" />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {content.stories.map((story) => (
+                <StoryCard key={story.id} story={story} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-16">
+          <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <div className="mb-6">
+                <SectionHeading kicker="Archives vivantes" title="Collections multimédias" />
+              </div>
+              <div className="grid grid-cols-2 gap-3.5">
+                {COLLECTION_STATS.map((stat) => (
+                  <StatTile key={stat.label} stat={stat} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="mb-6">
+                <SectionHeading kicker="Communauté" title="Dernières contributions" />
+              </div>
+              <div className="flex flex-col border-t border-gray-200">
+                {content.recentContributions.map((contribution) => (
+                  <ContributionRow
+                    key={contribution.id}
+                    contribution={contribution}
+                    cityName={cityNameById.get(contribution.cityId) ?? ""}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </MainLayout>
+  );
+}

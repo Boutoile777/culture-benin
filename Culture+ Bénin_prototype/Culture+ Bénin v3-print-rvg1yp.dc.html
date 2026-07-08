@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#fff;color:#1f1f1f;font-family:'Archivo',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0E3B2E}a:hover{color:#B4622D}
+::selection{background:#E9E4D8}
+input,select,textarea,button{font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid #0E3B2E;outline-offset:1px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes eq{0%{height:5px}50%{height:18px}100%{height:5px}}
+</style>
+</helmet>
+
+<!-- ============ NAVIGATION ============ -->
+<header style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid #e8eaed">
+  <div style="max-width:1280px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;gap:16px">
+    <button onClick="{{ goAccueil }}" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:baseline;gap:2px">
+      <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:22px;color:#1f1f1f">Culture</span>
+      <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:22px;color:#B4622D">+</span>
+      <span style="font-weight:500;font-size:12px;color:#5f6368;margin-left:6px;letter-spacing:.16em;text-transform:uppercase">Bénin</span>
+    </button>
+    <nav style="display:flex;gap:2px;flex:1;min-width:0">
+      <sc-for list="{{ navItems }}" as="it" hint-placeholder-count="5">
+        <button onClick="{{ it.go }}" style="background:none;border:none;cursor:pointer;font-size:14px;padding:8px 10px;color:{{ it.color }};font-weight:{{ it.weight }};border-bottom:2px solid {{ it.line }};border-radius:0;white-space:nowrap">{{ it.label }}</button>
+      </sc-for>
+    </nav>
+    <div style="position:relative;flex:0 1 270px;min-width:130px">
+      <input value="{{ q }}" onChange="{{ onSearch }}" placeholder="Rechercher une ville, un lieu…" style="width:100%;padding:9px 16px;border-radius:99px;border:1px solid #dadce0;background:#f8f9fa;font-size:13px;color:#1f1f1f;box-sizing:border-box">
+      <sc-if value="{{ hasSuggestions }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:44px;left:0;right:0;background:#fff;border:1px solid #e8eaed;border-radius:12px;box-shadow:0 10px 30px rgba(32,33,36,.14);overflow:hidden;display:flex;flex-direction:column">
+          <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.go }}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:11px 14px;text-align:left;border-bottom:1px solid #f1f3f4" style-hover="background:#f8f9fa">
+              <span style="font-size:13.5px;color:#1f1f1f">{{ s.label }}</span>
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5f6368;font-weight:600">{{ s.type }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <sc-if value="{{ isLogged }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ goProfil }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:4px">
+        <span style="width:33px;height:33px;border-radius:50%;background:#0E3B2E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px">{{ userInitial }}</span>
+      </button>
+    </sc-if>
+    <sc-if value="{{ notLogged }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ openLogin }}" style="background:none;color:#0E3B2E;border:1px solid #dadce0;cursor:pointer;padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;white-space:nowrap" style-hover="background:#f8f9fa">Se connecter</button>
+    </sc-if>
+  </div>
+</header>
+
+<!-- ============ ACCUEIL ============ -->
+<sc-if value="{{ isAccueil }}" hint-placeholder-val="{{ true }}">
+<main data-screen-label="Accueil" style="animation:fadeUp .4s ease both">
+
+  <section style="position:relative;height:620px;background:#1f1f1f;overflow:hidden">
+    <sc-for list="{{ heroSlides }}" as="h" hint-placeholder-count="1">
+      <img src="{{ h.img }}" alt="{{ h.nom }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:{{ h.op }};transition:opacity 1.1s ease">
+    </sc-for>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,15,15,.3) 0%,rgba(15,15,15,.06) 45%,rgba(15,15,15,.74) 100%)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0">
+      <div style="max-width:1280px;margin:0 auto;padding:0 24px 56px">
+        <div style="font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:16px">Musée numérique du patrimoine béninois</div>
+        <h1 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:58px;line-height:1.06;color:#fff;margin:0 0 16px;max-width:720px;text-wrap:balance">La mémoire vivante du Bénin</h1>
+        <p style="font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.85);max-width:540px;margin:0 0 24px">Villes, royaumes, traditions, arts et récits — explorez librement le patrimoine matériel et immatériel du Bénin, sans inscription.</p>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button onClick="{{ goExplorer }}" style="background:#fff;color:#1f1f1f;border:none;cursor:pointer;padding:13px 26px;border-radius:99px;font-size:14.5px;font-weight:600" style-hover="background:#f1f3f4">Explorer une ville</button>
+          <button onClick="{{ startTourOuidah }}" style="background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.5);cursor:pointer;padding:13px 26px;border-radius:99px;font-size:14.5px;font-weight:500;backdrop-filter:blur(4px)" style-hover="background:rgba(255,255,255,.26)">▶ Visite immersive</button>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;right:24px;bottom:24px;display:flex;flex-direction:column;align-items:flex-end;gap:12px">
+      <button onClick="{{ heroGoCity }}" style="display:flex;align-items:center;gap:10px;background:rgba(15,15,15,.55);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);color:#fff;cursor:pointer;padding:10px 16px;border-radius:99px;font-size:13px;font-weight:600" style-hover="background:rgba(15,15,15,.75)">{{ heroNom }} <span style="color:rgba(255,255,255,.7)">{{ heroAction }}</span></button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onClick="{{ heroPrev }}" style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;cursor:pointer;font-size:15px" style-hover="background:rgba(255,255,255,.3)">←</button>
+        <sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="6">
+          <button onClick="{{ d.go }}" style="width:{{ d.w }};height:7px;border-radius:99px;background:{{ d.bg }};border:none;cursor:pointer;padding:0;transition:all .25s"></button>
+        </sc-for>
+        <button onClick="{{ heroNext }}" style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;cursor:pointer;font-size:15px" style-hover="background:rgba(255,255,255,.3)">→</button>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1280px;margin:0 auto;padding:56px 24px 16px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <sc-for list="{{ quickLinks }}" as="ql" hint-placeholder-count="4">
+        <button onClick="{{ ql.go }}" style="text-align:left;background:#fff;border:1px solid #e8eaed;border-radius:14px;padding:22px;cursor:pointer;display:flex;flex-direction:column;gap:8px" style-hover="box-shadow:0 6px 20px rgba(32,33,36,.1)">
+          <span style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600">{{ ql.kicker }}</span>
+          <span style="font-family:'Spectral',Georgia,serif;font-size:20px;font-weight:600;color:#1f1f1f">{{ ql.titre }}</span>
+          <span style="font-size:13.5px;line-height:1.5;color:#5f6368">{{ ql.desc }}</span>
+          <span style="font-size:14px;color:#0E3B2E;font-weight:600;margin-top:4px">→</span>
+        </button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1280px;margin:0 auto;padding:56px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px">
+      <div>
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Découvrez le Bénin autrement</div>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:34px;margin:0;color:#1f1f1f">Lieux culturels à explorer</h2>
+      </div>
+      <button onClick="{{ goCarte }}" style="background:none;border:none;cursor:pointer;color:#0E3B2E;font-size:14px;font-weight:600;padding:0">Voir sur la carte →</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <sc-for list="{{ cities }}" as="c" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:16px;overflow:hidden;position:relative;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 28px rgba(32,33,36,.12)">
+          <img src="{{ c.img }}" alt="{{ c.nom }}" style="width:100%;height:210px;object-fit:cover;display:block;background:#f1f3f4">
+          <button onClick="{{ c.toggleFav }}" title="Ajouter aux favoris" style="position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.94);border:none;cursor:pointer;font-size:16px;color:{{ c.favColor }};display:flex;align-items:center;justify-content:center">{{ c.favIcon }}</button>
+          <button onClick="{{ c.select }}" style="text-align:left;background:none;border:none;cursor:pointer;padding:18px;display:flex;flex-direction:column;gap:6px;flex:1">
+            <span style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600">{{ c.region }}</span>
+            <span style="font-family:'Spectral',Georgia,serif;font-size:22px;font-weight:600;color:#1f1f1f">{{ c.nom }}</span>
+            <span style="font-size:13px;line-height:1.5;color:#5f6368">{{ c.tagline }}</span>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="border-top:1px solid #e8eaed;border-bottom:1px solid #e8eaed;background:#fafaf8;padding:64px 0">
+    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Récits & transmission</div>
+      <h2 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:34px;margin:0 0 28px;color:#1f1f1f">Histoires remarquables</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+        <sc-for list="{{ stories }}" as="st" hint-placeholder-count="4">
+          <button onClick="{{ st.go }}" style="text-align:left;background:#fff;border:1px solid #e8eaed;border-radius:16px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 28px rgba(32,33,36,.12)">
+            <img src="{{ st.img }}" alt="{{ st.titre }}" style="width:100%;height:150px;object-fit:cover;display:block;background:#f1f3f4">
+            <span style="display:flex;flex-direction:column;gap:8px;padding:18px">
+              <span style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#B4622D;font-weight:600">{{ st.cat }}</span>
+              <span style="font-family:'Spectral',Georgia,serif;font-size:19px;font-weight:500;color:#1f1f1f;line-height:1.3">{{ st.titre }}</span>
+              <span style="font-size:13px;line-height:1.55;color:#5f6368">{{ st.extrait }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1280px;margin:0 auto;padding:64px 24px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start">
+      <div>
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Archives vivantes</div>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:30px;margin:0 0 22px;color:#1f1f1f">Collections multimédias</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ collections }}" as="co" hint-placeholder-count="4">
+            <div style="background:#f8f9fa;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:4px">
+              <span style="font-family:'Spectral',Georgia,serif;font-size:30px;font-weight:600;color:#0E3B2E">{{ co.n }}</span>
+              <span style="font-size:13.5px;font-weight:600;color:#1f1f1f">{{ co.titre }}</span>
+              <span style="font-size:12.5px;color:#5f6368">{{ co.desc }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Communauté</div>
+        <h2 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:30px;margin:0 0 22px;color:#1f1f1f">Dernières contributions</h2>
+        <div style="display:flex;flex-direction:column;border-top:1px solid #e8eaed">
+          <sc-for list="{{ recentContribs }}" as="rc" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px solid #e8eaed">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:14.5px;font-weight:600;color:#1f1f1f">{{ rc.titre }}</span>
+                <span style="font-size:12.5px;color:#5f6368">{{ rc.par }} · {{ rc.ville }}</span>
+              </div>
+              <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#0E3B2E;font-weight:600;background:#f1f3f4;padding:5px 10px;border-radius:99px;white-space:nowrap">{{ rc.type }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ goContribuer }}" style="margin-top:20px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Contribuer au patrimoine →</button>
+      </div>
+    </div>
+  </section>
+</main>
+</sc-if>
+
+<!-- ============ EXPLORER ============ -->
+<sc-if value="{{ isExplorer }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Explorer — ville" style="animation:fadeUp .4s ease both">
+  <div style="border-bottom:1px solid #e8eaed;background:#fff">
+    <div style="max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-right:8px">Choisir une ville</span>
+      <sc-for list="{{ cityTabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.pick }}" style="border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};cursor:pointer;padding:8px 18px;border-radius:99px;font-size:13.5px;font-weight:600">{{ t.nom }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <section style="position:relative;height:440px;background:#1f1f1f">
+    <img src="{{ city.hero }}" alt="{{ city.nom }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,15,15,.2) 0%,rgba(15,15,15,.7) 100%)"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0">
+      <div style="max-width:1280px;margin:0 auto;padding:0 24px 44px">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:10px">{{ city.region }}</div>
+        <h1 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:54px;margin:0 0 6px;color:#fff;line-height:1.05">{{ city.nom }}</h1>
+        <div style="font-family:'Spectral',Georgia,serif;font-style:italic;font-size:20px;color:rgba(255,255,255,.85);margin-bottom:18px">{{ city.surnom }}</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button onClick="{{ startTour }}" style="background:#fff;color:#1f1f1f;border:none;cursor:pointer;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:600" style-hover="background:#f1f3f4">▶ Démarrer la visite immersive</button>
+          <button onClick="{{ goCarteCity }}" style="background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.5);cursor:pointer;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:500" style-hover="background:rgba(255,255,255,.26)">Voir sur la carte</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="max-width:1280px;margin:0 auto;padding:52px 24px;display:flex;flex-direction:column;gap:60px">
+
+    <section style="display:grid;grid-template-columns:220px 1fr;gap:40px">
+      <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">01</span>Histoire & origine</div>
+      <div>
+        <p style="font-size:16.5px;line-height:1.7;color:#1f1f1f;font-family:'Spectral',Georgia,serif;margin:0 0 18px">{{ city.intro }}</p>
+        <div style="columns:2;column-gap:40px;font-size:14.5px;line-height:1.75;color:#444;font-family:'Spectral',Georgia,serif">{{ city.histoire }}</div>
+      </div>
+    </section>
+
+    <section>
+      <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f;margin-bottom:6px"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">02</span>Sites & lieux importants</div>
+      <div style="font-size:13px;color:#5f6368;margin-bottom:22px">Cliquez sur un lieu pour ouvrir sa fiche : histoire dédiée, audio et médias.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <sc-for list="{{ citySites }}" as="s" hint-placeholder-count="3">
+          <button onClick="{{ s.open }}" style="text-align:left;background:#fff;border:1px solid #e8eaed;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;padding:0" style-hover="box-shadow:0 10px 28px rgba(32,33,36,.14)">
+            <sc-if value="{{ s.hasImg }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ s.img }}" alt="{{ s.nom }}" style="width:100%;height:140px;object-fit:cover;display:block;background:#f1f3f4">
+            </sc-if>
+            <sc-if value="{{ s.noImg }}" hint-placeholder-val="{{ true }}">
+              <span style="height:140px;background:linear-gradient(160deg,#f1f3f4,#e6e3da);display:flex;align-items:center;justify-content:center"><span style="font-size:11px;color:#9aa0a6">photo à venir — {{ s.nom }}</span></span>
+            </sc-if>
+            <span style="padding:16px;display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5f6368;font-weight:600">{{ s.cat }}</span>
+              <span style="font-family:'Spectral',Georgia,serif;font-size:18px;font-weight:600;color:#1f1f1f">{{ s.nom }}</span>
+              <span style="font-size:13px;line-height:1.5;color:#5f6368">{{ s.desc }}</span>
+              <span style="font-size:12.5px;color:#0E3B2E;font-weight:600;margin-top:4px">Lire son histoire →</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:220px 1fr;gap:40px">
+      <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">03</span>Personnalités historiques</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+        <sc-for list="{{ cityPersos }}" as="p" hint-placeholder-count="3">
+          <button onClick="{{ p.open }}" style="display:flex;gap:14px;align-items:center;background:#f8f9fa;border:1px solid transparent;border-radius:14px;padding:16px;cursor:pointer;text-align:left" style-hover="border-color:#dadce0;background:#fff">
+            <span style="width:50px;height:50px;border-radius:50%;background:#0E3B2E;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Spectral',Georgia,serif;font-size:19px;font-weight:600;flex:none">{{ p.ini }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:15px;font-weight:600;color:#1f1f1f">{{ p.nom }}</span>
+              <span style="font-size:12.5px;color:#5f6368;line-height:1.4">{{ p.role }}</span>
+              <span style="font-size:12px;color:#0E3B2E;font-weight:600;margin-top:2px">Sa biographie →</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:220px 1fr;gap:40px">
+      <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">04</span>Traditions locales</div>
+      <div style="display:flex;flex-direction:column;border-top:1px solid #e8eaed">
+        <sc-for list="{{ cityTraditions }}" as="tr" hint-placeholder-count="3">
+          <button onClick="{{ tr.open }}" style="display:grid;grid-template-columns:240px 1fr auto;gap:20px;padding:17px 4px;border:none;border-bottom:1px solid #e8eaed;background:none;cursor:pointer;text-align:left;align-items:center" style-hover="background:#fafaf8">
+            <span style="font-family:'Spectral',Georgia,serif;font-size:17.5px;font-weight:600;color:#1f1f1f">{{ tr.nom }}</span>
+            <span style="font-size:14px;line-height:1.6;color:#444">{{ tr.desc }}</span>
+            <span style="font-size:12.5px;color:#0E3B2E;font-weight:600;white-space:nowrap">Écouter le récit →</span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:220px 1fr;gap:40px">
+      <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">05</span>Événements culturels</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ cityEvents }}" as="ev" hint-placeholder-count="2">
+          <button onClick="{{ ev.open }}" style="display:flex;gap:20px;align-items:center;background:#fff;border:1px solid #e8eaed;border-radius:14px;padding:16px 20px;cursor:pointer;text-align:left" style-hover="box-shadow:0 6px 20px rgba(32,33,36,.1)">
+            <span style="flex:none;width:84px;text-align:center;background:#f1f3f4;color:#0E3B2E;border-radius:10px;padding:10px 6px;font-size:12px;font-weight:700;line-height:1.35">{{ ev.date }}</span>
+            <span style="display:flex;flex-direction:column;gap:3px;flex:1">
+              <span style="font-family:'Spectral',Georgia,serif;font-size:17.5px;font-weight:600;color:#1f1f1f">{{ ev.nom }}</span>
+              <span style="font-size:13.5px;color:#5f6368;line-height:1.5">{{ ev.desc }}</span>
+            </span>
+            <span style="font-size:12.5px;color:#0E3B2E;font-weight:600;white-space:nowrap">Découvrir →</span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:600;color:#1f1f1f"><span style="color:#B4622D;font-size:13px;font-family:'Archivo',sans-serif;font-weight:600;display:block;margin-bottom:6px">06</span>Galerie multimédia</div>
+        <button onClick="{{ startTour }}" style="background:none;border:none;cursor:pointer;color:#0E3B2E;font-size:14px;font-weight:600;padding:0">▶ Lancer la visite immersive</button>
+      </div>
+      <div style="font-size:13px;color:#5f6368;margin-bottom:22px">Photos, vidéos, archives sonores et visites 360° de {{ city.nom }}.</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        <sc-for list="{{ cityGalerie }}" as="g" hint-placeholder-count="8">
+          <button onClick="{{ g.open }}" style="position:relative;height:180px;border-radius:14px;overflow:hidden;border:1px solid #e8eaed;cursor:pointer;padding:0;background:#f1f3f4" style-hover="box-shadow:0 10px 28px rgba(32,33,36,.16)">
+            <img src="{{ g.img }}" alt="{{ g.titre }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block">
+            <span style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(15,15,15,.68) 100%)"></span>
+            <span style="position:absolute;left:12px;right:12px;bottom:11px;color:#fff;font-size:13px;font-weight:600;text-align:left;line-height:1.35">{{ g.titre }}</span>
+            <span style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,.92);color:#1f1f1f;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:99px">{{ g.badge }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ FICHE DÉTAIL (overlay) ============ -->
+<sc-if value="{{ ficheOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:130;background:rgba(32,33,36,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:fadeIn .25s ease both;padding:24px" onClick="{{ closeFiche }}">
+    <div style="background:#fff;border-radius:20px;width:720px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.35);position:relative" onClick="{{ stopProp }}">
+      <button onClick="{{ closeFiche }}" style="position:absolute;top:14px;right:14px;z-index:2;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.92);border:none;cursor:pointer;font-size:15px;color:#1f1f1f" style-hover="background:#fff">✕</button>
+      <sc-if value="{{ ficheHasImg }}" hint-placeholder-val="{{ true }}">
+        <img src="{{ ficheImg }}" alt="{{ ficheTitre }}" style="width:100%;height:280px;object-fit:cover;display:block;background:#f1f3f4">
+      </sc-if>
+      <div style="padding:28px 32px 32px;display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div style="font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#B4622D;font-weight:700;margin-bottom:8px">{{ ficheKicker }}</div>
+          <div style="font-family:'Spectral',Georgia,serif;font-size:30px;font-weight:600;color:#1f1f1f;line-height:1.15">{{ ficheTitre }}</div>
+        </div>
+        <p style="font-size:15px;line-height:1.75;color:#333;font-family:'Spectral',Georgia,serif;margin:0">{{ ficheTexte }}</p>
+
+        <div style="display:flex;align-items:center;gap:14px;background:#f8f9fa;border:1px solid #e8eaed;border-radius:14px;padding:14px 16px">
+          <button onClick="{{ toggleAudio }}" style="flex:none;width:44px;height:44px;border-radius:50%;background:#0E3B2E;color:#fff;border:none;cursor:pointer;font-size:15px" style-hover="background:#145243">{{ audioIcon }}</button>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">
+            <span style="font-size:13.5px;font-weight:600;color:#1f1f1f">{{ ficheAudio }}</span>
+            <span style="font-size:11.5px;color:#5f6368">Archive sonore · Culture+ Bénin</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:2.5px;height:20px;flex:none">
+            <sc-for list="{{ audioBars }}" as="b" hint-placeholder-count="18">
+              <span style="width:3px;border-radius:2px;background:#0E3B2E;height:6px;animation:eq .9s ease-in-out infinite;animation-delay:{{ b.delay }};animation-play-state:{{ b.play }};opacity:{{ b.op }}"></span>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-if value="{{ ficheHasVideo }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:14px;border:1px solid #e8eaed;border-radius:14px;padding:12px 16px 12px 12px">
+            <span style="position:relative;flex:none;width:96px;height:60px;border-radius:9px;overflow:hidden;display:block">
+              <img src="{{ ficheImg }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.7)">
+              <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px">▶</span>
+            </span>
+            <span style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-size:13.5px;font-weight:600;color:#1f1f1f">{{ ficheVideo }}</span>
+              <span style="font-size:11.5px;color:#5f6368">Vidéo documentaire · 3 à 6 min</span>
+            </span>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f3f4;padding-top:16px">
+          <span style="font-size:12px;color:#9aa0a6">{{ ficheVille }} · Collections Culture+ Bénin</span>
+          <button onClick="{{ closeFiche }}" style="background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:9px 18px;border-radius:99px;font-size:13px;font-weight:600" style-hover="background:#f8f9fa">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ VISITE IMMERSIVE (overlay) ============ -->
+<sc-if value="{{ tourOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:120;background:#0d0d0d;animation:fadeIn .3s ease both">
+    <img src="{{ tourImg }}" alt="{{ tourTitre }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;animation:fadeIn .5s ease both">
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.55) 0%,transparent 26%,transparent 55%,rgba(10,10,10,.82) 100%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px 26px">
+      <div style="color:#fff">
+        <div style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:600;margin-bottom:3px">Visite immersive — {{ tourVille }}</div>
+        <div style="font-family:'Spectral',Georgia,serif;font-size:19px;font-weight:500">{{ tourCompteur }}</div>
+      </div>
+      <button onClick="{{ closeTour }}" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;cursor:pointer;font-size:17px" style-hover="background:rgba(255,255,255,.28)">✕</button>
+    </div>
+    <button onClick="{{ tourPrev }}" style="position:absolute;left:22px;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;cursor:pointer;font-size:19px" style-hover="background:rgba(255,255,255,.3)">←</button>
+    <button onClick="{{ tourNext }}" style="position:absolute;right:22px;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;cursor:pointer;font-size:19px" style-hover="background:rgba(255,255,255,.3)">→</button>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:0 26px 26px">
+      <div style="max-width:760px">
+        <div style="font-family:'Spectral',Georgia,serif;font-size:32px;font-weight:500;color:#fff;margin-bottom:10px">{{ tourTitre }}</div>
+        <p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,.88);margin:0 0 18px;font-family:'Spectral',Georgia,serif">{{ tourTexte }}</p>
+        <div style="display:flex;gap:7px;align-items:center">
+          <sc-for list="{{ tourDots }}" as="d" hint-placeholder-count="5">
+            <button onClick="{{ d.go }}" style="width:{{ d.w }};height:7px;border-radius:99px;background:{{ d.bg }};border:none;cursor:pointer;padding:0;transition:all .25s"></button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ CARTE ============ -->
+<sc-if value="{{ isCarte }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Carte culturelle" style="animation:fadeUp .4s ease both">
+  <div style="max-width:1280px;margin:0 auto;padding:40px 24px 64px">
+    <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Orientation culturelle</div>
+    <h1 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:38px;margin:0 0 6px;color:#1f1f1f">La carte culturelle du Bénin</h1>
+    <p style="font-size:14.5px;color:#5f6368;margin:0 0 26px;max-width:620px;line-height:1.6">Sélectionnez un lieu pour le situer sur Google Maps et obtenir l'itinéraire depuis votre position actuelle.</p>
+    <div style="display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <input value="{{ q }}" onChange="{{ onSearch }}" placeholder="Rechercher un lieu…" style="padding:12px 16px;border-radius:12px;border:1px solid #dadce0;background:#fff;font-size:14px;box-sizing:border-box;width:100%">
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ mapFilters }}" as="f" hint-placeholder-count="6">
+            <button onClick="{{ f.pick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};cursor:pointer;padding:7px 14px;border-radius:99px;font-size:12.5px;font-weight:600">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;border:1px solid #e8eaed;border-radius:14px;overflow:hidden;max-height:430px;overflow-y:auto">
+          <sc-for list="{{ mapSites }}" as="ms" hint-placeholder-count="6">
+            <button onClick="{{ ms.pick }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:{{ ms.bg }};border:none;border-bottom:1px solid #f1f3f4;cursor:pointer;padding:13px 16px;text-align:left" style-hover="background:#f8f9fa">
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:14px;font-weight:{{ ms.w }};color:#1f1f1f">{{ ms.nom }}</span>
+                <span style="font-size:12px;color:#5f6368">{{ ms.ville }} · {{ ms.cat }}</span>
+              </span>
+              <span style="font-size:13px;color:{{ ms.dot }};flex:none">●</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="border:1px solid #e8eaed;border-radius:16px;overflow:hidden;height:430px;background:#f1f3f4">
+          <iframe src="{{ mapSrc }}" style="width:100%;height:100%;border:none;display:block" loading="lazy" title="Carte Google Maps"></iframe>
+        </div>
+        <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid #e8eaed;border-radius:16px;padding:18px 20px;background:#fff">
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+              <span style="font-family:'Spectral',Georgia,serif;font-size:20px;font-weight:600;color:#1f1f1f">{{ selNom }}</span>
+              <span style="font-size:13px;color:#5f6368;line-height:1.5">{{ selDesc }}</span>
+            </div>
+            <div style="display:flex;gap:10px;flex:none">
+              <button onClick="{{ goItineraire }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:600;white-space:nowrap" style-hover="background:#145243">Itinéraire depuis ma position ↗</button>
+              <button onClick="{{ goSelCity }}" style="background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:600;white-space:nowrap" style-hover="background:#f8f9fa">Page Explorer</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px dashed #dadce0;border-radius:16px;padding:18px 20px;font-size:13.5px;line-height:1.6;color:#5f6368">Choisissez un lieu dans la liste — la carte se centre dessus et le bouton itinéraire utilise votre position actuelle via Google Maps.</div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ JOUER ============ -->
+<sc-if value="{{ isJouer }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Jouer" style="animation:fadeUp .4s ease both">
+  <div style="max-width:1280px;margin:0 auto;padding:40px 24px 72px">
+    <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Apprendre en jouant</div>
+    <h1 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:38px;margin:0 0 26px;color:#1f1f1f">Jeux culturels</h1>
+
+    <sc-if value="{{ notLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px;background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:36px;display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:'Spectral',Georgia,serif;font-size:24px;font-weight:600;color:#1f1f1f">Connectez-vous pour jouer</span>
+        <span style="font-size:14px;line-height:1.6;color:#5f6368">La connexion permet de sauvegarder votre progression, vos scores et d'apparaître au classement. L'exploration du patrimoine reste libre et sans compte.</span>
+        <button onClick="{{ openLogin }}" style="margin-top:8px;background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:13px 24px;border-radius:99px;font-size:14px;font-weight:600;align-self:flex-start" style-hover="background:#145243">Se connecter</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap">
+        <sc-for list="{{ gameTabs }}" as="gt" hint-placeholder-count="4">
+          <button onClick="{{ gt.pick }}" style="border:1px solid {{ gt.border }};background:{{ gt.bg }};color:{{ gt.color }};cursor:pointer;padding:9px 20px;border-radius:99px;font-size:13.5px;font-weight:600">{{ gt.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:start">
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:32px">
+
+          <!-- QUIZ -->
+          <sc-if value="{{ showQuiz }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ quizActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Quiz historique</span>
+                <span style="font-size:13px;color:#5f6368">{{ quizProgress }}</span>
+              </div>
+              <div style="height:4px;background:#f1f3f4;border-radius:99px;margin-bottom:26px;overflow:hidden"><div style="height:100%;background:#0E3B2E;border-radius:99px;width:{{ quizPct }}"></div></div>
+              <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:500;line-height:1.35;color:#1f1f1f;margin-bottom:24px">{{ quizQuestion }}</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ quizOptions }}" as="o" hint-placeholder-count="4">
+                  <button onClick="{{ o.pick }}" style="text-align:left;background:{{ o.bg }};border:1.5px solid {{ o.border }};color:{{ o.color }};cursor:pointer;padding:13px 18px;border-radius:12px;font-size:14.5px;font-weight:500;display:flex;justify-content:space-between;gap:10px"><span>{{ o.label }}</span><span style="font-weight:700">{{ o.mark }}</span></button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ quizPicked }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:16px">
+                  <span style="font-size:13.5px;color:#444;font-style:italic;font-family:'Spectral',Georgia,serif;line-height:1.5">{{ quizFeedback }}</span>
+                  <button onClick="{{ quizNext }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:14px;font-weight:600;white-space:nowrap" style-hover="background:#145243">{{ quizNextLabel }}</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ quizDone }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Quiz terminé</span>
+                <span style="font-family:'Spectral',Georgia,serif;font-size:54px;font-weight:600;color:#0E3B2E">{{ quizScore }}</span>
+                <span style="font-size:14.5px;color:#5f6368;max-width:360px;line-height:1.6">{{ quizVerdict }}</span>
+                <button onClick="{{ quizRestart }}" style="margin-top:10px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Rejouer</button>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <!-- DEVINETTES -->
+          <sc-if value="{{ showDevinettes }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ devActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Devinettes culturelles</span>
+                <span style="font-size:13px;color:#5f6368">{{ devProgress }}</span>
+              </div>
+              <div style="background:#f8f9fa;border-radius:14px;padding:28px;margin-bottom:22px">
+                <div style="font-family:'Spectral',Georgia,serif;font-style:italic;font-size:23px;line-height:1.5;color:#1f1f1f">« {{ devTexte }} »</div>
+                <div style="font-size:12px;color:#5f6368;margin-top:12px">Qui suis-je ?</div>
+              </div>
+              <sc-if value="{{ devHidden }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ devReveal }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:12px 26px;border-radius:99px;font-size:14px;font-weight:600" style-hover="background:#145243">Révéler la réponse</button>
+              </sc-if>
+              <sc-if value="{{ devRevealed }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="font-family:'Spectral',Georgia,serif;font-size:26px;font-weight:600;color:#0E3B2E">{{ devReponse }}</div>
+                  <div style="font-size:13.5px;color:#5f6368;line-height:1.6">{{ devExplication }}</div>
+                  <div style="display:flex;gap:10px">
+                    <button onClick="{{ devFound }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#145243">J'avais trouvé ✓</button>
+                    <button onClick="{{ devMissed }}" style="background:none;border:1px solid #dadce0;color:#5f6368;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Pas trouvé</button>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ devDone }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Devinettes terminées</span>
+                <span style="font-family:'Spectral',Georgia,serif;font-size:54px;font-weight:600;color:#0E3B2E">{{ devScore }}</span>
+                <span style="font-size:14.5px;color:#5f6368;max-width:360px;line-height:1.6">La sagesse des devinettes se transmet de génération en génération — rejouez pour les mémoriser.</span>
+                <button onClick="{{ devRestart }}" style="margin-top:10px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Rejouer</button>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <!-- RECONNAÎTRE LES LIEUX -->
+          <sc-if value="{{ showLieux }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ lxActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Reconnaître les lieux</span>
+                <span style="font-size:13px;color:#5f6368">{{ lxProgress }}</span>
+              </div>
+              <div style="border-radius:14px;overflow:hidden;margin-bottom:20px;background:#f1f3f4">
+                <img src="{{ lxImg }}" alt="Lieu à reconnaître" style="width:100%;height:280px;object-fit:cover;display:block">
+              </div>
+              <div style="font-size:15px;font-weight:600;color:#1f1f1f;margin-bottom:14px">Quel est ce lieu ?</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <sc-for list="{{ lxOptions }}" as="o" hint-placeholder-count="4">
+                  <button onClick="{{ o.pick }}" style="text-align:left;background:{{ o.bg }};border:1.5px solid {{ o.border }};color:{{ o.color }};cursor:pointer;padding:13px 16px;border-radius:12px;font-size:14px;font-weight:500;display:flex;justify-content:space-between;gap:8px"><span>{{ o.label }}</span><span style="font-weight:700">{{ o.mark }}</span></button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ lxPicked }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:flex-end;margin-top:18px">
+                  <button onClick="{{ lxNext }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:14px;font-weight:600" style-hover="background:#145243">{{ lxNextLabel }}</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ lxDone }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Partie terminée</span>
+                <span style="font-family:'Spectral',Georgia,serif;font-size:54px;font-weight:600;color:#0E3B2E">{{ lxScore }}</span>
+                <span style="font-size:14.5px;color:#5f6368;max-width:360px;line-height:1.6">Vous savez maintenant reconnaître les grands lieux du patrimoine béninois.</span>
+                <button onClick="{{ lxRestart }}" style="margin-top:10px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Rejouer</button>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <!-- VRAI OU FAUX -->
+          <sc-if value="{{ showVf }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ vfActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Vrai ou faux</span>
+                <span style="font-size:13px;color:#5f6368">{{ vfProgress }}</span>
+              </div>
+              <div style="height:4px;background:#f1f3f4;border-radius:99px;margin-bottom:26px;overflow:hidden"><div style="height:100%;background:#0E3B2E;border-radius:99px;width:{{ vfPct }}"></div></div>
+              <div style="font-family:'Spectral',Georgia,serif;font-size:25px;font-weight:500;line-height:1.4;color:#1f1f1f;margin-bottom:26px">{{ vfEnonce }}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <sc-for list="{{ vfOptions }}" as="o" hint-placeholder-count="2">
+                  <button onClick="{{ o.pick }}" style="background:{{ o.bg }};border:1.5px solid {{ o.border }};color:{{ o.color }};cursor:pointer;padding:18px;border-radius:12px;font-size:16px;font-weight:600;display:flex;justify-content:center;gap:8px">{{ o.label }} {{ o.mark }}</button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ vfPicked }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:16px">
+                  <span style="font-size:13.5px;color:#444;font-style:italic;font-family:'Spectral',Georgia,serif;line-height:1.5">{{ vfFeedback }}</span>
+                  <button onClick="{{ vfNext }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:11px 22px;border-radius:99px;font-size:14px;font-weight:600;white-space:nowrap" style-hover="background:#145243">{{ vfNextLabel }}</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ vfDone }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                <span style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#B4622D;font-weight:600">Partie terminée</span>
+                <span style="font-family:'Spectral',Georgia,serif;font-size:54px;font-weight:600;color:#0E3B2E">{{ vfScore }}</span>
+                <span style="font-size:14.5px;color:#5f6368;max-width:360px;line-height:1.6">Le vrai du faux de l'histoire béninoise n'a plus de secret pour vous.</span>
+                <button onClick="{{ vfRestart }}" style="margin-top:10px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Rejouer</button>
+              </div>
+            </sc-if>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#f8f9fa;border:1px solid #e8eaed;border-radius:18px;padding:26px">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:16px">Classement</div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ leaderboard }}" as="l" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #e8eaed">
+                  <span style="width:22px;font-size:13px;color:#B4622D;font-weight:700">{{ l.rang }}</span>
+                  <span style="flex:1;font-size:13.5px;color:#1f1f1f;font-weight:{{ l.w }}">{{ l.nom }}</span>
+                  <span style="font-size:13px;color:#5f6368">{{ l.pts }} pts</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:24px">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:14px">Vos scores</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5f6368">Quiz historique</span><span style="font-weight:700;color:#0E3B2E">{{ statQuiz }}</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5f6368">Devinettes</span><span style="font-weight:700;color:#0E3B2E">{{ statDev }}</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5f6368">Reconnaître les lieux</span><span style="font-weight:700;color:#0E3B2E">{{ statLx }}</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#5f6368">Vrai ou faux</span><span style="font-weight:700;color:#0E3B2E">{{ statVf }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ CONTRIBUER ============ -->
+<sc-if value="{{ isContribuer }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Contribuer" style="animation:fadeUp .4s ease both">
+  <div style="max-width:1280px;margin:0 auto;padding:40px 24px 72px">
+    <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:8px">Transmission du savoir</div>
+    <h1 style="font-family:'Spectral',Georgia,serif;font-weight:500;font-size:38px;margin:0 0 26px;color:#1f1f1f">Contribuer au patrimoine</h1>
+
+    <sc-if value="{{ notLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px;background:#fff;border:1px solid #e8eaed;border-radius:18px;overflow:hidden">
+        <img src="{{ imgGelede }}" alt="Masque Guèlèdè" style="width:100%;height:180px;object-fit:cover;display:block">
+        <div style="padding:32px;display:flex;flex-direction:column;gap:12px">
+          <span style="font-family:'Spectral',Georgia,serif;font-size:24px;font-weight:600;color:#1f1f1f">Connectez-vous pour contribuer</span>
+          <span style="font-size:14px;line-height:1.6;color:#5f6368">Textes historiques, images, vidéos, audios, témoignages — chaque contribution est relue par nos modérateurs avant publication.</span>
+          <button onClick="{{ openLogin }}" style="margin-top:8px;background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:13px 24px;border-radius:99px;font-size:14px;font-weight:600;align-self:flex-start" style-hover="background:#145243">Se connecter</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showContribForm }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:start">
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444">Type de contenu
+              <select value="{{ cType }}" onChange="{{ onCType }}" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+                <option>Texte historique</option><option>Image</option><option>Vidéo</option><option>Audio</option><option>Témoignage</option><option>Document culturel</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444">Lieu concerné
+              <select value="{{ cVille }}" onChange="{{ onCVille }}" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+                <option>Ouidah</option><option>Abomey</option><option>Porto-Novo</option><option>Ganvié</option><option>Autre lieu au Bénin</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444">Catégorie culturelle
+            <select value="{{ cCat }}" onChange="{{ onCCat }}" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+              <option>Histoire & royaumes</option><option>Sites & monuments</option><option>Traditions & rites</option><option>Arts & artisanat</option><option>Festivals & événements</option><option>Patrimoine naturel</option>
+            </select>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444">Titre
+            <input value="{{ cTitre }}" onChange="{{ onCTitre }}" placeholder="Ex. Chant traditionnel de la pêche acadja" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444">Description / récit
+            <textarea value="{{ cDesc }}" onChange="{{ onCDesc }}" rows="5" placeholder="Racontez l'histoire, le contexte, la source…" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f;resize:vertical;line-height:1.6"></textarea>
+          </label>
+          <div style="border:1.5px dashed #dadce0;border-radius:12px;padding:26px;text-align:center;background:#f8f9fa">
+            <div style="font-size:14px;font-weight:600;color:#0E3B2E;margin-bottom:4px">Glissez vos fichiers multimédias ici</div>
+            <div style="font-size:12.5px;color:#5f6368">Images, vidéos, audios ou documents · 50 Mo max</div>
+          </div>
+          <button onClick="{{ submitContrib }}" style="background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:14px 28px;border-radius:99px;font-size:14.5px;font-weight:600;align-self:flex-start" style-hover="background:#145243">Soumettre pour modération</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="border-radius:18px;overflow:hidden;position:relative;height:170px">
+            <img src="{{ imgVodoun }}" alt="Cérémonie vodoun" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(15,15,15,.7) 100%)"></div>
+            <div style="position:absolute;left:18px;bottom:14px;color:#fff;font-family:'Spectral',Georgia,serif;font-size:17px;font-weight:500;line-height:1.35">Chaque témoignage enrichit<br>la mémoire collective.</div>
+          </div>
+          <div style="background:#f8f9fa;border:1px solid #e8eaed;border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:20px">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600">Comment ça marche</div>
+            <sc-for list="{{ contribSteps }}" as="cs" hint-placeholder-count="3">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <span style="flex:none;width:28px;height:28px;border-radius:50%;background:#0E3B2E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">{{ cs.n }}</span>
+                <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:14px;font-weight:600;color:#1f1f1f">{{ cs.titre }}</span><span style="font-size:13px;line-height:1.55;color:#5f6368">{{ cs.desc }}</span></span>
+              </div>
+            </sc-for>
+            <div style="font-size:12.5px;line-height:1.6;color:#5f6368;border-top:1px solid #e8eaed;padding-top:16px">Les contenus validés sont publiés avec le nom du contributeur et rejoignent les collections publiques de Culture+ Bénin.</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ contribSent }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px;background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:40px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
+        <span style="width:52px;height:52px;border-radius:50%;background:#0E3B2E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px">✓</span>
+        <span style="font-family:'Spectral',Georgia,serif;font-size:26px;font-weight:600;color:#0E3B2E">Merci pour votre contribution</span>
+        <span style="font-size:14.5px;line-height:1.6;color:#5f6368;max-width:400px">« {{ cTitreAff }} » est en cours de modération. Retrouvez son statut dans votre profil.</span>
+        <button onClick="{{ resetContrib }}" style="margin-top:10px;background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:600" style-hover="background:#f8f9fa">Nouvelle contribution</button>
+      </div>
+    </sc-if>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ PROFIL ============ -->
+<sc-if value="{{ isProfil }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Profil" style="animation:fadeUp .4s ease both">
+  <div style="max-width:1280px;margin:0 auto;padding:40px 24px 72px">
+    <sc-if value="{{ notLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px;background:#fff;border:1px solid #e8eaed;border-radius:18px;padding:36px;display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:'Spectral',Georgia,serif;font-size:24px;font-weight:600;color:#1f1f1f">Espace personnel</span>
+        <span style="font-size:14px;line-height:1.6;color:#5f6368">Connectez-vous pour retrouver vos favoris, vos contributions, vos jeux et votre historique de découvertes.</span>
+        <button onClick="{{ openLogin }}" style="margin-top:8px;background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:13px 24px;border-radius:99px;font-size:14px;font-weight:600;align-self:flex-start" style-hover="background:#145243">Se connecter</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isLogged }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:34px">
+        <span style="width:70px;height:70px;border-radius:50%;background:#0E3B2E;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Spectral',Georgia,serif;font-size:29px;font-weight:600">{{ userInitial }}</span>
+        <div style="flex:1">
+          <div style="font-family:'Spectral',Georgia,serif;font-size:29px;font-weight:600;color:#1f1f1f">{{ userName }}</div>
+          <div style="font-size:13.5px;color:#5f6368">Contributeur · Communauté Culture+ Bénin</div>
+        </div>
+        <button onClick="{{ logout }}" style="background:none;border:1px solid #dadce0;color:#5f6368;cursor:pointer;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600" style-hover="border-color:#B4622D;color:#B4622D">Se déconnecter</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px">
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:16px;padding:24px">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:14px">Favoris</div>
+          <sc-if value="{{ hasFavs }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ favList }}" as="fv" hint-placeholder-count="2">
+                <button onClick="{{ fv.go }}" style="display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;padding:11px 2px;border-bottom:1px solid #f1f3f4;text-align:left"><span style="font-size:14.5px;font-weight:600;color:#0E3B2E">♥ {{ fv.nom }}</span><span style="font-size:12.5px;color:#5f6368">{{ fv.region }} →</span></button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noFavs }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13.5px;color:#5f6368;line-height:1.6">Aucun favori — touchez le cœur sur une carte de ville pour la retrouver ici.</div>
+          </sc-if>
+        </div>
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:16px;padding:24px">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:14px">Mes contributions</div>
+          <sc-if value="{{ contribSent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 2px;border-bottom:1px solid #f1f3f4;gap:10px">
+              <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:600;color:#1f1f1f">{{ cTitreAff }}</span><span style="font-size:12.5px;color:#5f6368">{{ cType }} · {{ cVille }}</span></span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#B4622D;background:#f8f9fa;padding:5px 10px;border-radius:99px;white-space:nowrap">En modération</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noContrib }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13.5px;color:#5f6368;line-height:1.6">Aucune contribution envoyée. <button onClick="{{ goContribuer }}" style="background:none;border:none;cursor:pointer;color:#0E3B2E;font-weight:600;font-size:13.5px;padding:0;text-decoration:underline">Proposer un contenu →</button></div>
+          </sc-if>
+        </div>
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:16px;padding:24px">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:14px">Jeux</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:13.5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:#5f6368">Quiz historique</span><span style="font-weight:700;color:#0E3B2E">{{ statQuiz }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5f6368">Devinettes</span><span style="font-weight:700;color:#0E3B2E">{{ statDev }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5f6368">Reconnaître les lieux</span><span style="font-weight:700;color:#0E3B2E">{{ statLx }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#5f6368">Vrai ou faux</span><span style="font-weight:700;color:#0E3B2E">{{ statVf }}</span></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e8eaed;border-radius:16px;padding:24px">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5f6368;font-weight:600;margin-bottom:14px">Historique des découvertes</div>
+          <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ historyList }}" as="h" hint-placeholder-count="3">
+                <button onClick="{{ h.go }}" style="border:1px solid #dadce0;background:#fff;color:#0E3B2E;cursor:pointer;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:600" style-hover="background:#f8f9fa">{{ h.nom }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13.5px;color:#5f6368;line-height:1.6">Vos villes visitées apparaîtront ici.</div>
+          </sc-if>
+        </div>
+      </div>
+      <div style="margin-top:18px;background:#f8f9fa;border:1px solid #e8eaed;border-radius:16px;padding:24px;display:flex;justify-content:space-between;align-items:center;gap:16px">
+        <div>
+          <div style="font-size:14.5px;font-weight:600;color:#1f1f1f;margin-bottom:3px">Paramètres du compte</div>
+          <div style="font-size:13px;color:#5f6368">Informations personnelles, notifications, langue, confidentialité.</div>
+        </div>
+        <button style="background:none;border:1px solid #dadce0;color:#0E3B2E;cursor:pointer;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600" style-hover="background:#fff">Gérer</button>
+      </div>
+    </sc-if>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ PIED DE PAGE ============ -->
+<footer style="background:#f8f9fa;border-top:1px solid #e8eaed;color:#5f6368;padding:44px 0 32px">
+  <div style="max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px">
+    <div>
+      <div style="display:flex;align-items:baseline;gap:2px;margin-bottom:12px">
+        <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:20px;color:#1f1f1f">Culture</span>
+        <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:20px;color:#B4622D">+</span>
+        <span style="font-size:11px;color:#5f6368;margin-left:6px;letter-spacing:.14em;text-transform:uppercase">Bénin</span>
+      </div>
+      <p style="font-size:13px;line-height:1.65;max-width:320px;margin:0">Le musée numérique interactif du patrimoine béninois. Découvrir, explorer, apprendre, jouer, contribuer.</p>
+      <p style="font-size:11.5px;line-height:1.6;max-width:340px;margin:14px 0 0;color:#9aa0a6">Photographies : Wikimedia Commons, licences Creative Commons.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px">
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#1f1f1f;font-weight:600;margin-bottom:4px">Explorer</span>
+      <button onClick="{{ goExplorer }}" style="background:none;border:none;cursor:pointer;color:#5f6368;font-size:13.5px;text-align:left;padding:0" style-hover="color:#0E3B2E">Les villes</button>
+      <button onClick="{{ goCarte }}" style="background:none;border:none;cursor:pointer;color:#5f6368;font-size:13.5px;text-align:left;padding:0" style-hover="color:#0E3B2E">Carte culturelle</button>
+      <button onClick="{{ goJouer }}" style="background:none;border:none;cursor:pointer;color:#5f6368;font-size:13.5px;text-align:left;padding:0" style-hover="color:#0E3B2E">Jeux culturels</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px">
+      <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#1f1f1f;font-weight:600;margin-bottom:4px">Participer</span>
+      <button onClick="{{ goContribuer }}" style="background:none;border:none;cursor:pointer;color:#5f6368;font-size:13.5px;text-align:left;padding:0" style-hover="color:#0E3B2E">Contribuer</button>
+      <button onClick="{{ goProfil }}" style="background:none;border:none;cursor:pointer;color:#5f6368;font-size:13.5px;text-align:left;padding:0" style-hover="color:#0E3B2E">Mon espace</button>
+    </div>
+  </div>
+  <div style="max-width:1280px;margin:30px auto 0;padding:18px 24px 0;border-top:1px solid #e8eaed;font-size:12px;color:#9aa0a6">© 2026 Culture+ Bénin — Plateforme de valorisation du patrimoine culturel béninois</div>
+</footer>
+
+<!-- ============ MODALE CONNEXION ============ -->
+<sc-if value="{{ loginOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:140;background:rgba(32,33,36,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center" onClick="{{ closeLogin }}">
+    <div style="background:#fff;border-radius:20px;padding:40px;width:400px;box-shadow:0 30px 80px rgba(0,0,0,.3)" onClick="{{ stopProp }}">
+      <div style="display:flex;align-items:baseline;gap:2px;margin-bottom:8px">
+        <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:24px;color:#1f1f1f">Culture</span>
+        <span style="font-family:'Spectral',Georgia,serif;font-weight:600;font-size:24px;color:#B4622D">+</span>
+      </div>
+      <div style="font-size:14px;line-height:1.6;color:#5f6368;margin-bottom:24px">Connectez-vous pour contribuer, jouer et sauvegarder vos découvertes. L'exploration reste libre sans compte.</div>
+      <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444;margin-bottom:14px">Votre nom
+        <input value="{{ loginName }}" onChange="{{ onLoginName }}" onKeyDown="{{ loginKey }}" placeholder="Ex. Aïcha Dossou" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;font-weight:600;color:#444;margin-bottom:22px">Mot de passe
+        <input type="password" placeholder="••••••••" style="padding:12px 14px;border-radius:10px;border:1px solid #dadce0;background:#fff;font-size:14px;color:#1f1f1f">
+      </label>
+      <button onClick="{{ doLogin }}" style="width:100%;background:#0E3B2E;color:#fff;border:none;cursor:pointer;padding:14px;border-radius:99px;font-size:14.5px;font-weight:600" style-hover="background:#145243">Se connecter</button>
+      <div style="text-align:center;font-size:12.5px;color:#5f6368;margin-top:14px">Pas encore de compte ? <span style="color:#B4622D;font-weight:600;cursor:pointer">Créer un compte</span></div>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#B4622D&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#B4622D&quot;, &quot;#C8942A&quot;, &quot;#8a6d3b&quot;], &quot;section&quot;: &quot;Identité&quot;}}">
+const IMG = (name, w) => 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(name) + '?width=' + (w || 1200);
+const IMGS = {
+  porte: IMG('Porte du non-retour au Benin.jpg', 1800),
+  esplanade: IMG('Ouidah-Esplanade de la Porte du Non-Retour-Côté océan (1).jpg', 1600),
+  porte2: IMG('La porte du non retour à Ouidah.jpg'),
+  vodoun: IMG('Vodoun party in Benin.jpg', 1600),
+  door: IMG('Door of no return.jpg', 1600),
+  ganvie1: IMG('Ganvie1.jpg', 1800),
+  ganvie2: IMG('Ganvié.jpg', 1600),
+  marche: IMG('Ganvie market.jpg', 1600),
+  abomey: IMG('Abomey Royal Palace.jpg', 1800),
+  mosquee: IMG('Grande Mosquée de Porto-Novo.jpg', 1800),
+  zangbeto: IMG('Zangbeto.jpg', 1600),
+  pythons: IMG('Temple des pythons.jpg', 1600),
+  gelede1: IMG('Guèlèdè.jpg', 1600),
+  gelede2: IMG('Gelede mask.jpg', 1600),
+  egungun: IMG('Egungun.jpg', 1600),
+  tata: IMG('Tata Somba.jpg', 1800),
+  pendjari: IMG('Pendjari.jpg', 1800),
+  elephants: IMG('Elephants Pendjari.jpg', 1600)
+};
+
+const HEROES = [
+  { img: IMGS.porte, nom: 'Porte du Non-Retour · Ouidah', city: 'ouidah' },
+  { img: IMGS.ganvie1, nom: 'Ganvié, cité lacustre', city: 'ganvie' },
+  { img: IMGS.abomey, nom: 'Palais royaux · Abomey', city: 'abomey' },
+  { img: IMGS.mosquee, nom: 'Grande Mosquée · Porto-Novo', city: 'portonovo' },
+  { img: IMGS.elephants, nom: 'Parc national de la Pendjari' },
+  { img: IMGS.tata, nom: 'Tata Somba · Koutammakou (UNESCO)' }
+];
+
+const CITIES = {
+  ouidah: {
+    id: 'ouidah', nom: 'Ouidah', region: 'Département de l\'Atlantique', surnom: '« Cité mémoire du Vodoun »',
+    tagline: 'Route des Esclaves, temples vodoun et mémoire atlantique.',
+    hero: IMGS.esplanade, card: IMGS.porte2,
+    intro: 'Ancien comptoir du royaume de Xwéda puis port majeur de la traite atlantique, Ouidah est aujourd\'hui la capitale spirituelle du Vodoun et un haut lieu de mémoire mondiale.',
+    histoire: 'Fondée autour du royaume de Xwéda, Ouidah devient à partir du XVIIe siècle l\'un des principaux ports de la traite négrière sur la côte des Esclaves. Conquise par le royaume du Danxomè en 1727, la ville voit passer des centaines de milliers de captifs sur la Route des Esclaves, quatre kilomètres reliant la place aux enchères à la plage d\'embarquement. Ouidah est aussi le berceau du culte vodoun : temples, couvents et forêts sacrées y structurent la vie spirituelle. Depuis 1993, la ville accueille chaque 10 janvier la Fête nationale du Vodoun, et la Porte du Non-Retour, érigée face à l\'océan, est devenue un lieu de pèlerinage pour les diasporas.',
+    sites: [
+      { nom: 'Porte du Non-Retour', cat: 'Mémorial', desc: 'Arche monumentale face à l\'Atlantique, en mémoire des déportés.', img: IMGS.porte,
+        plus: 'Érigée en 1995 avec le concours de l\'UNESCO au terme de la Route des Esclaves, l\'arche monumentale marque l\'endroit où les captifs embarquaient vers les Amériques. Ses bas-reliefs de bronze représentent deux files d\'hommes et de femmes enchaînés avançant vers l\'océan. Chaque année, des milliers de descendants de la diaspora viennent s\'y recueillir, faisant de ce lieu l\'un des mémoriaux les plus visités d\'Afrique de l\'Ouest.' },
+      { nom: 'Temple des Pythons', cat: 'Site spirituel', desc: 'Sanctuaire vodoun dédié au serpent sacré Dangbé.', img: IMGS.pythons,
+        plus: 'Depuis le royaume de Xwéda, le python royal Dangbé est la divinité protectrice de Ouidah. Le temple abrite des dizaines de serpents sacrés qui circulent librement : lorsqu\'un python s\'aventure en ville, les habitants le ramènent respectueusement au sanctuaire. Face au temple se dresse la basilique catholique — un face-à-face devenu symbole de la coexistence religieuse béninoise.' },
+      { nom: 'Fort portugais — Musée d\'histoire', cat: 'Musée', desc: 'Ancien fort São João Baptista, musée de la mémoire de la traite.',
+        plus: 'Construit en 1721, le fort São João Baptista de Ajudá fut le dernier territoire portugais du golfe du Bénin, occupé jusqu\'en 1961. Devenu Musée d\'histoire de Ouidah, il conserve cartes, fers, objets de culte et archives qui documentent quatre siècles de commerce atlantique et les liens entre le Bénin et le Brésil.' },
+      { nom: 'Route des Esclaves', cat: 'Parcours mémoriel', desc: 'Quatre kilomètres jalonnés de statues et de lieux de rituels.', img: IMGS.esplanade,
+        plus: 'De la place Chacha — où se tenaient les enchères — jusqu\'à la plage, le parcours suit les derniers pas des captifs : l\'arbre de l\'Oubli, autour duquel on les faisait tourner pour effacer leur mémoire, la case de Zomaï où ils attendaient dans l\'obscurité, et l\'arbre du Retour, promesse que leur âme reviendrait sur la terre natale.' },
+      { nom: 'Forêt sacrée de Kpassè', cat: 'Patrimoine naturel', desc: 'Bois sacré du roi fondateur, peuplé de sculptures contemporaines.',
+        plus: 'La légende raconte que le roi Kpassè, fondateur de Ouidah, s\'y transforma en arbre pour échapper à ses ennemis — l\'iroko sacré est toujours vénéré. Depuis 1993, des sculptures monumentales d\'artistes béninois contemporains dialoguent avec les divinités du panthéon vodoun sous la canopée.' },
+      { nom: 'Basilique de l\'Immaculée Conception', cat: 'Monument', desc: 'Face au Temple des Pythons — symbole de coexistence religieuse.',
+        plus: 'Édifiée au début du XXe siècle sur l\'ancienne place des enchères, la basilique fait face au Temple des Pythons. Loin de s\'opposer, les deux cultes cohabitent : de nombreuses familles de Ouidah pratiquent à la fois le catholicisme et le vodoun, illustrant le syncrétisme religieux béninois.' }
+    ],
+    persos: [
+      { ini: 'K', nom: 'Roi Kpassè', role: 'Fondateur légendaire de Ouidah, associé à la forêt sacrée',
+        plus: 'Souverain du royaume de Xwéda au XVIe siècle, Kpassè est le père fondateur de Ouidah. La tradition rapporte qu\'encerclé par ses ennemis, il se métamorphosa en iroko au cœur de la forêt qui porte son nom. Ses descendants, gardiens du bois sacré, perpétuent les rituels qui lui sont dédiés.' },
+      { ini: 'FS', nom: 'Francisco Félix de Souza', role: 'Le « Chacha », figure controversée du commerce atlantique',
+        plus: 'Négrier brésilien devenu vice-roi de Ouidah sous le roi Guézo, dont il facilita l\'accession au trône en 1818. Personnage aussi puissant que controversé, il fonda la dynastie des de Souza, toujours influente, et son titre de « Chacha » se transmet encore aujourd\'hui.' },
+      { ini: 'D', nom: 'Daagbo Hounon', role: 'Chef suprême traditionnel du culte vodoun',
+        plus: 'Le trône Hounon dirige spirituellement le vodoun de la côte béninoise depuis le XVIIIe siècle. C\'est Daagbo Hounon Houna qui obtint en 1993 la reconnaissance officielle du vodoun et la création de la fête nationale du 10 janvier, célébrée depuis à Ouidah.' }
+    ],
+    traditions: [
+      { nom: 'Fête du Vodoun (10 janvier)', desc: 'Célébration nationale : processions, danses des Egungun et Zangbeto, cérémonies sur la plage.',
+        plus: 'Reconnue fête nationale en 1993, elle rassemble chaque année dignitaires, couvents et dizaines de milliers de fidèles sur la plage de Ouidah. Libations, danses de possession, sorties de masques Egungun et Zangbeto rythment une journée devenue aussi un grand rendez-vous des diasporas et — depuis 2024 — le festival international « Vodun Days ».' },
+      { nom: 'Culte de Dangbé', desc: 'Vénération du python royal, protecteur de la ville depuis le royaume de Xwéda.',
+        plus: 'Le python sauva, dit-on, le roi de Xwéda à la bataille : depuis, tuer un python est un interdit majeur à Ouidah. Les initiés du culte portent des scarifications distinctives et les cérémonies annuelles font processionner le serpent sacré à travers la ville.' },
+      { nom: 'Retour aux sources', desc: 'Pèlerinages des diasporas afro-descendantes sur les lieux de mémoire de la traite.',
+        plus: 'Depuis le festival « Ouidah 92 », la ville est devenue destination de mémoire pour les Afro-descendants du Brésil, des Caraïbes et des États-Unis. Cérémonies à l\'arbre du Retour, rituels de réconciliation et jumelages culturels tissent un lien vivant entre le Bénin et sa diaspora.' }
+    ],
+    events: [
+      { date: '10 JANV', nom: 'Fête nationale du Vodoun', desc: 'Le plus grand rassemblement vodoun au monde, sur la plage de Ouidah.',
+        plus: 'La journée s\'ouvre par des libations à la Porte du Non-Retour, se poursuit par les danses des couvents et culmine avec les sorties de masques. Depuis 2024, les « Vodun Days » étendent la célébration sur plusieurs jours : concerts, expositions et villages gastronomiques accueillent plus de 100 000 visiteurs.' },
+      { date: 'AOÛT', nom: 'Festival Ouidah Cité Mémoire', desc: 'Arts, musique et conférences autour de la mémoire atlantique.',
+        plus: 'Théâtre, cinéma, arts plastiques et colloques universitaires interrogent l\'héritage de la traite et la construction des identités afro-atlantiques. Les créations sont présentées dans les lieux mêmes de la mémoire : le fort, la place Chacha, la plage.' }
+    ],
+    tour: [
+      { type: 'Photo', titre: 'La Porte du Non-Retour', img: IMGS.porte, texte: 'Érigée en 1995 sur la plage de Ouidah, l\'arche marque le point d\'embarquement des captifs. Ses bas-reliefs représentent deux files d\'hommes et de femmes enchaînés marchant vers l\'océan.' },
+      { type: 'Photo', titre: 'L\'esplanade face à l\'océan', img: IMGS.esplanade, texte: 'Au bout de la Route des Esclaves, l\'esplanade s\'ouvre sur l\'Atlantique. Pour des milliers de déportés, cette plage fut la dernière image de l\'Afrique.' },
+      { type: 'Photo', titre: 'Le Temple des Pythons', img: IMGS.pythons, texte: 'Sanctuaire du serpent sacré Dangbé, protecteur de Ouidah. Les pythons royaux y circulent librement et sont ramenés au temple par les habitants lorsqu\'ils s\'aventurent en ville.' },
+      { type: 'Photo', titre: 'Cérémonie vodoun', img: IMGS.vodoun, texte: 'Chaque 10 janvier, Ouidah devient l\'épicentre mondial du Vodoun : processions, offrandes, transes et danses rituelles rassemblent des dizaines de milliers de fidèles et de visiteurs.' },
+      { type: 'Photo', titre: 'Zangbeto, gardien de la nuit', img: IMGS.zangbeto, texte: 'Tourbillons de paille tournoyants, les Zangbeto veillent traditionnellement sur la sécurité des villages. Leur danse hypnotique est l\'un des spectacles les plus saisissants du sud Bénin.' },
+      { type: 'Photo', titre: 'La sortie des Egungun', img: IMGS.egungun, texte: 'Revenants d\'étoffes chatoyantes, les Egungun incarnent les ancêtres de retour parmi les vivants. Leur passage, encadré d\'initiés, bénit les familles et rappelle que les morts veillent sur la cité.' }
+    ],
+    galerie: [
+      { badge: 'Photo', titre: 'La Porte du Non-Retour', img: IMGS.porte, tourIdx: 0 },
+      { badge: 'Visite 360°', titre: 'La Route des Esclaves', img: IMGS.esplanade, tourIdx: 1 },
+      { badge: 'Photo', titre: 'Le Temple des Pythons', img: IMGS.pythons, tourIdx: 2 },
+      { badge: 'Vidéo', titre: 'Fête du Vodoun — 10 janvier', img: IMGS.vodoun, tourIdx: 3 },
+      { badge: 'Vidéo', titre: 'Danse des Zangbeto', img: IMGS.zangbeto, tourIdx: 4 },
+      { badge: 'Photo', titre: 'Sortie des Egungun', img: IMGS.egungun, tourIdx: 5 },
+      { badge: 'Audio', titre: 'Chants rituels du temple', img: IMGS.pythons, tourIdx: 2 },
+      { badge: 'Photo', titre: 'La plage d\'embarquement', img: IMGS.door, tourIdx: 1 }
+    ]
+  },
+  abomey: {
+    id: 'abomey', nom: 'Abomey', region: 'Département du Zou', surnom: '« Berceau du royaume du Danxomè »',
+    tagline: 'Palais royaux classés UNESCO et épopée des rois du Danxomè.',
+    hero: IMGS.abomey, card: IMGS.abomey,
+    intro: 'Capitale historique du puissant royaume du Danxomè (1625–1894), Abomey conserve les palais royaux inscrits au patrimoine mondial de l\'UNESCO et une tradition artisanale d\'exception.',
+    histoire: 'Le royaume du Danxomè naît vers 1625 sous l\'impulsion du roi Houégbadja. Douze rois se succèdent, chacun bâtissant son propre palais dans l\'enceinte royale — un ensemble de 47 hectares aujourd\'hui classé UNESCO. Le royaume s\'illustre par son administration centralisée, son armée redoutée — dont les célèbres Agodjié, les amazones du Danxomè — et un art de cour raffiné : bas-reliefs polychromes, tentures appliquées, trônes et récades. La résistance du roi Béhanzin face à la conquête coloniale française (1892–1894) marque la fin de l\'indépendance du royaume, mais son héritage demeure au cœur de l\'identité béninoise, ravivé par le retour des trésors royaux en 2021.',
+    sites: [
+      { nom: 'Palais royaux d\'Abomey', cat: 'UNESCO', desc: 'Enceinte de 47 ha, douze palais des rois du Danxomè.', img: IMGS.abomey,
+        plus: 'Chaque roi du Danxomè fit édifier son propre palais de terre crue dans l\'enceinte royale, sans jamais occuper celui de son prédécesseur. Cours d\'apparat, temples des ancêtres, cases des épouses royales et ateliers d\'artisans composaient une véritable ville dans la ville, où vivaient jusqu\'à 8 000 personnes. Le site est inscrit au patrimoine mondial depuis 1985.' },
+      { nom: 'Musée historique d\'Abomey', cat: 'Musée', desc: 'Trônes, récades, bas-reliefs et trésors royaux restitués.',
+        plus: 'Installé dans les palais de Guézo et de Glélé, le musée présente trônes royaux, récades sculptées, autels asen et tentures appliquées. Depuis 2021, il prépare l\'accueil définitif des 26 trésors restitués par la France — dont le trône de Béhanzin et les grandes statues royales anthropomorphes.' },
+      { nom: 'Place Goho', cat: 'Mémorial', desc: 'Statue monumentale de Béhanzin, symbole de la résistance.',
+        plus: 'C\'est à Goho que Béhanzin se rendit au général Dodds en janvier 1894 pour épargner son peuple. La statue monumentale du roi debout, récade à la main, y fut érigée en hommage à celui qui déclara : « Je ne céderai jamais un morceau du Danxomè ».' },
+      { nom: 'Temple des Agodjié', cat: 'Mémorial', desc: 'Hommage aux amazones, guerrières d\'élite du royaume.',
+        plus: 'Recrutées dès l\'adolescence, soumises à un entraînement d\'une dureté légendaire, les Agodjié formaient jusqu\'à un tiers de l\'armée du Danxomè. Chasseresses d\'éléphants devenues garde royale puis troupes de choc, elles impressionnèrent jusqu\'aux officiers français qui les affrontèrent en 1892.' }
+    ],
+    persos: [
+      { ini: 'H', nom: 'Houégbadja', role: 'Roi fondateur du Danxomè (v. 1645–1685)',
+        plus: 'Troisième souverain d\'Abomey, il est considéré comme le véritable fondateur du royaume : il fixa la capitale, promulgua les premières lois et institua le culte royal des ancêtres. Son nom signifie « le poisson qui refuse la nasse » — devise de l\'indépendance du Danxomè.' },
+      { ini: 'G', nom: 'Guézo', role: 'Grand réformateur du royaume (1818–1858)',
+        plus: 'Arrivé au pouvoir avec l\'appui du Chacha de Souza, Guézo libéra le Danxomè du tribut versé au royaume d\'Oyo, réorganisa l\'armée — dont les Agodjié — et développa le commerce de l\'huile de palme. Son règne de quarante ans marque l\'apogée du royaume.' },
+      { ini: 'B', nom: 'Béhanzin', role: 'Roi résistant à la colonisation (1889–1894)',
+        plus: 'Le « Roi Requin » mena deux guerres contre la France avant d\'être déporté en Martinique puis en Algérie, où il mourut en 1906 sans avoir revu Abomey. Figure majeure de la résistance africaine, ses cendres reposent aujourd\'hui au Bénin et sa statue veille sur la place Goho.' },
+      { ini: 'T', nom: 'Tassi Hangbé', role: 'Reine, fondatrice légendaire du corps des Agodjié',
+        plus: 'Sœur jumelle du roi Akaba, elle aurait régné brièvement au début du XVIIIe siècle — seule femme à avoir occupé le trône du Danxomè. La tradition lui attribue la création du corps des Agodjié, d\'abord chasseresses d\'éléphants devenues l\'élite militaire du royaume.' }
+    ],
+    traditions: [
+      { nom: 'Bas-reliefs royaux', desc: 'Écriture murale du royaume : chaque motif raconte batailles, proverbes et emblèmes des rois.',
+        plus: 'Modelés en terre crue polychrome sur les murs des palais, les bas-reliefs formaient les archives visuelles du royaume : chaque roi y inscrivait ses emblèmes — le requin de Béhanzin, le buffle de Guézo — ses victoires et les proverbes fondant son autorité. Les artisans perpétuent aujourd\'hui cette technique classée.' },
+      { nom: 'Tentures appliquées', desc: 'Art textile des cours royales, transmis par les familles d\'artisans Yèmadjè.',
+        plus: 'Sur fond noir ou or, les tentures cousues d\'appliques colorées racontaient l\'histoire dynastique lors des cérémonies. La famille Yèmadjè, fournisseur historique de la cour, transmet ce savoir-faire de génération en génération dans ses ateliers du quartier Hountondji.' },
+      { nom: 'Cérémonies aux ancêtres royaux', desc: 'Rituels annuels d\'hommage aux douze rois dans l\'enceinte des palais.',
+        plus: 'Les « coutumes » royales honorent chaque année les mânes des douze rois : offrandes sur les autels asen, danses des familles princières et processions des trônes. Ces cérémonies maintiennent vivante la charge spirituelle du site UNESCO, qui n\'est pas qu\'un musée mais un lieu de culte actif.' }
+    ],
+    events: [
+      { date: 'JUIL', nom: 'Festival des arts du Zou', desc: 'Artisanat, danses royales et récits épiques du Danxomè.',
+        plus: 'Forgerons, tisserands et sculpteurs ouvrent leurs ateliers tandis que les places d\'Abomey accueillent danses de cour, récits de griots et reconstitutions de l\'épopée des rois. Un rendez-vous majeur pour la transmission des savoir-faire du Zou.' },
+      { date: 'NOV', nom: 'Vodoun Days — étape Abomey', desc: 'Circuit culturel autour des palais et ateliers d\'artisans.',
+        plus: 'En prélude aux célébrations de janvier, Abomey ouvre les temples royaux et les couvents de la région : cérémonies aux ancêtres, expositions des trésors restitués et circuits guidés dans l\'enceinte des palais.' }
+    ],
+    tour: [
+      { type: 'Photo', titre: 'Les palais royaux', img: IMGS.abomey, texte: 'Douze rois, douze palais : l\'enceinte royale d\'Abomey s\'étend sur 47 hectares. Murs de terre, cours cérémonielles et bas-reliefs racontent 270 ans de royauté.' },
+      { type: 'Récit', titre: 'Les Agodjié, guerrières d\'élite', img: IMGS.vodoun, texte: 'Uniques au monde, les amazones du Danxomè formaient un corps militaire féminin régulier pouvant compter plusieurs milliers de combattantes, craintes jusque par les armées coloniales.' },
+      { type: 'Récit', titre: 'Le retour des trésors royaux', img: IMGS.abomey, texte: 'En 2021, vingt-six œuvres pillées en 1892 — trônes, statues royales, portes de palais — sont restituées par la France. Un événement historique pour la mémoire béninoise.' },
+      { type: 'Photo', titre: 'Les Egungun du Zou', img: IMGS.egungun, texte: 'Dans la région d\'Abomey, les masques Egungun incarnent le retour des ancêtres royaux. Leurs étoffes précieuses tourbillonnent lors des grandes cérémonies dynastiques.' }
+    ],
+    galerie: [
+      { badge: 'Photo', titre: 'L\'enceinte des palais royaux', img: IMGS.abomey, tourIdx: 0 },
+      { badge: 'Vidéo', titre: 'L\'épopée des Agodjié', img: IMGS.vodoun, tourIdx: 1 },
+      { badge: 'Audio', titre: 'Tambours et chants de cour', img: IMGS.abomey, tourIdx: 0 },
+      { badge: 'Visite 360°', titre: 'Cour du palais de Guézo', img: IMGS.abomey, tourIdx: 0 },
+      { badge: 'Photo', titre: 'Egungun, ancêtres de retour', img: IMGS.egungun, tourIdx: 3 },
+      { badge: 'Récit', titre: 'Le retour des trésors royaux', img: IMGS.abomey, tourIdx: 2 }
+    ]
+  },
+  portonovo: {
+    id: 'portonovo', nom: 'Porto-Novo', region: 'Département de l\'Ouémé', surnom: '« Hogbonou, la ville aux trois noms »',
+    tagline: 'Capitale aux influences yoruba, afro-brésiliennes et coloniales.',
+    hero: IMGS.mosquee, card: IMGS.mosquee,
+    intro: 'Capitale officielle du Bénin, Porto-Novo — Hogbonou en goun, Adjacè en yoruba — mêle héritages goun et yoruba, architecture afro-brésilienne et mémoire coloniale.',
+    histoire: 'Fondée au XVIe siècle par des princes venus d\'Allada, la ville devient le siège du royaume de Hogbonou. Les navigateurs portugais la baptisent Porto-Novo au XVIIIe siècle. Elle accueille dès le XIXe siècle des familles afro-brésiliennes de retour d\'exil, les Aguda, qui y implantent une architecture unique — dont la Grande Mosquée au style d\'église baroque brésilienne. Protectorat français en 1863, capitale du Dahomey colonial, elle demeure la capitale officielle du Bénin indépendant. Musées, temples, places royales et patrimoine bâti en font un conservatoire vivant des métissages du golfe de Guinée.',
+    sites: [
+      { nom: 'Grande Mosquée', cat: 'Monument', desc: 'Architecture afro-brésilienne inspirée des églises de Bahia.', img: IMGS.mosquee,
+        plus: 'Édifiée entre 1912 et 1935 par les descendants d\'esclaves affranchis revenus du Brésil, la Grande Mosquée reprend fidèlement le plan et les façades polychromes des églises baroques de Salvador de Bahia. Unique au monde, elle témoigne du voyage aller-retour des cultures entre les deux rives de l\'Atlantique.' },
+      { nom: 'Musée Honmè', cat: 'Musée', desc: 'Ancien palais du roi Toffa, mémoire du royaume de Hogbonou.',
+        plus: 'Résidence des rois de Porto-Novo depuis le XVIIIe siècle, le palais Honmè conserve cours d\'audience, chambres royales et autels dynastiques. Le musée retrace le quotidien de la cour du roi Toffa 1er et les institutions du royaume goun.' },
+      { nom: 'Musée da Silva', cat: 'Musée', desc: 'Mémoire des Aguda et du retour afro-brésilien.',
+        plus: 'Installé dans une demeure familiale afro-brésilienne de 1870, le musée raconte l\'histoire des Aguda : l\'exil, l\'esclavage au Brésil, le retour au XIXe siècle et l\'empreinte laissée sur l\'architecture, la cuisine et les fêtes de la capitale — dont le carnaval de la Bonfim.' },
+      { nom: 'Jardin des Plantes et de la Nature', cat: 'Patrimoine naturel', desc: 'Poumon vert et jardin botanique au cœur de la capitale.',
+        plus: 'Ancien jardin d\'essai colonial devenu conservatoire botanique, le jardin abrite plus de 150 espèces végétales dont des arbres centenaires liés aux cultes traditionnels. Parcours pédagogiques et pépinières en font un lieu de transmission écologique.' },
+      { nom: 'Place Jean Bayol', cat: 'Place historique', desc: 'Statue du roi Toffa, cœur symbolique de la ville.',
+        plus: 'La grande esplanade du centre-ville porte la statue du roi Toffa 1er, signataire du traité de protectorat de 1863. Entre bâtiments coloniaux et grande mosquée, elle est le point de départ des circuits patrimoniaux de la capitale.' },
+      { nom: 'Musée Alexandre Adandé', cat: 'Musée', desc: 'Masques guèlèdè et cultures du sud Bénin.',
+        plus: 'Le musée ethnographique conserve l\'une des plus belles collections de masques guèlèdè du pays, ainsi que des objets rituels, instruments et parures documentant les cultures goun, yoruba et fon du sud Bénin.' }
+    ],
+    persos: [
+      { ini: 'T', nom: 'Roi Toffa 1er', role: 'Roi de Hogbonou, signataire du traité de 1863',
+        plus: 'Monté sur le trône en 1874, Toffa 1er navigua entre les ambitions du Danxomè, des Anglais et des Français. Son alliance avec la France fit de Porto-Novo la capitale du Dahomey colonial — et préserva l\'autonomie de sa dynastie, toujours vivante au palais Honmè.' },
+      { ini: 'K', nom: 'Kaba Onikoyi', role: 'Prince fondateur venu d\'Allada (tradition)',
+        plus: 'La tradition attribue la fondation de Hogbonou à des princes d\'Allada guidés par le chasseur yoruba Kaba Onikoyi. Cette double origine goun et yoruba explique les « trois noms » de la ville et son extraordinaire pluralité culturelle.' },
+      { ini: 'PH', nom: 'Paulin Hountondji', role: 'Philosophe béninois de renommée internationale',
+        plus: 'Figure majeure de la philosophie africaine contemporaine, critique de l\'« ethnophilosophie », Paulin Hountondji (1942–2024) enseigna à l\'Université d\'Abomey-Calavi et fut ministre de la Culture. Son œuvre interroge les savoirs endogènes et leur place dans la science mondiale.' }
+    ],
+    traditions: [
+      { nom: 'Masques Guèlèdè', desc: 'Patrimoine immatériel UNESCO : masques et danses yoruba honorant la puissance des mères.',
+        plus: 'Proclamé chef-d\'œuvre du patrimoine oral et immatériel de l\'humanité en 2001, le Guèlèdè honore Iyà Nlà, la Mère primordiale. Les masques polychromes, sculptés de scènes satiriques, dansent au crépuscule pour apaiser les puissances féminines et corriger, par l\'humour, les travers de la société.' },
+      { nom: 'Héritage Aguda', desc: 'Cuisine, fêtes et architecture des familles afro-brésiliennes revenues au XIXe siècle.',
+        plus: 'Feijoada devenue « fejoada », fête de la Bonfim en janvier, patronymes de Souza, da Silva ou d\'Almeida, façades à frontons sculptés : la culture aguda irrigue toute la vieille ville. Ce patrimoine du retour est aujourd\'hui candidat à l\'inventaire national.' },
+      { nom: 'Zangbeto', desc: 'Gardiens de la nuit goun, tourbillons de paille protecteurs de la cité.',
+        plus: 'Institution goun par excellence, la société des Zangbeto assure depuis le royaume de Hogbonou la police nocturne des quartiers. Leurs sorties spectaculaires — la paille tournoie, se soulève, révèle un vide inexplicable — rappellent que l\'ordre de la cité repose sur l\'invisible.' }
+    ],
+    events: [
+      { date: 'JANV', nom: 'Festival international de Porto-Novo', desc: 'Masques, arts urbains et mémoire des royautés.',
+        plus: 'Chaque début d\'année, la capitale fait dialoguer patrimoine et création : sorties de masques guèlèdè et zangbeto, fresques urbaines, concerts et colloques investissent les places royales et les berges de la lagune.' },
+      { date: 'JUIN', nom: 'Semaine du patrimoine afro-brésilien', desc: 'Circuits Aguda, gastronomie et musique.',
+        plus: 'Visites des demeures aguda, ateliers de cuisine afro-brésilienne, bal de la Bonfim et rencontres avec les familles descendantes font revivre le lien Porto-Novo – Bahia, en partenariat avec les institutions brésiliennes.' }
+    ],
+    tour: [
+      { type: 'Photo', titre: 'La Grande Mosquée', img: IMGS.mosquee, texte: 'Construite par les Aguda au début du XXe siècle, la Grande Mosquée reprend le plan et les couleurs des églises baroques de Bahia — un témoignage unique du retour afro-brésilien.' },
+      { type: 'Photo', titre: 'Les masques Guèlèdè', img: IMGS.gelede1, texte: 'Classé patrimoine immatériel de l\'humanité, le Guèlèdè honore la puissance spirituelle des mères à travers masques sculptés, satire sociale et danses nocturnes.' },
+      { type: 'Photo', titre: 'L\'art du masque', img: IMGS.gelede2, texte: 'Chaque masque Guèlèdè est une sculpture narrative : scènes de la vie quotidienne, proverbes et figures animales surmontent le visage serein de la mère primordiale.' },
+      { type: 'Photo', titre: 'Zangbeto, veilleur de Hogbonou', img: IMGS.zangbeto, texte: 'À Porto-Novo, les Zangbeto — « hommes de la nuit » en goun — assurent traditionnellement la police nocturne de la cité. Leur société secrète demeure très vivante.' },
+      { type: 'Photo', titre: 'Egungun, la voix des ancêtres', img: IMGS.egungun, texte: 'Héritage yoruba de la capitale, les Egungun reviennent parmi les vivants dans des costumes d\'étoffes précieuses. Nul ne doit les toucher : ce sont les ancêtres eux-mêmes.' }
+    ],
+    galerie: [
+      { badge: 'Photo', titre: 'La Grande Mosquée', img: IMGS.mosquee, tourIdx: 0 },
+      { badge: 'Vidéo', titre: 'Danse des masques Guèlèdè', img: IMGS.gelede1, tourIdx: 1 },
+      { badge: 'Photo', titre: 'Masque guèlèdè sculpté', img: IMGS.gelede2, tourIdx: 2 },
+      { badge: 'Photo', titre: 'Zangbeto en sortie', img: IMGS.zangbeto, tourIdx: 3 },
+      { badge: 'Photo', titre: 'Egungun de Porto-Novo', img: IMGS.egungun, tourIdx: 4 },
+      { badge: 'Audio', titre: 'Les trois noms de la capitale', img: IMGS.mosquee, tourIdx: 0 }
+    ]
+  },
+  ganvie: {
+    id: 'ganvie', nom: 'Ganvié', region: 'Lac Nokoué — Sô-Ava', surnom: '« La Venise de l\'Afrique »',
+    tagline: 'Cité lacustre sur pilotis, née de la résistance à l\'esclavage.',
+    hero: IMGS.ganvie1, card: IMGS.ganvie1,
+    intro: 'Plus grande cité lacustre d\'Afrique, Ganvié abrite plus de 30 000 habitants sur les eaux du lac Nokoué — un refuge fondé au XVIIIe siècle pour échapper aux razzias esclavagistes.',
+    histoire: 'Au XVIIIe siècle, les populations Toffinou fuient les chasseurs d\'esclaves du royaume du Danxomè. Les guerriers danxoméens ayant l\'interdit religieux de combattre sur l\'eau, les Toffinou s\'installent au milieu du lac Nokoué : Ganvié — « la communauté de ceux qui ont trouvé la paix ». Maisons sur pilotis de bois et de bambou, marché flottant, pêche à l\'acadja — un système ingénieux d\'enclos de branchages — organisent depuis trois siècles une vie entièrement lacustre. Inscrite sur la liste indicative de l\'UNESCO, Ganvié incarne une résistance devenue culture, où l\'école, le temple et le marché se rejoignent en pirogue.',
+    sites: [
+      { nom: 'Marché flottant', cat: 'Site vivant', desc: 'Commerce quotidien en pirogues au cœur de la cité.', img: IMGS.marche,
+        plus: 'Chaque matin, des dizaines de pirogues convergent vers le cœur de la cité : tomates, poissons fumés, épices et tissus s\'échangent de barque à barque. Tenu essentiellement par les femmes, le marché flottant est l\'institution sociale et économique centrale de Ganvié.' },
+      { nom: 'Maisons sur pilotis', cat: 'Architecture', desc: 'Habitat lacustre en bois et bambou, transmis depuis trois siècles.', img: IMGS.ganvie1,
+        plus: 'Bâties sur des pieux de bois rouge résistant à l\'eau, couvertes de tôle ou de paille, les maisons de Ganvié se transmettent et se reconstruisent selon des techniques éprouvées depuis le XVIIIe siècle. Chaque concession familiale possède son embarcadère et sa pirogue.' },
+      { nom: 'Enclos acadja', cat: 'Savoir-faire', desc: 'Pisciculture traditionnelle en enclos de branchages.',
+        plus: 'L\'acadja consiste à immerger des branchages qui attirent et nourrissent le poisson : un système d\'aquaculture ancestral d\'une productivité remarquable, aujourd\'hui étudié comme modèle de pêche durable — mais aussi régulé pour préserver l\'équilibre du lac.' },
+      { nom: 'Place Zinsou', cat: 'Site vivant', desc: 'Cœur communautaire et embarcadère principal de la cité.',
+        plus: 'Point d\'accostage des visiteurs venus d\'Abomey-Calavi, la place Zinsou concentre l\'artisanat, les auberges lacustres et les grandes assemblées communautaires. C\'est ici que s\'organisent régates et fêtes des pêcheurs.' }
+    ],
+    persos: [
+      { ini: 'A', nom: 'Abodohoui', role: 'Chef fondateur légendaire des Toffinou de Ganvié',
+        plus: 'La tradition orale raconte qu\'Abodohoui, guidé par un oracle, conduisit son peuple au milieu du lac Nokoué. Transformé en épervier puis en crocodile selon les récits, il trouva l\'emplacement où les guerriers du Danxomè ne pourraient jamais atteindre les siens.' },
+      { ini: 'T', nom: 'Les Toffinou', role: 'Peuple de l\'eau, bâtisseurs de la cité lacustre',
+        plus: '« Toffinou » signifie « hommes de l\'eau ». Pêcheurs, piroguiers et bâtisseurs, ils ont fait d\'un refuge une civilisation : cosmogonie liée aux esprits du lac, techniques de pêche uniques et organisation sociale adaptée à la vie lacustre.' }
+    ],
+    traditions: [
+      { nom: 'Pêche à l\'acadja', desc: 'Technique ancestrale d\'élevage de poissons dans des enclos de branchages immergés.',
+        plus: 'Savoir-faire fondateur des Toffinou, l\'acadja structure le territoire du lac : chaque famille entretient ses enclos, transmis en héritage. La récolte, spectaculaire, mobilise des dizaines de pirogues qui encerclent l\'enclos au filet.' },
+      { nom: 'Vie en pirogue', desc: 'Déplacements, commerce, école : toute la vie sociale se déroule sur l\'eau.',
+        plus: 'Les enfants apprennent à pagayer avant de marcher, dit-on à Ganvié. Pirogues-taxis, pirogues-boutiques, pirogues-écoles : l\'embarcation creusée dans un tronc est l\'extension naturelle de chaque habitant, et sa fabrication un métier respecté.' },
+      { nom: 'Cultes des divinités de l\'eau', desc: 'Rites dédiés aux esprits du lac Nokoué, protecteurs de la communauté.',
+        plus: 'Le lac est un être vivant : avant chaque saison de pêche, offrandes et libations honorent les divinités des eaux. Les temples vodoun sur pilotis ponctuent la cité, et certaines zones du lac, résidences des esprits, restent interdites à la pêche.' }
+    ],
+    events: [
+      { date: 'AVR', nom: 'Fête des pêcheurs du Nokoué', desc: 'Courses de pirogues et bénédiction des eaux.',
+        plus: 'À l\'ouverture de la saison, les quartiers de Ganvié s\'affrontent en courses de pirogues tandis que les dignitaires bénissent les eaux et les filets. Chants de pagayeurs et danses sur les embarcadères rythment la journée.' },
+      { date: 'DÉC', nom: 'Régates de Ganvié', desc: 'Grandes courses traditionnelles entre quartiers lacustres.',
+        plus: 'Les grandes pirogues à voile du Nokoué, gréées de toiles multicolores, s\'élancent devant des milliers de spectateurs massés sur les pilotis. L\'événement attire désormais des équipages de toute la région des lacs.' }
+    ],
+    tour: [
+      { type: 'Photo', titre: 'La cité sur l\'eau', img: IMGS.ganvie1, texte: 'Plus de 3 000 bâtiments sur pilotis se dressent au milieu du lac Nokoué. Maisons, écoles, églises et boutiques : toute une ville posée sur l\'eau depuis trois siècles.' },
+      { type: 'Photo', titre: 'La vie en pirogue', img: IMGS.ganvie2, texte: 'À Ganvié, la pirogue remplace la rue. Les femmes tiennent le marché flottant, les enfants pagaient vers l\'école, les pêcheurs relèvent les enclos acadja à l\'aube.' },
+      { type: 'Photo', titre: 'Le marché flottant', img: IMGS.marche, texte: 'Chaque matin, le commerce s\'organise de pirogue à pirogue : poissons fumés, légumes, épices et tissus circulent sur l\'eau, dans un ballet réglé par trois siècles d\'usage.' }
+    ],
+    galerie: [
+      { badge: 'Photo', titre: 'La cité sur pilotis', img: IMGS.ganvie1, tourIdx: 0 },
+      { badge: 'Photo', titre: 'Pirogues du Nokoué', img: IMGS.ganvie2, tourIdx: 1 },
+      { badge: 'Photo', titre: 'Le marché flottant', img: IMGS.marche, tourIdx: 2 },
+      { badge: 'Audio', titre: 'Chants des pêcheurs', img: IMGS.ganvie2, tourIdx: 1 },
+      { badge: 'Vidéo', titre: 'Une journée en pirogue', img: IMGS.ganvie1, tourIdx: 0 },
+      { badge: 'Visite 360°', titre: 'Traversée de la cité', img: IMGS.marche, tourIdx: 2 }
+    ]
+  }
+};
+
+const CITY_ORDER = ['ouidah', 'abomey', 'portonovo', 'ganvie'];
+
+const MAP_SITES = [
+  { id: 'porte', cityId: 'ouidah', nom: 'Porte du Non-Retour', ville: 'Ouidah', cat: 'Sites historiques', lat: 6.3222, lng: 2.0879, desc: 'Mémorial de la traite atlantique, sur la plage de Ouidah.' },
+  { id: 'pythons', cityId: 'ouidah', nom: 'Temple des Pythons', ville: 'Ouidah', cat: 'Sites historiques', lat: 6.3623, lng: 2.0851, desc: 'Sanctuaire vodoun du serpent sacré Dangbé.' },
+  { id: 'fort', cityId: 'ouidah', nom: 'Musée d\'histoire de Ouidah', ville: 'Ouidah', cat: 'Musées', lat: 6.3599, lng: 2.0877, desc: 'Ancien fort portugais, musée de la mémoire de la traite.' },
+  { id: 'kpasse', cityId: 'ouidah', nom: 'Forêt sacrée de Kpassè', ville: 'Ouidah', cat: 'Patrimoine naturel', lat: 6.3664, lng: 2.0836, desc: 'Bois sacré du roi fondateur, sculptures contemporaines.' },
+  { id: 'fetvodoun', cityId: 'ouidah', nom: 'Plage de Ouidah — Fête du Vodoun', ville: 'Ouidah', cat: 'Festivals', lat: 6.3199, lng: 2.0885, desc: 'Épicentre de la Fête nationale du Vodoun, chaque 10 janvier.' },
+  { id: 'palais', cityId: 'abomey', nom: 'Palais royaux d\'Abomey', ville: 'Abomey', cat: 'Sites historiques', lat: 7.1826, lng: 1.9889, desc: 'Enceinte royale UNESCO des douze rois du Danxomè.' },
+  { id: 'goho', cityId: 'abomey', nom: 'Place Goho', ville: 'Abomey', cat: 'Lieux touristiques', lat: 7.1786, lng: 1.9942, desc: 'Statue monumentale du roi Béhanzin.' },
+  { id: 'mosquee', cityId: 'portonovo', nom: 'Grande Mosquée', ville: 'Porto-Novo', cat: 'Sites historiques', lat: 6.4779, lng: 2.6323, desc: 'Architecture afro-brésilienne inspirée de Bahia.' },
+  { id: 'honme', cityId: 'portonovo', nom: 'Musée Honmè', ville: 'Porto-Novo', cat: 'Musées', lat: 6.4772, lng: 2.6289, desc: 'Palais du roi Toffa, mémoire du royaume de Hogbonou.' },
+  { id: 'jardin', cityId: 'portonovo', nom: 'Jardin des Plantes et de la Nature', ville: 'Porto-Novo', cat: 'Patrimoine naturel', lat: 6.4831, lng: 2.6283, desc: 'Jardin botanique au cœur de la capitale.' },
+  { id: 'ganvie', cityId: 'ganvie', nom: 'Ganvié, cité lacustre', ville: 'Ganvié', cat: 'Lieux touristiques', lat: 6.4667, lng: 2.4167, desc: 'La plus grande cité sur pilotis d\'Afrique, sur le lac Nokoué.' }
+];
+
+const QUIZ = [
+  { q: 'Quel roi a fondé le royaume du Danxomè vers 1625 ?', opts: ['Béhanzin', 'Houégbadja', 'Guézo', 'Toffa 1er'], a: 1, fb: 'Houégbadja est considéré comme le véritable fondateur du royaume à Abomey.' },
+  { q: 'Pourquoi les Toffinou ont-ils fondé Ganvié au milieu du lac Nokoué ?', opts: ['Pour la pêche à l\'acadja', 'Pour le commerce fluvial', 'Pour échapper aux razzias esclavagistes', 'Sur ordre du roi d\'Allada'], a: 2, fb: 'Les guerriers du Danxomè ne pouvaient combattre sur l\'eau : le lac devint un refuge.' },
+  { q: 'Que célèbre le Bénin chaque 10 janvier ?', opts: ['La fête de l\'indépendance', 'La Fête nationale du Vodoun', 'Le retour des trésors royaux', 'Les régates de Ganvié'], a: 1, fb: 'Depuis 1993, le 10 janvier est férié : Ouidah en est l\'épicentre.' },
+  { q: 'Qui étaient les Agodjié ?', opts: ['Des masques yoruba', 'Les guerrières d\'élite du Danxomè', 'Des pêcheurs du Nokoué', 'Des rois de Porto-Novo'], a: 1, fb: 'Les « amazones » formaient un corps militaire féminin unique au monde.' },
+  { q: 'Quel monument de Porto-Novo témoigne de l\'héritage afro-brésilien ?', opts: ['La Grande Mosquée', 'Le Temple des Pythons', 'La Porte du Non-Retour', 'La place Goho'], a: 0, fb: 'Construite par les Aguda, elle reprend le style des églises baroques de Bahia.' },
+  { q: 'Quel parc national du nord Bénin est réputé pour ses éléphants et ses lions ?', opts: ['Parc du W uniquement', 'Parc de la Pendjari', 'Réserve du Nokoué', 'Forêt de Kpassè'], a: 1, fb: 'La Pendjari est l\'un des derniers sanctuaires de grande faune d\'Afrique de l\'Ouest.' },
+  { q: 'Comment s\'appellent les habitations fortifiées du Koutammakou, classées UNESCO ?', opts: ['Les Tata Somba', 'Les Acadja', 'Les Honmè', 'Les Asen'], a: 0, fb: 'Ces « châteaux » de terre à tourelles abritent les familles Batammariba de l\'Atakora.' },
+  { q: 'Que signifie le nom « Ganvié » ?', opts: ['« La ville sur l\'eau »', '« Le grand marché »', '« La communauté de ceux qui ont trouvé la paix »', '« Le refuge des pêcheurs »'], a: 2, fb: 'Un nom qui rappelle que la cité lacustre est née d\'une quête de liberté.' }
+];
+
+const DEVINETTES = [
+  { texte: 'On me franchit une fois, jamais dans l\'autre sens. Face à l\'océan, je garde la mémoire de ceux qui sont partis.', rep: 'La Porte du Non-Retour', exp: 'Érigée en 1995 sur la plage de Ouidah, elle commémore les déportés de la traite atlantique.' },
+  { texte: 'Je suis une ville sans rues : mes avenues sont d\'eau et mes taxis sont des pirogues.', rep: 'Ganvié', exp: 'La cité lacustre du lac Nokoué, fondée par les Toffinou pour échapper aux razzias.' },
+  { texte: 'Femmes au combat, plus craintes que mille hommes, nous servions le roi du Danxomè.', rep: 'Les Agodjié', exp: 'Le corps des « amazones », unique armée féminine régulière de l\'histoire moderne.' },
+  { texte: 'Tourbillon de paille sans visage, je danse la nuit pour protéger la cité.', rep: 'Le Zangbeto', exp: 'Gardien de la nuit goun, sa société secrète assure traditionnellement la sécurité nocturne.' },
+  { texte: 'Serpent sacré, je circule librement dans ma ville et l\'on me ramène toujours à mon temple.', rep: 'Le python Dangbé', exp: 'Divinité protectrice de Ouidah, vénérée au Temple des Pythons.' },
+  { texte: 'Château de terre aux tourelles rondes, je protège ma famille dans les montagnes de l\'Atakora.', rep: 'Le Tata Somba', exp: 'Habitat fortifié des Batammariba du Koutammakou, classé au patrimoine mondial.' },
+  { texte: 'Sans quitter ma pirogue, je vends tomates, poissons fumés et épices à mes voisines.', rep: 'Le marché flottant de Ganvié', exp: 'Tenu par les femmes toffinou, il est le cœur économique de la cité lacustre.' }
+];
+
+const LIEUX = [
+  { img: IMGS.porte, opts: ['La Porte du Non-Retour, Ouidah', 'La place Goho, Abomey', 'Le Fort portugais', 'La Bouche du Roy'], a: 0 },
+  { img: IMGS.ganvie1, opts: ['Le port de Cotonou', 'Ganvié, sur le lac Nokoué', 'Les berges de l\'Ouémé', 'Grand-Popo'], a: 1 },
+  { img: IMGS.abomey, opts: ['Le musée Honmè', 'La Grande Mosquée', 'Les palais royaux d\'Abomey', 'Le fort de Ouidah'], a: 2 },
+  { img: IMGS.mosquee, opts: ['La basilique de Ouidah', 'La Grande Mosquée de Porto-Novo', 'La cathédrale de Cotonou', 'Le palais des congrès'], a: 1 },
+  { img: IMGS.pythons, opts: ['Le Temple des Pythons, Ouidah', 'La forêt de Kpassè', 'Le temple des Agodjié', 'Le couvent des Egungun'], a: 0 },
+  { img: IMGS.elephants, opts: ['Le parc national du W', 'La lagune de Grand-Popo', 'Le parc national de la Pendjari', 'La forêt de la Lama'], a: 2 }
+];
+
+const VRAIFAUX = [
+  { e: 'Les Agodjié étaient un corps militaire exclusivement féminin.', a: true, fb: 'Vrai — jusqu\'à plusieurs milliers de guerrières servaient le roi du Danxomè.' },
+  { e: 'Ganvié a été fondée par les guerriers du royaume du Danxomè.', a: false, fb: 'Faux — ce sont les Toffinou qui s\'y sont réfugiés pour fuir le Danxomè.' },
+  { e: 'La Fête nationale du Vodoun a lieu chaque 10 janvier.', a: true, fb: 'Vrai — jour férié depuis 1993, célébré en grand à Ouidah.' },
+  { e: 'Porto-Novo porte trois noms : Hogbonou, Adjacè et Porto-Novo.', a: true, fb: 'Vrai — goun, yoruba et portugais : trois héritages pour une capitale.' },
+  { e: 'La Grande Mosquée de Porto-Novo s\'inspire des mosquées du Caire.', a: false, fb: 'Faux — elle reprend le style des églises baroques de Bahia, au Brésil.' },
+  { e: 'Les palais royaux d\'Abomey sont classés au patrimoine mondial de l\'UNESCO.', a: true, fb: 'Vrai — inscrits depuis 1985, sur 47 hectares.' },
+  { e: 'À Ouidah, le python est considéré comme un animal nuisible.', a: false, fb: 'Faux — Dangbé est la divinité protectrice de la ville ; tuer un python est un interdit majeur.' },
+  { e: 'En 2021, la France a restitué 26 trésors royaux au Bénin.', a: true, fb: 'Vrai — trônes, statues et portes de palais pillés en 1892 sont revenus à Abomey.' }
+];
+
+class Component extends DCLogic {
+  state = {
+    page: 'accueil', cityId: 'ouidah',
+    heroIdx: 0,
+    logged: false, userName: '', loginOpen: false, loginName: '',
+    q: '', mapSel: null, mapFilter: 'Tout',
+    favs: [], history: [],
+    tourOpen: false, tourIdx: 0,
+    fiche: null, audioOn: false,
+    gameTab: 'quiz',
+    quizIdx: 0, quizPicked: null, quizScore: 0, quizFinished: false,
+    devIdx: 0, devRevealed: false, devScore: 0, devFinished: false,
+    lxIdx: 0, lxPicked: null, lxScore: 0, lxFinished: false,
+    vfIdx: 0, vfPicked: null, vfScore: 0, vfFinished: false,
+    cType: 'Texte historique', cVille: 'Ouidah', cCat: 'Histoire & royaumes', cTitre: '', cDesc: '', contribSent: false
+  };
+
+  componentDidMount() {
+    this._heroTimer = setInterval(() => {
+      const s = this.state;
+      if (s.page === 'accueil' && !s.tourOpen && !s.fiche && !s.loginOpen) {
+        this.setState(st => ({ heroIdx: (st.heroIdx + 1) % HEROES.length }));
+      }
+    }, 5000);
+  }
+  componentWillUnmount() { clearInterval(this._heroTimer); }
+
+  go(page, extra) { this.setState({ page, q: '', ...extra }); window.scrollTo(0, 0); }
+
+  goCity(id) {
+    this.setState(s => ({ page: 'explorer', cityId: id, q: '', history: s.history.includes(id) ? s.history : [...s.history, id] }));
+    window.scrollTo(0, 0);
+  }
+
+  openTour(cityId, idx) { this.setState({ tourOpen: true, tourIdx: idx || 0, cityId }); }
+
+  openFiche(kicker, item, ville) {
+    this.setState({
+      audioOn: false,
+      fiche: {
+        kicker, ville,
+        titre: item.nom,
+        texte: item.plus || item.desc,
+        img: item.img || null,
+        audio: 'Récit audio — ' + item.nom,
+        video: item.video || null
+      }
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accentColor ?? '#B4622D';
+    const green = '#0E3B2E';
+    const city = CITIES[s.cityId];
+    const nav = [
+      { key: 'accueil', label: 'Accueil' },
+      { key: 'explorer', label: 'Explorer' },
+      { key: 'carte', label: 'Carte' },
+      { key: 'jouer', label: 'Jouer' },
+      { key: 'contribuer', label: 'Contribuer' }
+    ];
+
+    const qn = s.q.trim().toLowerCase();
+    let suggestions = [];
+    if (qn.length >= 2) {
+      CITY_ORDER.forEach(id => {
+        const c = CITIES[id];
+        if (c.nom.toLowerCase().includes(qn)) suggestions.push({ label: c.nom, type: 'Ville', go: () => this.goCity(id) });
+        c.sites.forEach(site => { if (site.nom.toLowerCase().includes(qn)) suggestions.push({ label: site.nom + ' — ' + c.nom, type: 'Lieu', go: () => this.goCity(id) }); });
+        c.persos.forEach(p => { if (p.nom.toLowerCase().includes(qn)) suggestions.push({ label: p.nom, type: 'Personnalité', go: () => this.goCity(id) }); });
+        c.events.forEach(e => { if (e.nom.toLowerCase().includes(qn)) suggestions.push({ label: e.nom, type: 'Événement', go: () => this.goCity(id) }); });
+      });
+      suggestions = suggestions.slice(0, 6);
+    }
+
+    const quiz = QUIZ[s.quizIdx];
+    const quizOptions = quiz ? quiz.opts.map((label, i) => {
+      let bg = '#fff', border = '#dadce0', color = '#1f1f1f', mark = '';
+      if (s.quizPicked !== null) {
+        if (i === quiz.a) { bg = '#eef4ef'; border = green; color = green; mark = '✓'; }
+        else if (i === s.quizPicked) { bg = '#faf1ea'; border = accent; color = accent; mark = '✕'; }
+      }
+      return { label, bg, border, color, mark, pick: () => { if (this.state.quizPicked === null) this.setState(st => ({ quizPicked: i, quizScore: st.quizScore + (i === quiz.a ? 1 : 0) })); } };
+    }) : [];
+
+    const lx = LIEUX[s.lxIdx];
+    const lxOptions = lx ? lx.opts.map((label, i) => {
+      let bg = '#fff', border = '#dadce0', color = '#1f1f1f', mark = '';
+      if (s.lxPicked !== null) {
+        if (i === lx.a) { bg = '#eef4ef'; border = green; color = green; mark = '✓'; }
+        else if (i === s.lxPicked) { bg = '#faf1ea'; border = accent; color = accent; mark = '✕'; }
+      }
+      return { label, bg, border, color, mark, pick: () => { if (this.state.lxPicked === null) this.setState(st => ({ lxPicked: i, lxScore: st.lxScore + (i === lx.a ? 1 : 0) })); } };
+    }) : [];
+
+    const vf = VRAIFAUX[s.vfIdx];
+    const vfOptions = vf ? [true, false].map(val => {
+      const label = val ? 'Vrai' : 'Faux';
+      let bg = '#fff', border = '#dadce0', color = '#1f1f1f', mark = '';
+      if (s.vfPicked !== null) {
+        if (val === vf.a) { bg = '#eef4ef'; border = green; color = green; mark = '✓'; }
+        else if (val === s.vfPicked) { bg = '#faf1ea'; border = accent; color = accent; mark = '✕'; }
+      }
+      return { label, bg, border, color, mark, pick: () => { if (this.state.vfPicked === null) this.setState(st => ({ vfPicked: val, vfScore: st.vfScore + (val === vf.a ? 1 : 0) })); } };
+    }) : [];
+
+    const dev = DEVINETTES[s.devIdx];
+
+    const selSite = s.mapSel ? MAP_SITES.find(m => m.id === s.mapSel) : null;
+    const mapSrc = selSite
+      ? 'https://maps.google.com/maps?q=' + selSite.lat + ',' + selSite.lng + '&z=15&hl=fr&output=embed'
+      : 'https://maps.google.com/maps?q=B%C3%A9nin&z=7&hl=fr&output=embed';
+    const filteredSites = MAP_SITES.filter(m =>
+      (s.mapFilter === 'Tout' || m.cat === s.mapFilter) &&
+      (qn.length < 2 || m.nom.toLowerCase().includes(qn) || m.ville.toLowerCase().includes(qn))
+    );
+
+    const tour = city.tour;
+    const stop = tour[Math.min(s.tourIdx, tour.length - 1)];
+    const favSet = new Set(s.favs);
+    const hero = HEROES[s.heroIdx];
+    const fiche = s.fiche;
+
+    return {
+      navItems: nav.map(n => ({
+        label: n.label,
+        color: s.page === n.key ? '#1f1f1f' : '#5f6368',
+        weight: s.page === n.key ? 700 : 500,
+        line: s.page === n.key ? green : 'transparent',
+        go: () => this.go(n.key)
+      })),
+      isAccueil: s.page === 'accueil', isExplorer: s.page === 'explorer', isCarte: s.page === 'carte',
+      isJouer: s.page === 'jouer', isContribuer: s.page === 'contribuer', isProfil: s.page === 'profil',
+      goAccueil: () => this.go('accueil'), goExplorer: () => this.go('explorer'), goCarte: () => this.go('carte'),
+      goJouer: () => this.go('jouer'), goContribuer: () => this.go('contribuer'), goProfil: () => { if (!s.logged) this.setState({ loginOpen: true }); else this.go('profil'); },
+
+      // hero carousel
+      heroSlides: HEROES.map((h, i) => ({ img: h.img, nom: h.nom, op: i === s.heroIdx ? 1 : 0 })),
+      heroNom: hero.nom,
+      heroAction: hero.city ? 'Explorer →' : '',
+      heroGoCity: () => { if (hero.city) this.goCity(hero.city); },
+      heroPrev: () => this.setState(st => ({ heroIdx: (st.heroIdx - 1 + HEROES.length) % HEROES.length })),
+      heroNext: () => this.setState(st => ({ heroIdx: (st.heroIdx + 1) % HEROES.length })),
+      heroDots: HEROES.map((h, i) => ({
+        w: i === s.heroIdx ? '24px' : '8px',
+        bg: i === s.heroIdx ? '#fff' : 'rgba(255,255,255,.45)',
+        go: () => this.setState({ heroIdx: i })
+      })),
+
+      // auth
+      isLogged: s.logged, notLogged: !s.logged,
+      userName: s.userName || 'Visiteur', userInitial: (s.userName || 'V').trim().charAt(0).toUpperCase(),
+      loginOpen: s.loginOpen, loginName: s.loginName,
+      openLogin: () => this.setState({ loginOpen: true }),
+      closeLogin: () => this.setState({ loginOpen: false }),
+      stopProp: (e) => e.stopPropagation(),
+      onLoginName: (e) => this.setState({ loginName: e.target.value }),
+      loginKey: (e) => { if (e.key === 'Enter') this.doLoginNow(); },
+      doLogin: () => this.doLoginNow(),
+      logout: () => this.setState({ logged: false, userName: '', page: 'accueil' }),
+
+      // search
+      q: s.q, onSearch: (e) => this.setState({ q: e.target.value }),
+      hasSuggestions: suggestions.length > 0, suggestions,
+
+      // accueil
+      startTourOuidah: () => this.openTour('ouidah', 0),
+      quickLinks: [
+        { kicker: 'Explorer', titre: 'Explorer une ville', desc: 'Ouidah, Abomey, Porto-Novo, Ganvié — visites guidées virtuelles.', go: () => this.go('explorer') },
+        { kicker: 'S\'orienter', titre: 'La carte culturelle', desc: 'Localisez les sites sur Google Maps et obtenez l\'itinéraire.', go: () => this.go('carte') },
+        { kicker: 'Apprendre', titre: 'Les jeux culturels', desc: 'Quiz, devinettes, vrai/faux et reconnaissance de lieux.', go: () => this.go('jouer') },
+        { kicker: 'Transmettre', titre: 'Contribuer', desc: 'Partagez récits, images et témoignages avec la communauté.', go: () => this.go('contribuer') }
+      ],
+      cities: CITY_ORDER.map(id => {
+        const c = CITIES[id];
+        const isFav = favSet.has(id);
+        return {
+          nom: c.nom, region: c.region, tagline: c.tagline, img: c.card,
+          favIcon: isFav ? '♥' : '♡', favColor: isFav ? accent : '#5f6368',
+          toggleFav: () => {
+            this.setState(st => ({ favs: st.favs.includes(id) ? st.favs.filter(f => f !== id) : [...st.favs, id] }));
+          },
+          select: () => this.goCity(id)
+        };
+      }),
+      stories: [
+        { cat: 'Résistance', titre: 'Les Agodjié, guerrières du Danxomè', extrait: 'L\'histoire du seul corps militaire féminin régulier de l\'histoire moderne.', img: IMGS.abomey, go: () => this.goCity('abomey') },
+        { cat: 'Mémoire', titre: 'La Route des Esclaves', extrait: 'Quatre kilomètres de mémoire entre la place aux enchères et l\'océan.', img: IMGS.esplanade, go: () => this.openTour('ouidah', 1) },
+        { cat: 'Ingéniosité', titre: 'Ganvié, la paix sur l\'eau', extrait: 'Comment un peuple a bâti une cité entière sur un lac pour rester libre.', img: IMGS.ganvie2, go: () => this.goCity('ganvie') },
+        { cat: 'Spiritualité', titre: 'Le Vodoun, religion du vivant', extrait: 'Chaque 10 janvier, Ouidah devient l\'épicentre mondial du culte vodoun.', img: IMGS.vodoun, go: () => this.openTour('ouidah', 3) }
+      ],
+      collections: [
+        { n: '1 240', titre: 'Photographies', desc: 'Sites, rites et vie quotidienne' },
+        { n: '186', titre: 'Vidéos & visites 360°', desc: 'Immersions et documentaires' },
+        { n: '312', titre: 'Archives sonores', desc: 'Chants, contes et récits oraux' },
+        { n: '95', titre: 'Documents historiques', desc: 'Cartes, traités et manuscrits' }
+      ],
+      recentContribs: [
+        { titre: 'Chants de pêche du lac Nokoué', par: 'R. Houngbédji', ville: 'Ganvié', type: 'Audio' },
+        { titre: 'Le métier de tisserand à Abomey', par: 'C. Agossou', ville: 'Abomey', type: 'Témoignage' },
+        { titre: 'Façades afro-brésiliennes restaurées', par: 'M. da Silva', ville: 'Porto-Novo', type: 'Images' }
+      ],
+
+      // explorer
+      city,
+      startTour: () => this.openTour(s.cityId, 0),
+      goCarteCity: () => {
+        const site = MAP_SITES.find(m => m.cityId === s.cityId);
+        this.setState({ page: 'carte', mapSel: site ? site.id : null, q: '' });
+        window.scrollTo(0, 0);
+      },
+      cityTabs: CITY_ORDER.map(id => {
+        const active = id === s.cityId;
+        return {
+          nom: CITIES[id].nom,
+          bg: active ? '#1f1f1f' : '#fff', color: active ? '#fff' : '#1f1f1f',
+          border: active ? '#1f1f1f' : '#dadce0',
+          pick: () => this.goCity(id)
+        };
+      }),
+      citySites: city.sites.map(item => ({
+        nom: item.nom, cat: item.cat, desc: item.desc, img: item.img,
+        hasImg: !!item.img, noImg: !item.img,
+        open: () => this.openFiche('Site — ' + item.cat, item, city.nom)
+      })),
+      cityPersos: city.persos.map(item => ({
+        ini: item.ini, nom: item.nom, role: item.role,
+        open: () => this.openFiche('Personnalité historique', { ...item, desc: item.role }, city.nom)
+      })),
+      cityTraditions: city.traditions.map(item => ({
+        nom: item.nom, desc: item.desc,
+        open: () => this.openFiche('Tradition vivante', item, city.nom)
+      })),
+      cityEvents: city.events.map(item => ({
+        date: item.date, nom: item.nom, desc: item.desc,
+        open: () => this.openFiche('Événement culturel — ' + item.date, item, city.nom)
+      })),
+      cityGalerie: city.galerie.map(g => ({
+        badge: g.badge, titre: g.titre, img: g.img,
+        open: () => this.openTour(s.cityId, g.tourIdx)
+      })),
+
+      // fiche
+      ficheOpen: !!fiche,
+      ficheImg: fiche ? fiche.img : null, ficheHasImg: !!(fiche && fiche.img),
+      ficheKicker: fiche ? fiche.kicker : '', ficheTitre: fiche ? fiche.titre : '',
+      ficheTexte: fiche ? fiche.texte : '', ficheVille: fiche ? fiche.ville : '',
+      ficheAudio: fiche ? fiche.audio : '',
+      ficheHasVideo: !!(fiche && fiche.img), ficheVideo: fiche ? 'Documentaire — ' + fiche.titre : '',
+      closeFiche: () => this.setState({ fiche: null, audioOn: false }),
+      toggleAudio: () => this.setState(st => ({ audioOn: !st.audioOn })),
+      audioIcon: s.audioOn ? '❚❚' : '▶',
+      audioBars: Array.from({ length: 18 }, (_, i) => ({
+        delay: (i * 0.07).toFixed(2) + 's',
+        play: s.audioOn ? 'running' : 'paused',
+        op: s.audioOn ? 1 : 0.35
+      })),
+
+      // visite immersive
+      tourOpen: s.tourOpen,
+      tourVille: city.nom,
+      tourCompteur: 'Étape ' + (Math.min(s.tourIdx, tour.length - 1) + 1) + ' sur ' + tour.length,
+      tourImg: stop.img, tourTitre: stop.titre, tourTexte: stop.texte,
+      closeTour: () => this.setState({ tourOpen: false }),
+      tourPrev: () => this.setState(st => ({ tourIdx: (st.tourIdx - 1 + tour.length) % tour.length })),
+      tourNext: () => this.setState(st => ({ tourIdx: (st.tourIdx + 1) % tour.length })),
+      tourDots: tour.map((t, i) => ({
+        w: i === s.tourIdx ? '26px' : '10px',
+        bg: i === s.tourIdx ? '#fff' : 'rgba(255,255,255,.45)',
+        go: () => this.setState({ tourIdx: i })
+      })),
+
+      // carte
+      mapSrc,
+      mapFilters: ['Tout', 'Sites historiques', 'Musées', 'Festivals', 'Patrimoine naturel', 'Lieux touristiques'].map(f => {
+        const active = s.mapFilter === f;
+        return {
+          label: f,
+          bg: active ? '#1f1f1f' : '#fff', color: active ? '#fff' : '#444',
+          border: active ? '#1f1f1f' : '#dadce0',
+          pick: () => this.setState({ mapFilter: f })
+        };
+      }),
+      mapSites: filteredSites.map(m => {
+        const active = s.mapSel === m.id;
+        return {
+          nom: m.nom, ville: m.ville, cat: m.cat,
+          bg: active ? '#f1f3f4' : '#fff',
+          w: active ? 700 : 500,
+          dot: active ? accent : '#dadce0',
+          pick: () => this.setState({ mapSel: m.id })
+        };
+      }),
+      hasSel: !!selSite, noSel: !selSite,
+      selNom: selSite ? selSite.nom : '', selDesc: selSite ? selSite.desc : '',
+      goItineraire: () => {
+        if (selSite) window.open('https://www.google.com/maps/dir/?api=1&destination=' + selSite.lat + ',' + selSite.lng + '&travelmode=driving', '_blank');
+      },
+      goSelCity: () => { if (selSite) this.goCity(selSite.cityId); },
+
+      // jouer — tabs
+      gameTabs: [
+        { key: 'quiz', label: 'Quiz historique' },
+        { key: 'devinettes', label: 'Devinettes' },
+        { key: 'lieux', label: 'Reconnaître les lieux' },
+        { key: 'vf', label: 'Vrai ou faux' }
+      ].map(g => {
+        const active = s.gameTab === g.key;
+        return {
+          label: g.label,
+          bg: active ? '#1f1f1f' : '#fff', color: active ? '#fff' : '#444',
+          border: active ? '#1f1f1f' : '#dadce0',
+          pick: () => this.setState({ gameTab: g.key })
+        };
+      }),
+      showQuiz: s.gameTab === 'quiz', showDevinettes: s.gameTab === 'devinettes',
+      showLieux: s.gameTab === 'lieux', showVf: s.gameTab === 'vf',
+
+      // quiz
+      quizActive: !s.quizFinished, quizDone: s.quizFinished,
+      quizProgress: 'Question ' + (s.quizIdx + 1) + ' / ' + QUIZ.length,
+      quizPct: Math.round(((s.quizIdx + (s.quizPicked !== null ? 1 : 0)) / QUIZ.length) * 100) + '%',
+      quizQuestion: quiz ? quiz.q : '', quizOptions,
+      quizPicked: s.quizPicked !== null,
+      quizFeedback: quiz && s.quizPicked !== null ? (s.quizPicked === quiz.a ? 'Bonne réponse ! ' : '') + quiz.fb : '',
+      quizNextLabel: s.quizIdx < QUIZ.length - 1 ? 'Question suivante →' : 'Voir mon score',
+      quizNext: () => {
+        if (this.state.quizIdx < QUIZ.length - 1) this.setState(st => ({ quizIdx: st.quizIdx + 1, quizPicked: null }));
+        else this.setState({ quizFinished: true });
+      },
+      quizRestart: () => this.setState({ quizIdx: 0, quizPicked: null, quizScore: 0, quizFinished: false }),
+      quizScore: s.quizScore + ' / ' + QUIZ.length,
+      quizVerdict: s.quizScore >= 6 ? 'Excellent ! Vous êtes un véritable gardien de la mémoire béninoise.' : s.quizScore >= 3 ? 'Bien joué — continuez d\'explorer les villes pour parfaire vos connaissances.' : 'Un bon début ! Parcourez les pages Explorer et retentez votre chance.',
+
+      // devinettes
+      devActive: !s.devFinished, devDone: s.devFinished,
+      devProgress: 'Devinette ' + (s.devIdx + 1) + ' / ' + DEVINETTES.length,
+      devTexte: dev ? dev.texte : '', devReponse: dev ? dev.rep : '', devExplication: dev ? dev.exp : '',
+      devHidden: !s.devRevealed, devRevealed: s.devRevealed,
+      devReveal: () => this.setState({ devRevealed: true }),
+      devFound: () => this.devNext(true),
+      devMissed: () => this.devNext(false),
+      devRestart: () => this.setState({ devIdx: 0, devRevealed: false, devScore: 0, devFinished: false }),
+      devScore: s.devScore + ' / ' + DEVINETTES.length,
+
+      // lieux
+      lxActive: !s.lxFinished, lxDone: s.lxFinished,
+      lxProgress: 'Lieu ' + (s.lxIdx + 1) + ' / ' + LIEUX.length,
+      lxImg: lx ? lx.img : '', lxOptions,
+      lxPicked: s.lxPicked !== null,
+      lxNextLabel: s.lxIdx < LIEUX.length - 1 ? 'Lieu suivant →' : 'Voir mon score',
+      lxNext: () => {
+        if (this.state.lxIdx < LIEUX.length - 1) this.setState(st => ({ lxIdx: st.lxIdx + 1, lxPicked: null }));
+        else this.setState({ lxFinished: true });
+      },
+      lxRestart: () => this.setState({ lxIdx: 0, lxPicked: null, lxScore: 0, lxFinished: false }),
+      lxScore: s.lxScore + ' / ' + LIEUX.length,
+
+      // vrai ou faux
+      vfActive: !s.vfFinished, vfDone: s.vfFinished,
+      vfProgress: 'Affirmation ' + (s.vfIdx + 1) + ' / ' + VRAIFAUX.length,
+      vfPct: Math.round(((s.vfIdx + (s.vfPicked !== null ? 1 : 0)) / VRAIFAUX.length) * 100) + '%',
+      vfEnonce: vf ? vf.e : '', vfOptions,
+      vfPicked: s.vfPicked !== null,
+      vfFeedback: vf && s.vfPicked !== null ? vf.fb : '',
+      vfNextLabel: s.vfIdx < VRAIFAUX.length - 1 ? 'Affirmation suivante →' : 'Voir mon score',
+      vfNext: () => {
+        if (this.state.vfIdx < VRAIFAUX.length - 1) this.setState(st => ({ vfIdx: st.vfIdx + 1, vfPicked: null }));
+        else this.setState({ vfFinished: true });
+      },
+      vfRestart: () => this.setState({ vfIdx: 0, vfPicked: null, vfScore: 0, vfFinished: false }),
+      vfScore: s.vfScore + ' / ' + VRAIFAUX.length,
+
+      // stats
+      statQuiz: s.quizFinished ? s.quizScore + ' / ' + QUIZ.length : '—',
+      statDev: s.devFinished ? s.devScore + ' / ' + DEVINETTES.length : '—',
+      statLx: s.lxFinished ? s.lxScore + ' / ' + LIEUX.length : '—',
+      statVf: s.vfFinished ? s.vfScore + ' / ' + VRAIFAUX.length : '—',
+
+      leaderboard: [
+        { rang: '1', nom: 'A. Zinsou', pts: 980, w: 500 },
+        { rang: '2', nom: 'F. Gbaguidi', pts: 915, w: 500 },
+        { rang: '3', nom: 'S. Adjovi', pts: 870, w: 500 },
+        { rang: '4', nom: s.logged ? (s.userName || 'Vous') + ' (vous)' : '—', pts: s.logged ? 120 + (s.quizScore + s.devScore + s.lxScore + s.vfScore) * 40 : 0, w: 700 },
+        { rang: '5', nom: 'K. Ahouansou', pts: 640, w: 500 }
+      ],
+
+      // contribuer
+      imgGelede: IMGS.gelede1, imgVodoun: IMGS.vodoun,
+      showContribForm: s.logged && !s.contribSent,
+      contribSent: s.contribSent, noContrib: !s.contribSent,
+      cType: s.cType, cVille: s.cVille, cCat: s.cCat, cTitre: s.cTitre, cDesc: s.cDesc,
+      cTitreAff: s.cTitre.trim() || 'Contribution sans titre',
+      onCType: (e) => this.setState({ cType: e.target.value }),
+      onCVille: (e) => this.setState({ cVille: e.target.value }),
+      onCCat: (e) => this.setState({ cCat: e.target.value }),
+      onCTitre: (e) => this.setState({ cTitre: e.target.value }),
+      onCDesc: (e) => this.setState({ cDesc: e.target.value }),
+      submitContrib: () => this.setState({ contribSent: true }),
+      resetContrib: () => this.setState({ contribSent: false, cTitre: '', cDesc: '' }),
+      contribSteps: [
+        { n: '1', titre: 'Proposez', desc: 'Renseignez le type, le lieu et joignez vos fichiers.' },
+        { n: '2', titre: 'Modération', desc: 'Historiens et modérateurs vérifient les sources et le contenu.' },
+        { n: '3', titre: 'Publication', desc: 'Votre contribution rejoint les collections publiques, à votre nom.' }
+      ],
+
+      // profil
+      hasFavs: s.favs.length > 0, noFavs: s.favs.length === 0,
+      favList: s.favs.map(id => ({ nom: CITIES[id].nom, region: CITIES[id].region, go: () => this.goCity(id) })),
+      hasHistory: s.history.length > 0, noHistory: s.history.length === 0,
+      historyList: s.history.map(id => ({ nom: CITIES[id].nom, go: () => this.goCity(id) }))
+    };
+  }
+
+  devNext(found) {
+    const inc = found ? 1 : 0;
+    if (this.state.devIdx < DEVINETTES.length - 1) this.setState(st => ({ devIdx: st.devIdx + 1, devRevealed: false, devScore: st.devScore + inc }));
+    else this.setState(st => ({ devFinished: true, devScore: st.devScore + inc }));
+  }
+
+  doLoginNow() {
+    const name = this.state.loginName.trim() || 'Aïcha Dossou';
+    this.setState({ logged: true, userName: name, loginOpen: false });
+  }
+}
+</script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Culture+ Bénin v3";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var STAMP = true;
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', source: 'declared', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  // Declared kind: a doc-page tag names the kind outright, so no signal
+  // heuristics run (like the deck branch above, signals report false —
+  // they describe inferred classifications only). The tag alone is not
+  // trusted: the element must have upgraded (shadowRoot present), so a
+  // leftover tag whose script was deleted falls through to the heuristics
+  // that handle plain markup.
+  var stageSx = window.scrollX || 0, stageSy = window.scrollY || 0;
+  var dp = document.querySelector('doc-page');
+  if (dp && dp.shadowRoot) {
+    // Crop to the sheet, not the host — the desk around it is screen-only
+    // chrome that must not land in PNG exports.
+    var sheet = dp.shadowRoot.querySelector('.sheet');
+    var sr = (sheet || dp).getBoundingClientRect();
+    return { kind: 'paper-doc', source: 'declared', doc: doc,
+      frames: [{ left: sr.left + stageSx, top: sr.top + stageSy,
+        width: sr.width, height: sr.height }],
+      authored: [{ width: false, height: false }],
+      signals: { paperPage: false, pxPage: false } };
+  }
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    if (STAMP) el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', source: 'inferred', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', source: 'inferred', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  if (STAMP) el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', source: 'inferred', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

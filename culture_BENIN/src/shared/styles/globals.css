@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-culture-green: #0e3b2e;
+  --color-culture-green-dark: #145243;
+  --color-culture-terracotta: #b4622d;
+  --color-culture-ink: #1f1f1f;
+
+  --font-display: "Spectral", Georgia, serif;
+  --font-sans: "Archivo", Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-culture-ink);
+}
+
+::selection {
+  background: #e9e4d8;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
