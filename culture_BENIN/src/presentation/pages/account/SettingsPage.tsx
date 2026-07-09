@@ -1,20 +1,10 @@
-import { useState, type FormEvent } from "react";
-import { FormField, formInputClass } from "@/presentation/components/ui/FormField";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { getFullName } from "@/shared/utils/userDisplay";
 
 export function SettingsPage() {
-  const { user, updateProfile, logout } = useAuth();
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
-  const [saved, setSaved] = useState(false);
+  const { user, logout } = useAuth();
 
   if (!user) return null;
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    updateProfile(name, email);
-    setSaved(true);
-  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -23,49 +13,18 @@ export function SettingsPage() {
           Informations personnelles
         </h2>
         <p className="mb-4 text-[13px] text-gray-500">
-          Ces informations sont utilisées pour identifier vos contributions
-          et vous contacter en cas de suivi de modération.
+          La modification du profil n'est pas encore disponible en libre-service — contactez un administrateur si une information doit être corrigée.
         </p>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 rounded-[18px] border border-gray-200 bg-white p-6 sm:p-8"
-        >
-          <FormField label="Nom">
-            <input
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                setSaved(false);
-              }}
-              className={formInputClass}
-            />
-          </FormField>
-          <FormField label="Email">
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                setSaved(false);
-              }}
-              placeholder="Ex. aicha.dossou@email.com"
-              className={formInputClass}
-            />
-          </FormField>
-
-          {saved && (
-            <p className="text-[13px] font-semibold text-culture-green">
-              Profil mis à jour.
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="self-start rounded-full bg-culture-green px-6 py-2.5 text-[13.5px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark"
-          >
-            Enregistrer
-          </button>
-        </form>
+        <div className="flex flex-col gap-4 rounded-[18px] border border-gray-200 bg-white p-6 sm:p-8">
+          <div className="flex flex-col gap-1">
+            <span className="text-[12.5px] font-semibold text-gray-500">Nom</span>
+            <span className="text-[14.5px] text-culture-ink">{getFullName(user)}</span>
+          </div>
+          <div className="flex flex-col gap-1 border-t border-gray-100 pt-4">
+            <span className="text-[12.5px] font-semibold text-gray-500">Email</span>
+            <span className="text-[14.5px] text-culture-ink">{user.email}</span>
+          </div>
+        </div>
       </section>
 
       <section>

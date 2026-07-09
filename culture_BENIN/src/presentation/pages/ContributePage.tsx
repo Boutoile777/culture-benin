@@ -10,6 +10,7 @@ import { CONTENT_CATEGORY_LABELS } from "@/shared/constants/contentCategoryLabel
 import { cityRepository, contributionRepository } from "@/infrastructure/config/repositories";
 import { wikimediaImage } from "@/shared/utils/wikimedia";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { getFullName } from "@/shared/utils/userDisplay";
 
 const OTHER_PLACE_ID = "autre";
 
@@ -40,7 +41,7 @@ export function ContributePage() {
   const { user, openLogin } = useAuth();
   const [cities, setCities] = useState<City[]>([]);
 
-  const [authorName, setAuthorName] = useState(user?.name ?? "");
+  const [authorName, setAuthorName] = useState(user ? getFullName(user) : "");
   const [contentType, setContentType] = useState<ContributionType>("historical_text");
   const [cityId, setCityId] = useState<string>("");
   const [category, setCategory] = useState<ContentCategory>("history_kingdoms");
@@ -79,7 +80,7 @@ export function ContributePage() {
   };
 
   const resetForm = () => {
-    setAuthorName(user?.name ?? "");
+    setAuthorName(user ? getFullName(user) : "");
     setContentType("historical_text");
     setCityId(cities[0]?.id ?? "");
     setCategory("history_kingdoms");

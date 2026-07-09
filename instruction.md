@@ -1,28 +1,12 @@
-
-
-
-Pour les sites historiques, ont doit avoir : 
-    Description et historique
-    Visiter
-    Témoignages : des contenus audios et vidéos.(Pour les audios, on aura un dialog à deux colonnes : une colonne de l'image illustrative du récit, de l'autre coté l'audio en cours suivie de la transcription en bas(pour le moment, après on proposera du multilingue))
-    Gallerie (assez fourni)
-
-- On aura d'autres petites fonctionnalités en haut comme Voir la carte, favoris, etc. 
-
-
-Pour les Personnalités Historiques, on aura : 
-    Histoire de la personnalité avec des images tout au long de la description
-    Des témoignages aussi 
-
-- On aura d'autres petites fonctionnalités en haut comme découvrir la ville liée favoris, etc. 
-
-
-Pour évenements & Tradictions aura : 
-    Une description de l'évenement 
-    Contenu multimédia (des vidéos des évenements passés)
-    Une gallerie étoffée 
-
-
-
-
-Ne pas oublier que toute ces données et contenus viendrons du backend et donc de la base NoSQL, mais pour le moment on contenu avec des données de test. s
+j'essaie de créer un compte, mais ça marche pas. 
+J'ai l'erreur suivante : [vite] connected from window 6597ddc3-f162-4051-bbdd-3db5adc2cc22:67:11
+[vite] new window visibility hidden 6597ddc3-f162-4051-bbdd-3db5adc2cc22:63:12
+[vite] ping successful 6597ddc3-f162-4051-bbdd-3db5adc2cc22:69:12
+[vite] connecting... client:851:9
+[vite] connected. client:955:12
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools react-dom_client.js:14336:49
+Avertissements Content-Security-Policy 5
+Search endpoint requested! init_embed.js:301:349
+Un accès partitionné à un cookie ou au stockage a été fourni à « https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1zQsOpbmlu!6i7!3m1!1sfr!5m1!1sfr » car il est chargé dans le contexte tiers et le partitionnement d’état dynamique est activé. main.js:178:229
+Blocage d’une requête multiorigines (Cross-Origin Request) : la politique « Same Origin » ne permet pas de consulter la ressource distante située sur https://cultureplusbenin-backend-nestjs.onrender.com/auth/register. Raison : l’en-tête CORS « Access-Control-Allow-Origin » est manquant. Code d’état : 404.
+Blocage d’une requête multiorigine (Cross-Origin Request) : la politique « Same Origin » ne permet pas de consulter la ressource distante située sur https://cultureplusbenin-backend-nestjs.onrender.com/auth/register. Raison : échec de la requête CORS. Code d’état : (null).

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { useFavorites } from "@/presentation/hooks/useFavorites";
 import { contributionRepository } from "@/infrastructure/config/repositories";
+import { getFullName, getInitials } from "@/shared/utils/userDisplay";
 
 const QUICK_LINKS = [
   {
@@ -45,15 +46,13 @@ export function ProfilePage() {
       <div className="flex flex-col gap-6 rounded-[18px] border border-gray-200 bg-white p-6 sm:p-8">
         <div className="flex items-center gap-4">
           <span className="flex h-16 w-16 flex-none items-center justify-center rounded-full bg-culture-green text-2xl font-semibold text-white">
-            {user.initials}
+            {getInitials(user)}
           </span>
           <div className="flex flex-col gap-0.5">
             <span className="font-display text-xl font-semibold text-culture-ink">
-              {user.name}
+              {getFullName(user)}
             </span>
-            <span className="text-[13px] text-gray-500">
-              {user.email ?? "Aucun email renseigné"}
-            </span>
+            <span className="text-[13px] text-gray-500">{user.email}</span>
           </div>
         </div>
 

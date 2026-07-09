@@ -4,6 +4,7 @@ import { NAV_ITEMS } from "@/shared/constants/homeStaticContent";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { cityRepository } from "@/infrastructure/config/repositories";
+import { getFullName, getInitials } from "@/shared/utils/userDisplay";
 import type { City } from "@/domain/entities/City";
 
 const ACCOUNT_MENU_LINKS = [
@@ -163,7 +164,7 @@ export function SiteHeader() {
                 aria-expanded={isAccountMenuOpen}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-culture-green text-[13px] font-semibold text-white transition-transform duration-200 hover:scale-105"
               >
-                {user.initials}
+                {getInitials(user)}
               </button>
 
               {isAccountMenuOpen && (
@@ -175,13 +176,11 @@ export function SiteHeader() {
                   <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-56 overflow-hidden rounded-2xl border border-gray-200 bg-white py-2 shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
                     <div className="border-b border-gray-100 px-4 pb-2.5">
                       <span className="block text-[13.5px] font-semibold text-culture-ink">
-                        {user.name}
+                        {getFullName(user)}
                       </span>
-                      {user.email && (
-                        <span className="block truncate text-[12px] text-gray-500">
-                          {user.email}
-                        </span>
-                      )}
+                      <span className="block truncate text-[12px] text-gray-500">
+                        {user.email}
+                      </span>
                     </div>
                     <div className="py-1.5">
                       {ACCOUNT_MENU_LINKS.map((link) => (
@@ -278,10 +277,10 @@ export function SiteHeader() {
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-culture-green text-[13px] font-semibold text-white">
-                    {user.initials}
+                    {getInitials(user)}
                   </span>
                   <span className="text-sm font-semibold text-culture-ink">
-                    {user.name}
+                    {getFullName(user)}
                   </span>
                 </div>
                 <nav className="flex flex-col gap-1">

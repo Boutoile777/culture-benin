@@ -2,19 +2,29 @@ import { useState, type FormEvent, type MouseEvent } from "react";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { FormField, formInputClass } from "@/presentation/components/ui/FormField";
+import { PasswordInput } from "@/presentation/components/ui/PasswordInput";
 import { wikimediaImage } from "@/shared/utils/wikimedia";
+import { getErrorMessage } from "@/infrastructure/api/httpClient";
 
 export function SignupDialog() {
-  const { login, closeAuthDialog, openLogin } = useAuth();
-  const [name, setName] = useState("");
+  const { register, closeAuthDialog, openLogin } = useAuth();
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (
+      !firstname.trim() ||
+      !lastname.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
       setError("Merci de remplir tous les champs.");
       return;
     }
@@ -22,8 +32,8 @@ export function SignupDialog() {
       setError("Merci de renseigner une adresse email valide.");
       return;
     }
-    if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères.");
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
       return;
     }
     if (password !== confirmPassword) {
@@ -31,7 +41,19 @@ export function SignupDialog() {
       return;
     }
     setError(null);
-    login(name, email);
+    setIsSubmitting(true);
+    try {
+      await register({
+        firstname: firstname.trim(),
+        lastname: lastname.trim(),
+        email: email.trim(),
+        password,
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const stopPropagation = (event: MouseEvent) => event.stopPropagation();
@@ -66,15 +88,25 @@ export function SignupDialog() {
           </p>
 
           <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-4">
-            <FormField label="Votre nom">
-              <input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Ex. Aïcha Dossou"
-                className={formInputClass}
-                autoFocus
-              />
-            </FormField>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Prénom">
+                <input
+                  value={firstname}
+                  onChange={(event) => setFirstname(event.target.value)}
+                  placeholder="Aïcha"
+                  className={formInputClass}
+                  autoFocus
+                />
+              </FormField>
+              <FormField label="Nom">
+                <input
+                  value={lastname}
+                  onChange={(event) => setLastname(event.target.value)}
+                  placeholder="Dossou"
+                  className={formInputClass}
+                />
+              </FormField>
+            </div>
             <FormField label="Email">
               <input
                 type="email"
@@ -85,21 +117,17 @@ export function SignupDialog() {
               />
             </FormField>
             <FormField label="Mot de passe">
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••"
-                className={formInputClass}
+                onChange={setPassword}
+                placeholder="8 caractères minimum"
               />
             </FormField>
             <FormField label="Confirmer le mot de passe">
-              <input
-                type="password"
+              <PasswordInput
                 value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                onChange={setConfirmPassword}
                 placeholder="••••••••"
-                className={formInputClass}
               />
             </FormField>
 
@@ -107,9 +135,10 @@ export function SignupDialog() {
 
             <button
               type="submit"
-              className="mt-2 rounded-full bg-culture-green py-3 text-[14.5px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark"
+              disabled={isSubmitting}
+              className="mt-2 rounded-full bg-culture-green py-3 text-[14.5px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark disabled:opacity-60"
             >
-              Créer mon compte
+              {isSubmitting ? "Création…" : "Créer mon compte"}
             </button>
           </form>
 

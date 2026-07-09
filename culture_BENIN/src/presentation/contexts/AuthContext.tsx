@@ -2,25 +2,26 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import type { User } from "@/domain/entities/User";
+import type { RegisterInput } from "@/domain/repositories/AuthRepository";
+import { authRepository } from "@/infrastructure/config/repositories";
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email?: string;
-  initials: string;
-}
+const TOKEN_STORAGE_KEY = "culture-benin:auth-token";
 
 export type AuthDialog = "login" | "signup" | null;
 
 interface AuthContextValue {
-  user: AuthUser | null;
-  login: (name: string, email?: string) => void;
+  user: User | null;
+  token: string | null;
+  isRestoring: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
-  updateProfile: (name: string, email?: string) => void;
   authDialog: AuthDialog;
   openLogin: () => void;
   openSignup: () => void;
@@ -30,34 +31,49 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isRestoring, setIsRestoring] = useState(true);
   const [authDialog, setAuthDialog] = useState<AuthDialog>(null);
 
-  const login = useCallback((name: string, email?: string) => {
-    const trimmed = name.trim();
-    setUser({
-      id: crypto.randomUUID(),
-      name: trimmed,
-      email: email?.trim() || undefined,
-      initials: trimmed.charAt(0).toUpperCase(),
-    });
+  useEffect(() => {
+    const storedToken = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!storedToken) {
+      setIsRestoring(false);
+      return;
+    }
+    authRepository
+      .getProfile(storedToken)
+      .then((profile) => {
+        setUser(profile);
+        setToken(storedToken);
+      })
+      .catch(() => {
+        window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+      })
+      .finally(() => setIsRestoring(false));
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const session = await authRepository.login({ email, password });
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, session.accessToken);
+    setToken(session.accessToken);
+    setUser(session.user);
     setAuthDialog(null);
   }, []);
 
-  const logout = useCallback(() => setUser(null), []);
+  const register = useCallback(async (input: RegisterInput) => {
+    const session = await authRepository.register(input);
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, session.accessToken);
+    setToken(session.accessToken);
+    setUser(session.user);
+    setAuthDialog(null);
+  }, []);
 
-  const updateProfile = useCallback((name: string, email?: string) => {
-    const trimmed = name.trim();
-    setUser((current) =>
-      current
-        ? {
-            ...current,
-            name: trimmed,
-            email: email?.trim() || undefined,
-            initials: trimmed.charAt(0).toUpperCase(),
-          }
-        : current,
-    );
+  const logout = useCallback(() => {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    setToken(null);
+    setUser(null);
   }, []);
 
   const openLogin = useCallback(() => setAuthDialog("login"), []);
@@ -67,15 +83,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       user,
+      token,
+      isRestoring,
       login,
+      register,
       logout,
-      updateProfile,
       authDialog,
       openLogin,
       openSignup,
       closeAuthDialog,
     }),
-    [user, login, logout, updateProfile, authDialog, openLogin, openSignup, closeAuthDialog],
+    [
+      user,
+      token,
+      isRestoring,
+      login,
+      register,
+      logout,
+      authDialog,
+      openLogin,
+      openSignup,
+      closeAuthDialog,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
