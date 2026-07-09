@@ -6,15 +6,11 @@ export class MapRepositoryImpl implements MapRepository {
   async getPoints(filter?: MapPointFilter): Promise<MapPoint[]> {
     const query = filter?.query?.trim().toLowerCase() ?? "";
     return MAP_POINTS_MOCK.filter((point) => {
-      const matchesCategory =
-        !filter?.category ||
-        filter.category === "Tout" ||
-        point.category === filter.category;
-      const matchesQuery =
-        !query ||
+      if (!query) return true;
+      return (
         point.name.toLowerCase().includes(query) ||
-        point.cityId.toLowerCase().includes(query);
-      return matchesCategory && matchesQuery;
+        point.cityId.toLowerCase().includes(query)
+      );
     });
   }
 }

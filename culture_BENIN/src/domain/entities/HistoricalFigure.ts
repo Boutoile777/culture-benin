@@ -1,4 +1,4 @@
-import type { MediaResources } from "@/domain/entities/MediaResources";
+import type { Testimony } from "@/domain/entities/Testimony";
 
 export interface HistoricalFigure {
   id: string;
@@ -6,6 +6,8 @@ export interface HistoricalFigure {
   name: string;
   role: string;
   initials: string;
-  biography: string;
-  media?: MediaResources;
+  biography: string[];
+  portrait?: string;
+  gallery?: string[];
+  testimonies?: Testimony[];
 }

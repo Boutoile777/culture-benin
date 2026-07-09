@@ -80,8 +80,8 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: "Accueil", path: "/" },
-  { label: "Explorer", path: null },
+  { label: "Explorer", path: "/explorer" },
   { label: "Carte", path: "/carte" },
-  { label: "Jouer", path: null },
+  { label: "Jouer", path: "/jouer" },
   { label: "Contribuer", path: "/contribuer" },
 ];

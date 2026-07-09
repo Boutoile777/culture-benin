@@ -6,6 +6,7 @@ export const CITIES_MOCK: City[] = [
     id: "ouidah",
     name: "Ouidah",
     region: "Département de l'Atlantique",
+    theme: "Spiritualité & mémoire",
     nickname: "« Cité mémoire du Vodoun »",
     tagline:
       "Face à l'océan, la mémoire atlantique s'écrit encore : Route des Esclaves, temples vodoun et pèlerinages venus du monde entier.",
@@ -21,6 +22,7 @@ export const CITIES_MOCK: City[] = [
     id: "abomey",
     name: "Abomey",
     region: "Département du Zou",
+    theme: "Histoire royale",
     nickname: "« Berceau du royaume du Danxomè »",
     tagline:
       "Douze rois, un seul défi : parcourez les palais UNESCO et l'épopée guerrière du Danxomè.",
@@ -36,6 +38,7 @@ export const CITIES_MOCK: City[] = [
     id: "portonovo",
     name: "Porto-Novo",
     region: "Département de l'Ouémé",
+    theme: "Métissage culturel",
     nickname: "« Hogbonou, la ville aux trois noms »",
     tagline:
       "Trois noms, un carrefour : la capitale où se croisent héritages yoruba, afro-brésilien et colonial.",
@@ -51,6 +54,7 @@ export const CITIES_MOCK: City[] = [
     id: "ganvie",
     name: "Ganvié",
     region: "Lac Nokoué — Sô-Ava",
+    theme: "Patrimoine lacustre",
     nickname: "« La Venise de l'Afrique »",
     tagline:
       "Une cité entière posée sur l'eau, née d'un pari audacieux pour échapper à l'esclavage.",
@@ -61,5 +65,75 @@ export const CITIES_MOCK: City[] = [
     history:
       "Au XVIIIe siècle, les populations Toffinou fuient les chasseurs d'esclaves du royaume du Danxomè. Les guerriers danxoméens ayant l'interdit religieux de combattre sur l'eau, les Toffinou s'installent au milieu du lac Nokoué : Ganvié — « la communauté de ceux qui ont trouvé la paix ». Maisons sur pilotis de bois et de bambou, marché flottant, pêche à l'acadja — un système ingénieux d'enclos de branchages — organisent depuis trois siècles une vie entièrement lacustre. Inscrite sur la liste indicative de l'UNESCO, Ganvié incarne une résistance devenue culture, où l'école, le temple et le marché se rejoignent en pirogue.",
     order: 3,
+  },
+  {
+    id: "cotonou",
+    name: "Cotonou",
+    region: "Département du Littoral",
+    theme: "Vie urbaine & modernité",
+    nickname: "« La capitale économique »",
+    tagline:
+      "Le vrai cœur battant du Bénin : port international, grand marché de Dantokpa et vie urbaine effervescente.",
+    heroImage: wikimediaImage(
+      "Vue panoramique quartier cadjéhoun-Cotonou au Bénin 1.jpg",
+      1800,
+    ),
+    cardImage: wikimediaImage(
+      "Vue panoramique quartier cadjéhoun-Cotonou au Bénin 1.jpg",
+      1800,
+    ),
+    introduction:
+      "Plus grande ville et capitale économique du Bénin, Cotonou concentre le port autonome — l'un des plus actifs d'Afrique de l'Ouest — et le marché Dantokpa, l'un des plus grands marchés à ciel ouvert de la sous-région.",
+    history:
+      "Fondée au XVIIIe siècle comme comptoir sur le cordon lagunaire séparant le lac Nokoué de l'océan Atlantique, Cotonou — dont le nom signifierait « à l'embouchure du fleuve de la mort » en fon — est cédée à la France en 1868 et devient un port stratégique de la colonie du Dahomey. Après l'indépendance, elle s'impose comme le principal centre économique, administratif de facto et démographique du pays, tandis que Porto-Novo reste la capitale officielle. Aujourd'hui, ministères, ambassades, universités et aéroport international y font battre le pouls du Bénin contemporain.",
+    order: 4,
+  },
+  {
+    id: "natitingou",
+    name: "Natitingou",
+    region: "Département de l'Atacora",
+    theme: "Architecture traditionnelle",
+    nickname: "« Porte de l'Atacora »",
+    tagline:
+      "Le pays des tata somba, forteresses de terre uniques au monde, aux portes du parc de la Pendjari.",
+    heroImage: wikimediaImage("Benin Natitingou.JPG", 1800),
+    cardImage: wikimediaImage("Benin Natitingou.JPG", 1800),
+    introduction:
+      "Chef-lieu de l'Atacora dans le nord-ouest du Bénin, Natitingou est la porte d'entrée vers les chaînes de l'Atacora et le parc national de la Pendjari, au cœur du pays Otammari.",
+    history:
+      "La région est habitée depuis des siècles par les Betammaribè (Otammari), bâtisseurs des tata somba — ces maisons-forteresses en terre à tourelles, uniques en leur genre et aujourd'hui candidates au patrimoine mondial de l'UNESCO. Devenue chef-lieu administratif à l'époque coloniale, Natitingou s'est développée comme carrefour commercial et point de départ des visites vers les villages Somba de Koussoukoingou et le parc de la Pendjari, l'une des plus importantes réserves de faune sauvage d'Afrique de l'Ouest.",
+    order: 5,
+  },
+  {
+    id: "parakou",
+    name: "Parakou",
+    region: "Département du Borgou",
+    theme: "Carrefour du Nord",
+    nickname: "« Le carrefour du Nord béninois »",
+    tagline:
+      "Terminus du chemin de fer et grand marché commercial entre le sud du Bénin, le Niger et le Nigeria.",
+    heroImage: wikimediaImage("Parakou2.jpg", 1800),
+    cardImage: wikimediaImage("Parakou2.jpg", 1800),
+    introduction:
+      "Troisième ville du Bénin par sa population, Parakou est le grand carrefour commercial et logistique du nord du pays, terminus de la voie ferrée Cotonou–Parakou et porte vers le Niger, le Burkina Faso et le Nigeria voisins.",
+    history:
+      "Ancienne escale sur les routes caravanières reliant la côte aux royaumes du Nord, Parakou prend son essor avec l'arrivée du chemin de fer au début du XXe siècle, qui en fait le terminus du réseau ferroviaire du Dahomey colonial. Elle demeure aujourd'hui un carrefour commercial majeur — son grand marché et sa gare structurent les échanges entre le sud du pays et les régions sahéliennes, dans une ville marquée par la cohabitation des cultures bariba, dendi et peule.",
+    order: 6,
+  },
+  {
+    id: "grandpopo",
+    name: "Grand-Popo",
+    region: "Département du Mono",
+    theme: "Littoral & évasion",
+    nickname: "« Entre lagune, fleuve et océan »",
+    tagline:
+      "Plages, embouchure du fleuve Mono et lodges écotouristiques, aux portes du Togo.",
+    heroImage: wikimediaImage("Benin4.jpg", 1800),
+    cardImage: wikimediaImage("Benin4.jpg", 1800),
+    introduction:
+      "Étirée entre l'océan Atlantique, le fleuve Mono et ses lagunes, Grand-Popo est devenue la destination balnéaire et écotouristique de référence du Bénin, à la frontière du Togo.",
+    history:
+      "Ancien comptoir commercial dès le XVIIe siècle, disputé entre royaumes locaux et négociants européens, Grand-Popo conserve les traces de son passé colonial — dont la Villa Karo, ancienne maison coloniale devenue centre culturel finno-béninois. Aujourd'hui, ses plages, l'embouchure du fleuve Mono et ses lodges écotouristiques en ont fait une étape prisée du tourisme durable, loin de l'agitation de Cotonou.",
+    order: 7,
   },
 ];

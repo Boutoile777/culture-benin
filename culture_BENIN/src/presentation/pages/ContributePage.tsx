@@ -37,7 +37,6 @@ interface SelectedFile {
 }
 
 export function ContributePage() {
-  const [searchValue, setSearchValue] = useState("");
   const { user, openLogin } = useAuth();
   const [cities, setCities] = useState<City[]>([]);
 
@@ -115,7 +114,7 @@ export function ContributePage() {
   };
 
   return (
-    <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+    <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 pb-[72px] sm:px-6">
           <SectionHeading kicker="Transmission du savoir" title="Contribuer au patrimoine" />

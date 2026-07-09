@@ -10,11 +10,10 @@ const DEMO_TOUR = {
 };
 
 export function ImmersiveTestPage() {
-  const [searchValue, setSearchValue] = useState("");
   const [tourOpen, setTourOpen] = useState(false);
 
   return (
-    <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+    <MainLayout>
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
           Page de test

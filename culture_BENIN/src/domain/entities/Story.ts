@@ -6,4 +6,5 @@ export interface Story {
   excerpt: string;
   content: string;
   image: string;
+  gallery?: string[];
 }

@@ -8,8 +8,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Porte du Non-Retour",
     category: "Sites historiques",
     description: "Mémorial de la traite atlantique, sur la plage de Ouidah.",
-    latitude: 6.3222,
-    longitude: 2.0879,
+    latitude: 6.324,
+    longitude: 2.0894,
   },
   {
     id: "pythons",
@@ -18,8 +18,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Temple des Pythons",
     category: "Sites historiques",
     description: "Sanctuaire vodoun du serpent sacré Dangbé.",
-    latitude: 6.3623,
-    longitude: 2.0851,
+    latitude: 6.35997,
+    longitude: 2.08504,
   },
   {
     id: "fort",
@@ -28,8 +28,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Musée d'histoire de Ouidah",
     category: "Musées",
     description: "Ancien fort portugais, musée de la mémoire de la traite.",
-    latitude: 6.3599,
-    longitude: 2.0877,
+    latitude: 6.359029,
+    longitude: 2.090149,
   },
   {
     id: "kpasse",
@@ -38,8 +38,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Forêt sacrée de Kpassè",
     category: "Patrimoine naturel",
     description: "Bois sacré du roi fondateur, sculptures contemporaines.",
-    latitude: 6.3664,
-    longitude: 2.0836,
+    latitude: 6.36463,
+    longitude: 2.095942,
   },
   {
     id: "fetvodoun",
@@ -49,8 +49,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     category: "Festivals",
     description:
       "Épicentre de la Fête nationale du Vodoun, chaque 10 janvier.",
-    latitude: 6.3199,
-    longitude: 2.0885,
+    latitude: 6.3245,
+    longitude: 2.0895,
   },
   {
     id: "palais",
@@ -59,8 +59,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Palais royaux d'Abomey",
     category: "Sites historiques",
     description: "Enceinte royale UNESCO des douze rois du Danxomè.",
-    latitude: 7.1826,
-    longitude: 1.9889,
+    latitude: 7.18666,
+    longitude: 1.99438,
   },
   {
     id: "goho",
@@ -69,8 +69,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Place Goho",
     category: "Lieux touristiques",
     description: "Statue monumentale du roi Béhanzin.",
-    latitude: 7.1786,
-    longitude: 1.9942,
+    latitude: 7.1853,
+    longitude: 1.9914,
   },
   {
     id: "mosquee",
@@ -79,8 +79,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Grande Mosquée",
     category: "Sites historiques",
     description: "Architecture afro-brésilienne inspirée de Bahia.",
-    latitude: 6.4779,
-    longitude: 2.6323,
+    latitude: 6.47167,
+    longitude: 2.62833,
   },
   {
     id: "honme",
@@ -89,8 +89,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Musée Honmè",
     category: "Musées",
     description: "Palais du roi Toffa, mémoire du royaume de Hogbonou.",
-    latitude: 6.4772,
-    longitude: 2.6289,
+    latitude: 6.46947,
+    longitude: 2.62519,
   },
   {
     id: "jardin",
@@ -99,8 +99,8 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     name: "Jardin des Plantes et de la Nature",
     category: "Patrimoine naturel",
     description: "Jardin botanique au cœur de la capitale.",
-    latitude: 6.4831,
-    longitude: 2.6283,
+    latitude: 6.47391,
+    longitude: 2.61499,
   },
   {
     id: "ganvie",
@@ -110,7 +110,7 @@ export const MAP_POINTS_MOCK: MapPoint[] = [
     category: "Lieux touristiques",
     description:
       "La plus grande cité sur pilotis d'Afrique, sur le lac Nokoué.",
-    latitude: 6.4667,
-    longitude: 2.4167,
+    latitude: 6.46769,
+    longitude: 2.39125,
   },
 ];

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { City } from "@/domain/entities/City";
 
 interface CityCardProps {
@@ -9,7 +10,6 @@ interface CityCardProps {
 
 export function CityCard({ city, isFavorite, onToggleFavorite }: CityCardProps) {
   const [imageErrored, setImageErrored] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
@@ -46,18 +46,12 @@ export function CityCard({ city, isFavorite, onToggleFavorite }: CityCardProps) 
         <span className="text-[13px] leading-relaxed text-gray-500">
           {city.tagline}
         </span>
-        {expanded && (
-          <p className="mt-1 border-t border-gray-100 pt-2.5 text-[13px] leading-relaxed text-gray-500">
-            {city.introduction}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={() => setExpanded((current) => !current)}
+        <Link
+          to={`/explorer/${city.id}`}
           className="mt-1.5 self-start text-[12.5px] font-semibold text-culture-green transition-colors hover:text-culture-terracotta"
         >
-          {expanded ? "Voir moins ↑" : "Voir plus ↓"}
-        </button>
+          Voir plus →
+        </Link>
       </div>
     </div>
   );

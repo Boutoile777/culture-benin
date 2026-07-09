@@ -20,6 +20,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   login: (name: string, email?: string) => void;
   logout: () => void;
+  updateProfile: (name: string, email?: string) => void;
   authDialog: AuthDialog;
   openLogin: () => void;
   openSignup: () => void;
@@ -44,13 +45,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => setUser(null), []);
+
+  const updateProfile = useCallback((name: string, email?: string) => {
+    const trimmed = name.trim();
+    setUser((current) =>
+      current
+        ? {
+            ...current,
+            name: trimmed,
+            email: email?.trim() || undefined,
+            initials: trimmed.charAt(0).toUpperCase(),
+          }
+        : current,
+    );
+  }, []);
+
   const openLogin = useCallback(() => setAuthDialog("login"), []);
   const openSignup = useCallback(() => setAuthDialog("signup"), []);
   const closeAuthDialog = useCallback(() => setAuthDialog(null), []);
 
   const value = useMemo(
-    () => ({ user, login, logout, authDialog, openLogin, openSignup, closeAuthDialog }),
-    [user, login, logout, authDialog, openLogin, openSignup, closeAuthDialog],
+    () => ({
+      user,
+      login,
+      logout,
+      updateProfile,
+      authDialog,
+      openLogin,
+      openSignup,
+      closeAuthDialog,
+    }),
+    [user, login, logout, updateProfile, authDialog, openLogin, openSignup, closeAuthDialog],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

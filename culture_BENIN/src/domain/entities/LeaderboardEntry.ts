@@ -1,4 +1,4 @@
-export type GameType = "quiz" | "riddles" | "placeGuess" | "trueFalse";
+export type GameType = "quiz" | "chronology" | "memory";
 
 export interface LeaderboardEntry {
   rank: number;

@@ -1,4 +1,4 @@
-import type { MediaResources } from "@/domain/entities/MediaResources";
+import type { Testimony } from "@/domain/entities/Testimony";
 
 export interface Site {
   id: string;
@@ -7,6 +7,7 @@ export interface Site {
   name: string;
   description: string;
   image?: string;
+  gallery?: string[];
   narrative?: string;
-  media?: MediaResources;
+  testimonies?: Testimony[];
 }

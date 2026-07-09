@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { Story } from "@/domain/entities/Story";
 
 interface StoryCardProps {
@@ -6,16 +7,23 @@ interface StoryCardProps {
 }
 
 export function StoryCard({ story }: StoryCardProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [imageErrored, setImageErrored] = useState(false);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
       <div className="overflow-hidden">
-        <img
-          src={story.image}
-          alt={story.title}
-          className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        {imageErrored ? (
+          <div className="flex h-[150px] items-center justify-center bg-gradient-to-br from-gray-100 to-[#e6e3da] text-xs text-gray-400">
+            photo à venir — {story.title}
+          </div>
+        ) : (
+          <img
+            src={story.image}
+            alt={story.title}
+            onError={() => setImageErrored(true)}
+            className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        )}
       </div>
       <div className="flex flex-col gap-2 p-[18px]">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-culture-terracotta">
@@ -27,18 +35,12 @@ export function StoryCard({ story }: StoryCardProps) {
         <span className="text-[13px] leading-relaxed text-gray-500">
           {story.excerpt}
         </span>
-        {expanded && (
-          <p className="mt-1 border-t border-gray-100 pt-2.5 text-[13px] leading-relaxed text-gray-500">
-            {story.content}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={() => setExpanded((current) => !current)}
+        <Link
+          to={`/explorer/recits/${story.id}`}
           className="mt-1.5 self-start text-[12.5px] font-semibold text-culture-green transition-colors hover:text-culture-terracotta"
         >
-          {expanded ? "Voir moins ↑" : "Voir plus ↓"}
-        </button>
+          Voir plus →
+        </Link>
       </div>
     </div>
   );

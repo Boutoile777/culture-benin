@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { useHomeContent } from "@/presentation/hooks/useHomeContent";
+import { useFavorites } from "@/presentation/hooks/useFavorites";
 import { HeroCarousel } from "@/presentation/components/home/HeroCarousel";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { CityCard } from "@/presentation/components/ui/CityCard";
@@ -15,20 +16,8 @@ import {
 
 export function HomePage() {
   const { content, isLoading } = useHomeContent();
-  const [searchValue, setSearchValue] = useState("");
-  const [favoriteCityIds, setFavoriteCityIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const { favoriteIds: favoriteCityIds, toggleFavorite } = useFavorites();
   const citiesSectionRef = useRef<HTMLDivElement>(null);
-
-  const filteredCities = useMemo(() => {
-    if (!content) return [];
-    const query = searchValue.trim().toLowerCase();
-    if (!query) return content.cities;
-    return content.cities.filter((city) =>
-      city.name.toLowerCase().includes(query),
-    );
-  }, [content, searchValue]);
 
   const cityNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -36,18 +25,9 @@ export function HomePage() {
     return map;
   }, [content]);
 
-  const toggleFavorite = (cityId: string) => {
-    setFavoriteCityIds((current) => {
-      const next = new Set(current);
-      if (next.has(cityId)) next.delete(cityId);
-      else next.add(cityId);
-      return next;
-    });
-  };
-
   if (isLoading || !content) {
     return (
-      <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+      <MainLayout>
         <div className="flex h-[400px] items-center justify-center text-gray-400">
           Chargement du patrimoine béninois…
         </div>
@@ -56,7 +36,7 @@ export function HomePage() {
   }
 
   return (
-    <MainLayout searchValue={searchValue} onSearchChange={setSearchValue}>
+    <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <HeroCarousel
           slides={content.heroSlides}
@@ -80,22 +60,16 @@ export function HomePage() {
               title="Lieux culturels à explorer"
             />
           </div>
-          {filteredCities.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              Aucune ville ne correspond à « {searchValue} ».
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {filteredCities.map((city) => (
-                <CityCard
-                  key={city.id}
-                  city={city}
-                  isFavorite={favoriteCityIds.has(city.id)}
-                  onToggleFavorite={toggleFavorite}
-                />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {content.cities.map((city) => (
+              <CityCard
+                key={city.id}
+                city={city}
+                isFavorite={favoriteCityIds.has(city.id)}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
+          </div>
         </section>
 
         <section className="border-y border-gray-200 bg-[#fafaf8] py-10 lg:py-16">

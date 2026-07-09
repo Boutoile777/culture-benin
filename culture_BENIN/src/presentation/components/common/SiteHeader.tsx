@@ -1,49 +1,120 @@
-import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "@/shared/constants/homeStaticContent";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { cityRepository } from "@/infrastructure/config/repositories";
+import type { City } from "@/domain/entities/City";
 
-interface SiteHeaderProps {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
+const ACCOUNT_MENU_LINKS = [
+  { label: "Mon profil", path: "/compte" },
+  { label: "Mes favoris", path: "/compte/favoris" },
+  { label: "Mes contributions", path: "/compte/contributions" },
+  { label: "Paramètres", path: "/compte/parametres" },
+];
+
+function CitySearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.2-3.2" />
+    </svg>
+  );
 }
 
-function SearchInput({
-  searchValue,
-  onSearchChange,
-  className = "",
-}: SiteHeaderProps & { className?: string }) {
+function CitySearch({ className = "" }: { className?: string }) {
+  const navigate = useNavigate();
+  const [cities, setCities] = useState<City[]>([]);
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    cityRepository.getAll().then((result) => {
+      if (!cancelled) setCities(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const results = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+    return cities
+      .filter(
+        (city) =>
+          city.name.toLowerCase().includes(normalized) ||
+          city.region.toLowerCase().includes(normalized) ||
+          city.theme.toLowerCase().includes(normalized),
+      )
+      .slice(0, 6);
+  }, [cities, query]);
+
+  const goToCity = (city: City) => {
+    navigate(`/explorer/${city.id}`);
+    setQuery("");
+    setIsOpen(false);
+  };
+
   return (
     <div className={`relative ${className}`}>
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-3.2-3.2" />
-      </svg>
+      <CitySearchIcon />
       <input
-        value={searchValue}
-        onChange={(event) => onSearchChange(event.target.value)}
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && results[0]) goToCity(results[0]);
+          if (event.key === "Escape") setIsOpen(false);
+        }}
         placeholder="Rechercher une ville…"
         className="w-full rounded-full border border-gray-300 bg-gray-50 py-2 pl-9 pr-4 text-[13px] text-culture-ink focus:outline-none focus:ring-2 focus:ring-culture-green"
       />
+
+      {isOpen && results.length > 0 && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
+            {results.map((city) => (
+              <button
+                key={city.id}
+                type="button"
+                onClick={() => goToCity(city)}
+                className="flex w-full flex-col items-start px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-50"
+              >
+                <span className="text-[13.5px] font-semibold text-culture-ink">
+                  {city.name}
+                </span>
+                <span className="text-[11.5px] text-gray-500">{city.region}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-export function SiteHeader({ searchValue, onSearchChange }: SiteHeaderProps) {
+export function SiteHeader() {
   const { user, logout, openLogin } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsAccountMenuOpen(false);
   }, [location.pathname]);
 
   return (
@@ -54,8 +125,8 @@ export function SiteHeader({ searchValue, onSearchChange }: SiteHeaderProps) {
         </NavLink>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {NAV_ITEMS.map((item) =>
-            item.path ? (
+          {NAV_ITEMS.map((item) => {
+            return item.path ? (
               <NavLink
                 key={item.label}
                 to={item.path}
@@ -77,29 +148,69 @@ export function SiteHeader({ searchValue, onSearchChange }: SiteHeaderProps) {
               >
                 {item.label}
               </span>
-            ),
-          )}
+            );
+          })}
         </nav>
 
         <div className="hidden items-center justify-end gap-3 lg:flex">
-          <SearchInput
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            className="w-[210px]"
-          />
+          <CitySearch className="w-[210px]" />
 
           {user ? (
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-culture-green text-[13px] font-semibold text-white">
-                {user.initials}
-              </span>
+            <div className="relative">
               <button
                 type="button"
-                onClick={logout}
-                className="whitespace-nowrap rounded-full border border-gray-300 px-[16px] py-2 text-[13px] font-semibold text-gray-500 transition-colors duration-200 hover:border-culture-terracotta hover:text-culture-terracotta"
+                onClick={() => setIsAccountMenuOpen((current) => !current)}
+                aria-expanded={isAccountMenuOpen}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-culture-green text-[13px] font-semibold text-white transition-transform duration-200 hover:scale-105"
               >
-                Se déconnecter
+                {user.initials}
               </button>
+
+              {isAccountMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-56 overflow-hidden rounded-2xl border border-gray-200 bg-white py-2 shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
+                    <div className="border-b border-gray-100 px-4 pb-2.5">
+                      <span className="block text-[13.5px] font-semibold text-culture-ink">
+                        {user.name}
+                      </span>
+                      {user.email && (
+                        <span className="block truncate text-[12px] text-gray-500">
+                          {user.email}
+                        </span>
+                      )}
+                    </div>
+                    <div className="py-1.5">
+                      {ACCOUNT_MENU_LINKS.map((link) => (
+                        <NavLink
+                          key={link.path}
+                          to={link.path}
+                          end={link.path === "/compte"}
+                          className={({ isActive }: { isActive: boolean }) =>
+                            `block px-4 py-2 text-[13.5px] transition-colors duration-200 ${
+                              isActive
+                                ? "bg-[#eef4ef] font-semibold text-culture-green"
+                                : "text-gray-600 hover:bg-gray-50"
+                            }`
+                          }
+                        >
+                          {link.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="block w-full border-t border-gray-100 px-4 py-2.5 text-left text-[13.5px] font-semibold text-culture-terracotta transition-colors duration-200 hover:bg-gray-50"
+                    >
+                      Se déconnecter
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <button
@@ -160,15 +271,11 @@ export function SiteHeader({ searchValue, onSearchChange }: SiteHeaderProps) {
             )}
           </nav>
 
-          <SearchInput
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            className="mt-4"
-          />
+          <CitySearch className="mt-4" />
 
           <div className="mt-4">
             {user ? (
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-culture-green text-[13px] font-semibold text-white">
                     {user.initials}
@@ -177,10 +284,28 @@ export function SiteHeader({ searchValue, onSearchChange }: SiteHeaderProps) {
                     {user.name}
                   </span>
                 </div>
+                <nav className="flex flex-col gap-1">
+                  {ACCOUNT_MENU_LINKS.map((link) => (
+                    <NavLink
+                      key={link.path}
+                      to={link.path}
+                      end={link.path === "/compte"}
+                      className={({ isActive }: { isActive: boolean }) =>
+                        `rounded-lg px-3 py-2 text-[14px] ${
+                          isActive
+                            ? "bg-[#eef4ef] font-bold text-culture-ink"
+                            : "font-medium text-gray-500"
+                        }`
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </nav>
                 <button
                   type="button"
                   onClick={logout}
-                  className="whitespace-nowrap rounded-full border border-gray-300 px-4 py-2 text-[13px] font-semibold text-gray-500 transition-colors duration-200 hover:border-culture-terracotta hover:text-culture-terracotta"
+                  className="self-start whitespace-nowrap rounded-full border border-gray-300 px-4 py-2 text-[13px] font-semibold text-gray-500 transition-colors duration-200 hover:border-culture-terracotta hover:text-culture-terracotta"
                 >
                   Se déconnecter
                 </button>
