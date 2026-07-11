@@ -29,13 +29,16 @@ export function useHomeContent() {
       contributionRepository.getRecent(3),
     ]).then(([cities, stories, recentContributions]) => {
       if (!cancelled) {
+        const HERO_CITY_NAMES = ["Ouidah", "Porto-Novo", "Abomey"];
         const heroSlides: HeroSlide[] = [
-          ...cities.map((city) => ({
-            id: city.id,
-            image: city.heroImage,
-            title: city.name,
-            subtitle: city.region,
-          })),
+          ...cities
+            .filter((city) => HERO_CITY_NAMES.includes(city.name))
+            .map((city) => ({
+              id: city.id,
+              image: city.heroImage,
+              title: city.name,
+              subtitle: city.region,
+            })),
           ...HERO_HIGHLIGHTS_MOCK,
         ];
         setContent({ cities, stories, recentContributions, heroSlides });

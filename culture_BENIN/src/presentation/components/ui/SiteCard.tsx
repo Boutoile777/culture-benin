@@ -30,18 +30,18 @@ export function SiteCard({ site, cityName }: SiteCardProps) {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1.5 p-[18px]">
+      <div className="flex h-[190px] flex-col gap-1.5 p-[18px]">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-culture-terracotta">
           {site.category}
           {cityName ? ` · ${cityName}` : ""}
         </span>
-        <span className="font-display text-[18px] font-medium leading-tight text-culture-ink">
+        <span className="line-clamp-2 font-display text-[18px] font-medium leading-tight text-culture-ink">
           {site.name}
         </span>
-        <span className="text-[13px] leading-relaxed text-gray-500">
+        <span className="line-clamp-3 text-[13px] leading-relaxed text-gray-500">
           {site.description}
         </span>
-        <span className="mt-1.5 text-[12.5px] font-semibold text-culture-green">
+        <span className="mt-auto text-[12.5px] font-semibold text-culture-green">
           Lire son histoire →
         </span>
       </div>

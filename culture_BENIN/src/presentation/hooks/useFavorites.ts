@@ -37,4 +37,6 @@ export const FAVORITES_STORAGE_KEYS = {
   sites: "culture-benin:favorite-sites",
   figures: "culture-benin:favorite-figures",
   events: "culture-benin:favorite-events",
+  stories: "culture-benin:favorite-stories",
+  traditions: "culture-benin:favorite-traditions",
 } as const;

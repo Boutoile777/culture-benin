@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
+import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
@@ -97,6 +98,14 @@ export function EventDetailPage() {
             >
               {favoriteIds.has(event.id) ? "♥ Favori" : "♡ Ajouter aux favoris"}
             </button>
+            {city && (
+              <Link
+                to={`/explorer/${city.id}`}
+                className="rounded-full border border-gray-300 px-5 py-2.5 text-[13px] font-semibold text-culture-ink transition-colors duration-200 hover:border-culture-green hover:text-culture-green"
+              >
+                Découvrir {city.name}
+              </Link>
+            )}
           </div>
 
           <p className="text-[15px] leading-relaxed text-gray-600">
@@ -120,37 +129,7 @@ export function EventDetailPage() {
             </div>
           )}
 
-          {event.gallery && event.gallery.length > 0 && (
-            <div className="mt-10 border-t border-gray-200 pt-8">
-              <h2 className="mb-4 font-display text-[20px] font-medium text-culture-ink">
-                Galerie
-              </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {event.gallery.map((image) => (
-                  <img
-                    key={image}
-                    src={image}
-                    alt={event.name}
-                    className="h-[130px] w-full rounded-xl object-cover sm:h-[150px]"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {city && (
-            <div className="mt-10 flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-[#fafaf8] p-5">
-              <span className="text-[13.5px] text-gray-500">
-                Cet événement se déroule à <strong className="text-culture-ink">{city.name}</strong>.
-              </span>
-              <Link
-                to={`/explorer/${city.id}`}
-                className="whitespace-nowrap rounded-full bg-culture-green px-5 py-2.5 text-[13px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark"
-              >
-                Découvrir {city.name} →
-              </Link>
-            </div>
-          )}
+          <PhotoGallery images={event.gallery ?? []} alt={event.name} />
         </div>
       </main>
     </MainLayout>

@@ -8,4 +8,5 @@ export interface Testimony {
   image: string;
   transcript?: string;
   duration?: string;
+  mediaUrl?: string;
 }

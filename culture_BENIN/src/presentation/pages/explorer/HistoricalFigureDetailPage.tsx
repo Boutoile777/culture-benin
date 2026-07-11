@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
+import { GalleryLightbox } from "@/presentation/components/gallery/GalleryLightbox";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
@@ -11,6 +12,7 @@ export function HistoricalFigureDetailPage() {
   const { figureId } = useParams<{ figureId: string }>();
   const [figure, setFigure] = useState<HistoricalFigure | null | undefined>(undefined);
   const [city, setCity] = useState<City | null>(null);
+  const [openGalleryIndex, setOpenGalleryIndex] = useState<number | null>(null);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.figures);
 
   useEffect(() => {
@@ -123,11 +125,17 @@ export function HistoricalFigureDetailPage() {
                   {paragraph}
                 </p>
                 {galleryImages[index] && (
-                  <img
-                    src={galleryImages[index]}
-                    alt={figure.name}
-                    className="h-[220px] w-full rounded-2xl object-cover sm:h-[280px]"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setOpenGalleryIndex(index)}
+                    className="block overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-culture-green"
+                  >
+                    <img
+                      src={galleryImages[index]}
+                      alt={figure.name}
+                      className="h-[220px] w-full object-cover transition-transform duration-200 hover:scale-105 sm:h-[280px]"
+                    />
+                  </button>
                 )}
               </div>
             ))}
@@ -138,22 +146,17 @@ export function HistoricalFigureDetailPage() {
               <TestimonySection testimonies={figure.testimonies} />
             </div>
           )}
-
-          {city && (
-            <div className="mt-10 flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-[#fafaf8] p-5">
-              <span className="text-[13.5px] text-gray-500">
-                Cette figure est liée à l'histoire de <strong className="text-culture-ink">{city.name}</strong>.
-              </span>
-              <Link
-                to={`/explorer/${city.id}`}
-                className="whitespace-nowrap rounded-full bg-culture-green px-5 py-2.5 text-[13px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark"
-              >
-                Découvrir {city.name} →
-              </Link>
-            </div>
-          )}
         </div>
       </main>
+
+      {openGalleryIndex !== null && (
+        <GalleryLightbox
+          images={galleryImages}
+          initialIndex={openGalleryIndex}
+          alt={figure.name}
+          onClose={() => setOpenGalleryIndex(null)}
+        />
+      )}
     </MainLayout>
   );
 }

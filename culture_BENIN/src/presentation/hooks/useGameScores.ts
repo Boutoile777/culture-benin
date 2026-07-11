@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { GameType } from "@/domain/entities/LeaderboardEntry";
 
 const STORAGE_KEY = "culture-benin:game-scores";
 
-type ScoresState = Partial<Record<GameType, number>>;
+type ScoresState = Partial<Record<string, number>>;
+
+function scoreKey(game: GameType, difficulty?: Difficulty): string {
+  return difficulty ? `${game}:${difficulty}` : game;
+}
 
 function readStoredScores(): ScoresState {
   try {
@@ -21,13 +26,22 @@ export function useGameScores() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
   }, [scores]);
 
-  const recordScore = useCallback((game: GameType, score: number) => {
-    setScores((current) => {
-      const best = current[game] ?? 0;
-      if (score <= best) return current;
-      return { ...current, [game]: score };
-    });
-  }, []);
+  const recordScore = useCallback(
+    (game: GameType, score: number, difficulty?: Difficulty) => {
+      const key = scoreKey(game, difficulty);
+      setScores((current) => {
+        const best = current[key] ?? 0;
+        if (score <= best) return current;
+        return { ...current, [key]: score };
+      });
+    },
+    [],
+  );
 
-  return { scores, recordScore };
+  const getScore = useCallback(
+    (game: GameType, difficulty?: Difficulty) => scores[scoreKey(game, difficulty)],
+    [scores],
+  );
+
+  return { scores, recordScore, getScore };
 }

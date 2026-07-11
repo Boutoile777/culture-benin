@@ -92,16 +92,31 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
       "Héritière de la Fête du Vodoun instituée fête nationale en 1993, l'édition internationale « Vodun Days » a été lancée en 2024 pour ouvrir la célébration aux diasporas afro-descendantes et au grand public international.",
     gallery: [
       wikimediaImage("Vodoun party in Benin.jpg", 1600),
-      wikimediaImage("Door of no return.jpg", 1600),
+      wikimediaImage("Fête du vodoun 2022 01.jpg", 1600),
+      wikimediaImage("Fête du vodoun 2022 03.jpg", 1600),
+      wikimediaImage("Fête du vodoun 2022 05.jpg", 1600),
+      wikimediaImage("Fête du vodoun 2022 07.jpg", 1600),
+      wikimediaImage("Adeptes du vodun.jpg", 1600),
+      wikimediaImage("Entrée Vodun days.jpg", 1600),
+      wikimediaImage("10 Janvier 2023, Fête de vodoun à Ouidah 39.jpg", 1600),
+      wikimediaImage("Vodun Days Edition 2024 à Ouidah au Bénin 17.jpg", 1600),
+      wikimediaImage("Danse de Zangbéto à Godomey Hlouacomey - Bénin.jpg", 1600),
+      wikimediaImage("DANSE EGUNGUN AU BENIN 01.jpg", 1600),
+      wikimediaImage("Célébration des VODUN DAYS à Ouidah.jpg", 1600),
     ],
     testimonies: [
       {
         id: "vodun-days-temoignage-1",
         type: "video",
-        title: "Vodun Days 2024, première édition internationale",
-        speaker: "Comité d'organisation, Vodun Days",
-        image: wikimediaImage("Vodoun party in Benin.jpg", 1200),
-        duration: "3 min 40",
+        title: "Une cérémonie vodoun à Ouidah",
+        speaker: "Extrait vidéo libre de droits — Wikimedia Commons",
+        image: wikimediaImage("DANSE EGUNGUN AU BENIN 02.jpg", 1200),
+        transcript:
+          "Extrait filmé d'une cérémonie vodoun à Ouidah, illustrant les libations, chants et danses rituelles au cœur de la Fête du Vodoun et des Vodun Days.",
+        duration: "0 min 53",
+        // Special:FilePath without a width param — a width query on a video
+        // makes Wikimedia serve a JPEG poster frame instead of the video file.
+        mediaUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Vaudou%20%C3%A0%20Ouidah%20(1).webm",
       },
     ],
   },

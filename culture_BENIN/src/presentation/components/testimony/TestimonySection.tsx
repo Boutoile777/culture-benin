@@ -5,9 +5,10 @@ import { VideoTestimonyDialog } from "@/presentation/components/testimony/VideoT
 
 interface TestimonySectionProps {
   testimonies: Testimony[];
+  title?: string;
 }
 
-export function TestimonySection({ testimonies }: TestimonySectionProps) {
+export function TestimonySection({ testimonies, title = "Témoignages" }: TestimonySectionProps) {
   const [activeTestimony, setActiveTestimony] = useState<Testimony | null>(null);
 
   if (testimonies.length === 0) return null;
@@ -15,7 +16,7 @@ export function TestimonySection({ testimonies }: TestimonySectionProps) {
   return (
     <div className="border-t border-gray-200 pt-8">
       <h2 className="mb-4 font-display text-[20px] font-medium text-culture-ink">
-        Témoignages
+        {title}
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {testimonies.map((testimony) => (

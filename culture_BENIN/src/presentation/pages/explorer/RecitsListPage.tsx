@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
@@ -7,6 +7,14 @@ import type { Story } from "@/domain/entities/Story";
 import { storyRepository } from "@/infrastructure/config/repositories";
 
 const ALL_CATEGORY = "Tout";
+
+const RECIT_TABS: { label: string; value: string }[] = [
+  { label: "Tout", value: ALL_CATEGORY },
+  { label: "Résistances", value: "Résistance" },
+  { label: "Spiritualités", value: "Spiritualité" },
+  { label: "Histoires contemporaines", value: "Histoire contemporaine" },
+  { label: "Contes", value: "Conte" },
+];
 
 export function RecitsListPage() {
   const [searchParams] = useSearchParams();
@@ -22,16 +30,6 @@ export function RecitsListPage() {
       cancelled = true;
     };
   }, []);
-
-  const rubriques = useMemo(() => {
-    const groups = new Map<string, Story[]>();
-    for (const story of stories) {
-      const group = groups.get(story.category) ?? [];
-      group.push(story);
-      groups.set(story.category, group);
-    }
-    return Array.from(groups.entries());
-  }, [stories]);
 
   const filteredStories = useMemo(
     () =>
@@ -53,27 +51,35 @@ export function RecitsListPage() {
                 : `Récits — ${activeCategory}`
             }
           />
-          <p className="mb-10 mt-3 max-w-[620px] text-[14.5px] leading-relaxed text-gray-500">
+          <p className="mb-8 mt-3 max-w-[620px] text-[14.5px] leading-relaxed text-gray-500">
             Résistance, mémoire, spiritualité, ingéniosité, contes — chaque
             récit a sa page dédiée avec des images explicatives.
           </p>
 
-          {activeCategory === ALL_CATEGORY ? (
-            <div className="flex flex-col gap-12">
-              {rubriques.map(([category, categoryStories]) => (
-                <section key={category}>
-                  <h2 className="mb-4 font-display text-[20px] font-semibold text-culture-ink">
-                    {category}
-                  </h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {categoryStories.map((story) => (
-                      <StoryCard key={story.id} story={story} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          ) : filteredStories.length === 0 ? (
+          <nav className="mb-10 flex flex-wrap gap-2.5">
+            {RECIT_TABS.map((tab) => {
+              const isActive = activeCategory === tab.value;
+              const to =
+                tab.value === ALL_CATEGORY
+                  ? "/explorer/recits"
+                  : `/explorer/recits?categorie=${encodeURIComponent(tab.value)}`;
+              return (
+                <Link
+                  key={tab.value}
+                  to={to}
+                  className={`rounded-full border px-5 py-2.5 text-[13px] font-semibold transition-colors duration-200 ${
+                    isActive
+                      ? "border-culture-green bg-culture-green text-white"
+                      : "border-gray-300 text-culture-ink hover:border-culture-green hover:text-culture-green"
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {filteredStories.length === 0 ? (
             <p className="text-sm text-gray-500">
               Aucun récit dans cette rubrique pour le moment.
             </p>

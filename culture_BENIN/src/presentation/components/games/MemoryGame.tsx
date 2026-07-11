@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { MemoryItem } from "@/domain/entities/MemoryItem";
 import { memoryRepository } from "@/infrastructure/config/repositories";
+import { useAuth } from "@/presentation/contexts/AuthContext";
 
 interface MemoryGameProps {
+  difficulty: Difficulty;
   onFinish: (score: number, total: number) => void;
 }
 
@@ -25,7 +28,8 @@ function buildShuffledDeck(items: MemoryItem[]): MemoryCard[] {
   return deck;
 }
 
-export function MemoryGame({ onFinish }: MemoryGameProps) {
+export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
+  const { token } = useAuth();
   const [items, setItems] = useState<MemoryItem[]>([]);
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
@@ -35,8 +39,9 @@ export function MemoryGame({ onFinish }: MemoryGameProps) {
   const [hasFinished, setHasFinished] = useState(false);
 
   useEffect(() => {
+    if (!token) return;
     let cancelled = false;
-    memoryRepository.getItems().then((result) => {
+    memoryRepository.getItems(token, difficulty).then((result) => {
       if (!cancelled) {
         setItems(result);
         setCards(buildShuffledDeck(result));
@@ -45,7 +50,7 @@ export function MemoryGame({ onFinish }: MemoryGameProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [token, difficulty]);
 
   const totalPairs = items.length;
   const isComplete = totalPairs > 0 && matchedPairIds.size === totalPairs;

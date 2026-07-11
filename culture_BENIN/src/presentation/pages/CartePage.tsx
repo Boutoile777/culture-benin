@@ -2,17 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
-import type { City } from "@/domain/entities/City";
 import type { MapPoint } from "@/domain/entities/MapPoint";
 import type { Site } from "@/domain/entities/Site";
-import { cityRepository, mapRepository, siteRepository } from "@/infrastructure/config/repositories";
+import { mapRepository, siteRepository } from "@/infrastructure/config/repositories";
 
 type GeoStatus = "idle" | "locating" | "error";
 
 export function CartePage() {
   const [searchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState("");
-  const [cities, setCities] = useState<City[]>([]);
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -23,17 +21,14 @@ export function CartePage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      cityRepository.getAll(),
-      mapRepository.getPoints(),
-      siteRepository.getAll(),
-    ]).then(([cityResult, pointResult, siteResult]) => {
-      if (!cancelled) {
-        setCities(cityResult);
-        setPoints(pointResult);
-        setSites(siteResult);
-      }
-    });
+    Promise.all([mapRepository.getPoints(), siteRepository.getAll()]).then(
+      ([pointResult, siteResult]) => {
+        if (!cancelled) {
+          setPoints(pointResult);
+          setSites(siteResult);
+        }
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -49,21 +44,14 @@ export function CartePage() {
     };
   }, [searchValue]);
 
-  const cityNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    cities.forEach((city) => map.set(city.id, city.name));
-    return map;
-  }, [cities]);
-
-  const siteImageById = useMemo(() => {
-    const map = new Map<string, string>();
-    sites.forEach((site) => {
-      if (site.image) map.set(site.id, site.image);
-    });
+  const siteByName = useMemo(() => {
+    const map = new Map<string, Site>();
+    sites.forEach((site) => map.set(site.name, site));
     return map;
   }, [sites]);
 
   const selected = points.find((point) => point.id === selectedId) ?? null;
+  const selectedSite = selected ? siteByName.get(selected.siteName) : undefined;
 
   const mapSrc = (() => {
     if (selected && origin) {
@@ -121,7 +109,6 @@ export function CartePage() {
                 ) : (
                   points.map((point) => {
                     const isSelected = point.id === selectedId;
-                    const image = siteImageById.get(point.siteId);
                     return (
                       <button
                         key={point.id}
@@ -135,19 +122,11 @@ export function CartePage() {
                           isSelected ? "bg-[#eef4ef]" : "hover:bg-gray-50"
                         }`}
                       >
-                        {image ? (
-                          <img
-                            src={image}
-                            alt=""
-                            className="h-11 w-11 flex-none rounded-lg object-cover"
-                          />
-                        ) : (
-                          <span className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                            <span
-                              className={`h-2 w-2 rounded-full ${isSelected ? "bg-culture-green" : "bg-gray-300"}`}
-                            />
-                          </span>
-                        )}
+                        <img
+                          src={point.image}
+                          alt=""
+                          className="h-11 w-11 flex-none rounded-lg object-cover"
+                        />
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span
                             className={`text-sm ${isSelected ? "font-bold text-culture-ink" : "font-semibold text-culture-ink"}`}
@@ -155,7 +134,7 @@ export function CartePage() {
                             {point.name}
                           </span>
                           <span className="text-xs text-gray-500">
-                            {cityNameById.get(point.cityId) ?? ""} · {point.category}
+                            {point.cityName} · {point.category}
                           </span>
                         </span>
                       </button>
@@ -200,12 +179,14 @@ export function CartePage() {
                             ? "Itinéraire affiché"
                             : "Itinéraire depuis ma position"}
                       </button>
-                      <Link
-                        to={`/explorer/sites/${selected.siteId}`}
-                        className="whitespace-nowrap rounded-full border border-gray-300 px-5 py-2.5 text-[13.5px] font-semibold text-culture-ink transition-colors duration-200 hover:border-culture-green hover:text-culture-green"
-                      >
-                        Ouvrir sa fiche
-                      </Link>
+                      {selectedSite && (
+                        <Link
+                          to={`/explorer/sites/${selectedSite.id}`}
+                          className="whitespace-nowrap rounded-full border border-gray-300 px-5 py-2.5 text-[13.5px] font-semibold text-culture-ink transition-colors duration-200 hover:border-culture-green hover:text-culture-green"
+                        >
+                          Ouvrir sa fiche
+                        </Link>
+                      )}
                     </div>
                   </div>
                   {geoStatus === "error" && (

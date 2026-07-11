@@ -28,22 +28,34 @@ export function VideoTestimonyDialog({ testimony, onClose }: VideoTestimonyDialo
           ✕
         </button>
 
-        <button
-          type="button"
-          onClick={() => setIsPlaying((current) => !current)}
-          className="relative block h-[280px] w-full sm:h-[360px]"
-        >
-          <img
-            src={testimony.image}
-            alt={testimony.title}
-            className={`h-full w-full object-cover transition-[filter] duration-300 ${isPlaying ? "brightness-50" : "brightness-90"}`}
+        {testimony.mediaUrl ? (
+          <video
+            src={testimony.mediaUrl}
+            poster={testimony.image}
+            controls
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
+            className="block h-[280px] w-full bg-black object-contain sm:h-[360px]"
           />
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-2xl text-culture-ink">
-              {isPlaying ? "❙❙" : "▶"}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsPlaying((current) => !current)}
+            className="relative block h-[280px] w-full sm:h-[360px]"
+          >
+            <img
+              src={testimony.image}
+              alt={testimony.title}
+              className={`h-full w-full object-cover transition-[filter] duration-300 ${isPlaying ? "brightness-50" : "brightness-90"}`}
+            />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-2xl text-culture-ink">
+                {isPlaying ? "❙❙" : "▶"}
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        )}
 
         <div className="flex flex-col gap-2 p-6 sm:p-8">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-culture-terracotta">

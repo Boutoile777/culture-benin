@@ -1,9 +1,10 @@
+import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { QuizQuestion } from "@/domain/entities/QuizQuestion";
 import type { QuizRepository } from "@/domain/repositories/QuizRepository";
-import { QUIZ_QUESTIONS_MOCK } from "@/data/datasources/local/quiz.mock";
+import { apiFetch } from "@/infrastructure/api/httpClient";
 
 export class QuizRepositoryImpl implements QuizRepository {
-  async getQuestions(): Promise<QuizQuestion[]> {
-    return [...QUIZ_QUESTIONS_MOCK];
+  async getQuestions(token: string, difficulty: Difficulty): Promise<QuizQuestion[]> {
+    return apiFetch<QuizQuestion[]>(`/quiz/questions?difficulty=${difficulty}`, { token });
   }
 }

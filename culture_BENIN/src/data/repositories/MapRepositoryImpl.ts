@@ -9,7 +9,7 @@ export class MapRepositoryImpl implements MapRepository {
       if (!query) return true;
       return (
         point.name.toLowerCase().includes(query) ||
-        point.cityId.toLowerCase().includes(query)
+        point.cityName.toLowerCase().includes(query)
       );
     });
   }

@@ -1,14 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
+import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
+import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
+import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { Story } from "@/domain/entities/Story";
 import { cityRepository, storyRepository } from "@/infrastructure/config/repositories";
+
+// Résistance & Spiritualité racontent surtout par l'image (galerie) ; les
+// contes et les récits plus factuels (mémoire, ingéniosité...) racontent
+// plutôt par le son/l'image animée (multimédia).
+const GALLERY_CATEGORIES = new Set(["Résistance", "Spiritualité"]);
 
 export function StoryDetailPage() {
   const { storyId } = useParams<{ storyId: string }>();
   const [story, setStory] = useState<Story | null | undefined>(undefined);
   const [city, setCity] = useState<City | null>(null);
+  const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.stories);
 
   useEffect(() => {
     if (!storyId) return;
@@ -17,8 +26,9 @@ export function StoryDetailPage() {
     storyRepository.getById(storyId).then(async (result) => {
       if (cancelled) return;
       setStory(result);
-      if (result?.cityId) {
-        const relatedCity = await cityRepository.getById(result.cityId);
+      if (result?.cityName) {
+        const matches = await cityRepository.search(result.cityName);
+        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
         if (!cancelled) setCity(relatedCity);
       } else {
         setCity(null);
@@ -86,6 +96,28 @@ export function StoryDetailPage() {
             ← Retour aux récits
           </Link>
 
+          <div className="mb-8 flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              onClick={() => toggleFavorite(story.id)}
+              className={`rounded-full border px-5 py-2.5 text-[13px] font-semibold transition-colors duration-200 ${
+                favoriteIds.has(story.id)
+                  ? "border-culture-terracotta text-culture-terracotta"
+                  : "border-gray-300 text-culture-ink hover:border-culture-green hover:text-culture-green"
+              }`}
+            >
+              {favoriteIds.has(story.id) ? "♥ Favori" : "♡ Ajouter aux favoris"}
+            </button>
+            {city && (
+              <Link
+                to={`/explorer/${city.id}`}
+                className="rounded-full border border-gray-300 px-5 py-2.5 text-[13px] font-semibold text-culture-ink transition-colors duration-200 hover:border-culture-green hover:text-culture-green"
+              >
+                Découvrir {city.name}
+              </Link>
+            )}
+          </div>
+
           <p className="mb-6 text-[15px] leading-relaxed text-gray-600">
             {story.excerpt}
           </p>
@@ -93,36 +125,15 @@ export function StoryDetailPage() {
             {story.content}
           </p>
 
-          {story.gallery && story.gallery.length > 0 && (
-            <div className="mt-10 border-t border-gray-200 pt-8">
-              <h2 className="mb-4 font-display text-[20px] font-medium text-culture-ink">
-                Galerie
-              </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {story.gallery.map((image) => (
-                  <img
-                    key={image}
-                    src={image}
-                    alt={story.title}
-                    className="h-[130px] w-full rounded-xl object-cover sm:h-[150px]"
-                  />
-                ))}
+          {GALLERY_CATEGORIES.has(story.category) ? (
+            <PhotoGallery images={story.gallery ?? []} alt={story.title} />
+          ) : (
+            story.testimonies &&
+            story.testimonies.length > 0 && (
+              <div className="mt-10">
+                <TestimonySection testimonies={story.testimonies} title="Multimédia" />
               </div>
-            </div>
-          )}
-
-          {city && (
-            <div className="mt-10 flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-[#fafaf8] p-5">
-              <span className="text-[13.5px] text-gray-500">
-                Ce récit se déroule à <strong className="text-culture-ink">{city.name}</strong>.
-              </span>
-              <Link
-                to={`/explorer/${city.id}`}
-                className="whitespace-nowrap rounded-full bg-culture-green px-5 py-2.5 text-[13px] font-semibold text-white transition-colors duration-200 hover:bg-culture-green-dark"
-              >
-                Découvrir {city.name} →
-              </Link>
-            </div>
+            )
           )}
         </div>
       </main>

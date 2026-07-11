@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import type { Testimony } from "@/domain/entities/Testimony";
 
 interface AudioTestimonyDialogProps {
@@ -28,8 +28,23 @@ function EqualizerBars({ isPlaying }: { isPlaying: boolean }) {
 
 export function AudioTestimonyDialog({ testimony, onClose }: AudioTestimonyDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const stopPropagation = (event: MouseEvent) => event.stopPropagation();
+
+  const togglePlayback = () => {
+    if (!testimony.mediaUrl) {
+      setIsPlaying((current) => !current);
+      return;
+    }
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  };
 
   return (
     <div
@@ -74,7 +89,7 @@ export function AudioTestimonyDialog({ testimony, onClose }: AudioTestimonyDialo
           <div className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4">
             <button
               type="button"
-              onClick={() => setIsPlaying((current) => !current)}
+              onClick={togglePlayback}
               aria-label={isPlaying ? "Mettre en pause" : "Lire"}
               className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-culture-green text-white transition-colors hover:bg-culture-green-dark"
             >
@@ -87,6 +102,17 @@ export function AudioTestimonyDialog({ testimony, onClose }: AudioTestimonyDialo
               )}
             </div>
           </div>
+
+          {testimony.mediaUrl && (
+            <audio
+              ref={audioRef}
+              src={testimony.mediaUrl}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              className="hidden"
+            />
+          )}
 
           {testimony.transcript && (
             <div className="border-t border-gray-100 pt-4">

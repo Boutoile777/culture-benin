@@ -25,19 +25,19 @@ export function StoryCard({ story }: StoryCardProps) {
           />
         )}
       </div>
-      <div className="flex flex-col gap-2 p-[18px]">
+      <div className="flex h-[200px] flex-col gap-2 p-[18px]">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-culture-terracotta">
           {story.category}
         </span>
-        <span className="font-display text-[19px] font-medium leading-tight text-culture-ink">
+        <span className="line-clamp-2 font-display text-[19px] font-medium leading-tight text-culture-ink">
           {story.title}
         </span>
-        <span className="text-[13px] leading-relaxed text-gray-500">
+        <span className="line-clamp-3 text-[13px] leading-relaxed text-gray-500">
           {story.excerpt}
         </span>
         <Link
           to={`/explorer/recits/${story.id}`}
-          className="mt-1.5 self-start text-[12.5px] font-semibold text-culture-green transition-colors hover:text-culture-terracotta"
+          className="mt-auto self-start text-[12.5px] font-semibold text-culture-green transition-colors hover:text-culture-terracotta"
         >
           Voir plus →
         </Link>

@@ -7,6 +7,7 @@ import { MemoryGame } from "@/presentation/components/games/MemoryGame";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { useGameScores } from "@/presentation/hooks/useGameScores";
 import type { GameType, LeaderboardEntry } from "@/domain/entities/LeaderboardEntry";
+import { DIFFICULTY_LEVELS, type Difficulty } from "@/domain/entities/Difficulty";
 import { leaderboardRepository } from "@/infrastructure/config/repositories";
 
 const GAME_TABS: { key: GameType; label: string }[] = [
@@ -21,21 +22,26 @@ const GAME_LABELS: Record<GameType, string> = {
   memory: "Memory culturel",
 };
 
+// Chronology only has a handful of items in total, not split by level yet.
+const GAMES_WITH_LEVELS: GameType[] = ["quiz", "memory"];
+
 export function JouerPage() {
-  const { user, openLogin } = useAuth();
+  const { user, token, openLogin } = useAuth();
   const [activeGame, setActiveGame] = useState<GameType>("quiz");
+  const [difficulty, setDifficulty] = useState<Difficulty>("facile");
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const { scores, recordScore } = useGameScores();
+  const { scores, recordScore, getScore } = useGameScores();
+  const hasLevels = GAMES_WITH_LEVELS.includes(activeGame);
 
   useEffect(() => {
     let cancelled = false;
-    leaderboardRepository.getTop(activeGame, 5).then((result) => {
+    leaderboardRepository.getTop(activeGame, 5, token ?? undefined).then((result) => {
       if (!cancelled) setLeaderboard(result);
     });
     return () => {
       cancelled = true;
     };
-  }, [activeGame]);
+  }, [activeGame, token]);
 
   return (
     <MainLayout>
@@ -63,7 +69,7 @@ export function JouerPage() {
             </div>
           ) : (
             <>
-              <div className="mb-6 flex flex-wrap gap-2">
+              <div className="mb-4 flex flex-wrap gap-2">
                 {GAME_TABS.map((tab) => {
                   const isActive = tab.key === activeGame;
                   return (
@@ -83,12 +89,40 @@ export function JouerPage() {
                 })}
               </div>
 
+              {hasLevels && (
+                <div className="mb-6 flex flex-wrap items-center gap-2">
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-gray-500">
+                    Niveau
+                  </span>
+                  {DIFFICULTY_LEVELS.map((level) => {
+                    const isActive = level.value === difficulty;
+                    return (
+                      <button
+                        key={level.value}
+                        type="button"
+                        onClick={() => setDifficulty(level.value)}
+                        className={`rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors duration-200 ${
+                          isActive
+                            ? "border-culture-green bg-culture-green text-white"
+                            : "border-gray-300 bg-white text-culture-ink hover:bg-gray-50"
+                        }`}
+                      >
+                        {level.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 gap-[22px] lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="rounded-[18px] border border-gray-200 bg-white p-8">
                   {activeGame === "quiz" && (
                     <QuizGame
-                      key="quiz"
-                      onFinish={(score, total) => recordScore("quiz", (score / total) * 100)}
+                      key={`quiz-${difficulty}`}
+                      difficulty={difficulty}
+                      onFinish={(score, total) =>
+                        recordScore("quiz", (score / total) * 100, difficulty)
+                      }
                     />
                   )}
                   {activeGame === "chronology" && (
@@ -99,8 +133,11 @@ export function JouerPage() {
                   )}
                   {activeGame === "memory" && (
                     <MemoryGame
-                      key="memory"
-                      onFinish={(score, total) => recordScore("memory", (score / total) * 100)}
+                      key={`memory-${difficulty}`}
+                      difficulty={difficulty}
+                      onFinish={(score, total) =>
+                        recordScore("memory", (score / total) * 100, difficulty)
+                      }
                     />
                   )}
                 </div>
@@ -134,18 +171,36 @@ export function JouerPage() {
                     <span className="mb-3.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
                       Vos scores
                     </span>
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-3">
                       {GAME_TABS.map((tab) => (
-                        <div
-                          key={tab.key}
-                          className="flex justify-between text-[13.5px]"
-                        >
-                          <span className="text-gray-500">{tab.label}</span>
-                          <span className="font-bold text-culture-green">
-                            {scores[tab.key] !== undefined
-                              ? `${Math.round(scores[tab.key] ?? 0)}%`
-                              : "—"}
-                          </span>
+                        <div key={tab.key} className="flex items-center justify-between gap-3">
+                          <span className="text-[13.5px] text-gray-500">{tab.label}</span>
+                          {GAMES_WITH_LEVELS.includes(tab.key) ? (
+                            <div className="flex gap-1.5">
+                              {DIFFICULTY_LEVELS.map((level) => {
+                                const levelScore = getScore(tab.key, level.value);
+                                return (
+                                  <span
+                                    key={level.value}
+                                    title={`${level.label} · ${levelScore !== undefined ? `${Math.round(levelScore)}%` : "pas encore joué"}`}
+                                    className={`flex h-7 w-7 items-center justify-center rounded-full text-[10.5px] font-bold ${
+                                      levelScore !== undefined
+                                        ? "bg-[#eef4ef] text-culture-green"
+                                        : "bg-gray-100 text-gray-400"
+                                    }`}
+                                  >
+                                    {level.short}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span className="text-[13.5px] font-bold text-culture-green">
+                              {scores[tab.key] !== undefined
+                                ? `${Math.round(scores[tab.key] ?? 0)}%`
+                                : "—"}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
