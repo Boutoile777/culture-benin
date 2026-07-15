@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
+import { BackLink } from "@/presentation/components/common/BackLink";
 import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
 import { culturalEventRepository } from "@/infrastructure/config/repositories";
 
@@ -83,6 +84,7 @@ export function EvenementsListPage() {
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+          <BackLink to="/explorer" label="Retour à Explorer" className="mb-4" />
           <SectionHeading
             kicker="Explorer · Agenda"
             title={cityFilter ? `Événements — ${cityFilter}` : "Événements"}

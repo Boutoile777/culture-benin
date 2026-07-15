@@ -1,10 +1,9 @@
 import { useMemo, useRef } from "react";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { useHomeContent } from "@/presentation/hooks/useHomeContent";
-import { useFavorites } from "@/presentation/hooks/useFavorites";
 import { HeroCarousel } from "@/presentation/components/home/HeroCarousel";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
-import { CityCard } from "@/presentation/components/ui/CityCard";
+import { SiteCard } from "@/presentation/components/ui/SiteCard";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
 import { QuickLinkCard } from "@/presentation/components/ui/QuickLinkCard";
 import { StatTile } from "@/presentation/components/ui/StatTile";
@@ -17,7 +16,6 @@ import {
 
 export function HomePage() {
   const { content, isLoading } = useHomeContent();
-  const { favoriteIds: favoriteCityIds, toggleFavorite } = useFavorites();
   const citiesSectionRef = useRef<HTMLDivElement>(null);
 
   const cityNameById = useMemo(() => {
@@ -73,13 +71,8 @@ export function HomePage() {
             />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {content.cities.map((city) => (
-              <CityCard
-                key={city.id}
-                city={city}
-                isFavorite={favoriteCityIds.has(city.id)}
-                onToggleFavorite={toggleFavorite}
-              />
+            {content.sites.slice(0, 8).map((site) => (
+              <SiteCard key={site.id} site={site} cityName={cityNameById.get(site.cityId)} />
             ))}
           </div>
         </section>

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import type { City } from "@/domain/entities/City";
+import type { Site } from "@/domain/entities/Site";
 import type { Story } from "@/domain/entities/Story";
 import type { Contribution } from "@/domain/entities/Contribution";
 import type { HeroSlide } from "@/presentation/components/home/HeroCarousel";
 import {
   cityRepository,
+  siteRepository,
   storyRepository,
   contributionRepository,
 } from "@/infrastructure/config/repositories";
@@ -12,6 +14,7 @@ import { HERO_HIGHLIGHTS_MOCK } from "@/data/datasources/local/heroHighlights.mo
 
 interface HomeContent {
   cities: City[];
+  sites: Site[];
   stories: Story[];
   recentContributions: Contribution[];
   heroSlides: HeroSlide[];
@@ -25,9 +28,10 @@ export function useHomeContent() {
 
     Promise.all([
       cityRepository.getAll(),
+      siteRepository.getAll(),
       storyRepository.getFeatured(4),
       contributionRepository.getRecent(3),
-    ]).then(([cities, stories, recentContributions]) => {
+    ]).then(([cities, sites, stories, recentContributions]) => {
       if (!cancelled) {
         const HERO_CITY_NAMES = ["Ouidah", "Porto-Novo", "Abomey"];
         const heroSlides: HeroSlide[] = [
@@ -41,7 +45,7 @@ export function useHomeContent() {
             })),
           ...HERO_HIGHLIGHTS_MOCK,
         ];
-        setContent({ cities, stories, recentContributions, heroSlides });
+        setContent({ cities, sites, stories, recentContributions, heroSlides });
       }
     });
 

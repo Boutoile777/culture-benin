@@ -237,7 +237,7 @@ export function SiteHeader() {
               <NavLink
                 key={item.label}
                 to={item.path}
-                end
+                end={item.path === "/"}
                 className={({ isActive }: { isActive: boolean }) =>
                   `whitespace-nowrap border-b-2 px-3.5 py-2 text-sm transition-colors duration-200 ${
                     isActive
@@ -354,7 +354,7 @@ export function SiteHeader() {
                 <NavLink
                   key={item.label}
                   to={item.path}
-                  end
+                  end={item.path === "/"}
                   className={({ isActive }: { isActive: boolean }) =>
                     `rounded-lg px-3 py-2.5 text-[15px] ${
                       isActive

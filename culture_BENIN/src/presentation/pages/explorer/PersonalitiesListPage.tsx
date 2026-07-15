@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
+import { BackLink } from "@/presentation/components/common/BackLink";
 import type { City } from "@/domain/entities/City";
 import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
 import { cityRepository, historicalFigureRepository } from "@/infrastructure/config/repositories";
@@ -44,6 +45,11 @@ export function PersonalitiesListPage() {
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+          <BackLink
+            to={cityFilter ? `/explorer/${cityFilter}` : "/explorer"}
+            label={filteredCityName ? `Retour à ${filteredCityName}` : "Retour à Explorer"}
+            className="mb-4"
+          />
           <SectionHeading
             kicker="Explorer · Mémoire vivante"
             title={

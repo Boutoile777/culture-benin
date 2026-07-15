@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
+import { BackLink } from "@/presentation/components/common/BackLink";
 import { SiteCard } from "@/presentation/components/ui/SiteCard";
 import type { City } from "@/domain/entities/City";
 import type { Site } from "@/domain/entities/Site";
@@ -45,6 +46,11 @@ export function SitesListPage() {
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+          <BackLink
+            to={cityFilter ? `/explorer/${cityFilter}` : "/explorer"}
+            label={filteredCityName ? `Retour à ${filteredCityName}` : "Retour à Explorer"}
+            className="mb-4"
+          />
           <SectionHeading
             kicker="Explorer · Patrimoine bâti"
             title={
