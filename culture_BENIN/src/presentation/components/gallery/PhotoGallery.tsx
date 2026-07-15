@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { GalleryLightbox } from "@/presentation/components/gallery/GalleryLightbox";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface PhotoGalleryProps {
   images: string[];
@@ -22,7 +23,7 @@ export function PhotoGallery({ images, alt }: PhotoGalleryProps) {
             onClick={() => setOpenIndex(index)}
             className="block overflow-hidden rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-culture-green"
           >
-            <img
+            <ImageWithSkeleton
               src={image}
               alt={alt}
               className="h-[130px] w-full object-cover transition-transform duration-200 hover:scale-105 sm:h-[150px]"

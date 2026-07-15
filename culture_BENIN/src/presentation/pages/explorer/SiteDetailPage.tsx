@@ -1,14 +1,25 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
-import { ImmersiveTourViewer } from "@/presentation/components/immersive/ImmersiveTourViewer";
-import { Immersive3DViewer } from "@/presentation/components/immersive/Immersive3DViewer";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { Site } from "@/domain/entities/Site";
 import { cityRepository, siteRepository } from "@/infrastructure/config/repositories";
+
+const ImmersiveTourViewer = lazy(() =>
+  import("@/presentation/components/immersive/ImmersiveTourViewer").then((m) => ({
+    default: m.ImmersiveTourViewer,
+  })),
+);
+const Immersive3DViewer = lazy(() =>
+  import("@/presentation/components/immersive/Immersive3DViewer").then((m) => ({
+    default: m.Immersive3DViewer,
+  })),
+);
 
 const OUIDAH_DEMO_TOUR = {
   imageId: "888939035048535",
@@ -50,9 +61,7 @@ export function SiteDetailPage() {
   if (site === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }
@@ -84,9 +93,11 @@ export function SiteDetailPage() {
       <main className="animate-[fadeUp_0.4s_ease_both]">
         {site.image ? (
           <div className="relative h-[280px] overflow-hidden sm:h-[380px]">
-            <img
+            <ImageWithSkeleton
               src={site.image}
               alt={site.name}
+              eager
+              fallbackLabel={site.name}
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -187,21 +198,25 @@ export function SiteDetailPage() {
       </main>
 
       {isTourOpen && (
-        <ImmersiveTourViewer
-          imageId={OUIDAH_DEMO_TOUR.imageId}
-          title={OUIDAH_DEMO_TOUR.title}
-          caption={OUIDAH_DEMO_TOUR.caption}
-          onClose={() => setIsTourOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <ImmersiveTourViewer
+            imageId={OUIDAH_DEMO_TOUR.imageId}
+            title={OUIDAH_DEMO_TOUR.title}
+            caption={OUIDAH_DEMO_TOUR.caption}
+            onClose={() => setIsTourOpen(false)}
+          />
+        </Suspense>
       )}
 
       {is3DTourOpen && (
-        <Immersive3DViewer
-          modelUrl={ABOMEY_DEMO_3D_TOUR.modelUrl}
-          title={ABOMEY_DEMO_3D_TOUR.title}
-          caption={ABOMEY_DEMO_3D_TOUR.caption}
-          onClose={() => setIs3DTourOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <Immersive3DViewer
+            modelUrl={ABOMEY_DEMO_3D_TOUR.modelUrl}
+            title={ABOMEY_DEMO_3D_TOUR.title}
+            caption={ABOMEY_DEMO_3D_TOUR.caption}
+            onClose={() => setIs3DTourOpen(false)}
+          />
+        </Suspense>
       )}
     </MainLayout>
   );

@@ -6,6 +6,7 @@ export const CITIES_MOCK: City[] = [
     id: "ouidah",
     name: "Ouidah",
     region: "Département de l'Atlantique",
+    departement: "Atlantique",
     theme: "Spiritualité & mémoire",
     nickname: "« Cité mémoire du Vodoun »",
     tagline:
@@ -22,6 +23,7 @@ export const CITIES_MOCK: City[] = [
     id: "abomey",
     name: "Abomey",
     region: "Département du Zou",
+    departement: "Zou",
     theme: "Histoire royale",
     nickname: "« Berceau du royaume du Danxomè »",
     tagline:
@@ -38,6 +40,7 @@ export const CITIES_MOCK: City[] = [
     id: "portonovo",
     name: "Porto-Novo",
     region: "Département de l'Ouémé",
+    departement: "Ouémé",
     theme: "Métissage culturel",
     nickname: "« Hogbonou, la ville aux trois noms »",
     tagline:
@@ -54,6 +57,7 @@ export const CITIES_MOCK: City[] = [
     id: "ganvie",
     name: "Ganvié",
     region: "Lac Nokoué — Sô-Ava",
+    departement: "Atlantique",
     theme: "Patrimoine lacustre",
     nickname: "« La Venise de l'Afrique »",
     tagline:
@@ -70,6 +74,7 @@ export const CITIES_MOCK: City[] = [
     id: "cotonou",
     name: "Cotonou",
     region: "Département du Littoral",
+    departement: "Littoral",
     theme: "Vie urbaine & modernité",
     nickname: "« La capitale économique »",
     tagline:
@@ -92,6 +97,7 @@ export const CITIES_MOCK: City[] = [
     id: "natitingou",
     name: "Natitingou",
     region: "Département de l'Atacora",
+    departement: "Atacora",
     theme: "Architecture traditionnelle",
     nickname: "« Porte de l'Atacora »",
     tagline:
@@ -108,6 +114,7 @@ export const CITIES_MOCK: City[] = [
     id: "parakou",
     name: "Parakou",
     region: "Département du Borgou",
+    departement: "Borgou",
     theme: "Carrefour du Nord",
     nickname: "« Le carrefour du Nord béninois »",
     tagline:
@@ -124,6 +131,7 @@ export const CITIES_MOCK: City[] = [
     id: "grandpopo",
     name: "Grand-Popo",
     region: "Département du Mono",
+    departement: "Mono",
     theme: "Littoral & évasion",
     nickname: "« Entre lagune, fleuve et océan »",
     tagline:

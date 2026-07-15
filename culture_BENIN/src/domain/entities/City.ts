@@ -2,6 +2,7 @@ export interface City {
   id: string;
   name: string;
   region: string;
+  departement: string;
   theme: string;
   nickname: string;
   tagline: string;

@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { Story } from "@/domain/entities/Story";
@@ -42,9 +44,7 @@ export function StoryDetailPage() {
   if (story === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }
@@ -71,9 +71,11 @@ export function StoryDetailPage() {
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="relative h-[280px] overflow-hidden sm:h-[360px]">
-          <img
+          <ImageWithSkeleton
             src={story.image}
             alt={story.title}
+            eager
+            fallbackLabel={story.title}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

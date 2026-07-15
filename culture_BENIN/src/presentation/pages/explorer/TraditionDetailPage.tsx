@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { Tradition } from "@/domain/entities/Tradition";
@@ -21,8 +22,9 @@ export function TraditionDetailPage() {
     traditionRepository.getById(traditionId).then(async (result) => {
       if (cancelled) return;
       setTradition(result);
-      if (result?.cityId) {
-        const relatedCity = await cityRepository.getById(result.cityId);
+      if (result?.cityName) {
+        const matches = await cityRepository.search(result.cityName);
+        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
         if (!cancelled) setCity(relatedCity);
       }
     });
@@ -34,9 +36,7 @@ export function TraditionDetailPage() {
   if (tradition === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }
@@ -49,7 +49,7 @@ export function TraditionDetailPage() {
             Cette tradition n'existe pas ou n'est plus disponible.
           </p>
           <Link
-            to="/explorer/evenements"
+            to="/explorer/traditions"
             className="mt-4 inline-block text-[13.5px] font-semibold text-culture-green hover:text-culture-terracotta"
           >
             ← Retour aux traditions
@@ -64,7 +64,7 @@ export function TraditionDetailPage() {
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:py-16">
           <Link
-            to="/explorer/evenements"
+            to="/explorer/traditions"
             className="mb-6 inline-block text-[12.5px] font-semibold text-gray-500 hover:text-culture-green"
           >
             ← Retour aux traditions

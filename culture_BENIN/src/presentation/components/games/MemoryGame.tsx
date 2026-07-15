@@ -3,6 +3,8 @@ import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { MemoryItem } from "@/domain/entities/MemoryItem";
 import { memoryRepository } from "@/infrastructure/config/repositories";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { Skeleton } from "@/presentation/components/ui/Skeleton";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface MemoryGameProps {
   difficulty: Difficulty;
@@ -64,7 +66,13 @@ export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
   }, [isComplete, hasFinished, flips, totalPairs, onFinish]);
 
   if (items.length === 0) {
-    return <p className="text-sm text-gray-400">Chargement…</p>;
+    return (
+      <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <Skeleton key={index} className="h-[100px] w-full rounded-xl sm:h-[120px]" />
+        ))}
+      </div>
+    );
   }
 
   const handleRestart = () => {
@@ -159,9 +167,10 @@ export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
             >
               {isFlipped ? (
                 card.type === "image" ? (
-                  <img
+                  <ImageWithSkeleton
                     src={card.item.image}
                     alt={card.item.name}
+                    fallbackLabel={card.item.name}
                     className="h-full w-full rounded-lg object-cover"
                   />
                 ) : (

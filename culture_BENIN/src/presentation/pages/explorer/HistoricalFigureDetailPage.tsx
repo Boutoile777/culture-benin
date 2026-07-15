@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { GalleryLightbox } from "@/presentation/components/gallery/GalleryLightbox";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
@@ -35,9 +37,7 @@ export function HistoricalFigureDetailPage() {
   if (figure === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }
@@ -76,9 +76,11 @@ export function HistoricalFigureDetailPage() {
 
           <div className="flex items-center gap-5">
             {figure.portrait ? (
-              <img
+              <ImageWithSkeleton
                 src={figure.portrait}
                 alt={figure.name}
+                eager
+                fallbackLabel={figure.initials}
                 className="h-20 w-20 flex-none rounded-full object-cover"
               />
             ) : (
@@ -130,9 +132,10 @@ export function HistoricalFigureDetailPage() {
                     onClick={() => setOpenGalleryIndex(index)}
                     className="block overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-culture-green"
                   >
-                    <img
+                    <ImageWithSkeleton
                       src={galleryImages[index]}
                       alt={figure.name}
+                      fallbackLabel={figure.name}
                       className="h-[220px] w-full object-cover transition-transform duration-200 hover:scale-105 sm:h-[280px]"
                     />
                   </button>

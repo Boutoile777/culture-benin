@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
 import type { City } from "@/domain/entities/City";
 import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
@@ -29,8 +30,9 @@ export function EventDetailPage() {
     culturalEventRepository.getById(eventId).then(async (result) => {
       if (cancelled) return;
       setEvent(result);
-      if (result?.cityId) {
-        const relatedCity = await cityRepository.getById(result.cityId);
+      if (result?.cityName) {
+        const matches = await cityRepository.search(result.cityName);
+        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
         if (!cancelled) setCity(relatedCity);
       }
     });
@@ -42,9 +44,7 @@ export function EventDetailPage() {
   if (event === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }

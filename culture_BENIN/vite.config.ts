@@ -12,6 +12,12 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    // ImmersiveTourViewer (mapillary-js) and Immersive3DViewer (three) are lazy-loaded
+    // on demand (360°/3D tour buttons), not part of the initial bundle — their size
+    // doesn't affect first load, so the default 500kB warning doesn't apply to them.
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     proxy: {
       // Dev-only workaround: the backend doesn't send CORS headers yet, so

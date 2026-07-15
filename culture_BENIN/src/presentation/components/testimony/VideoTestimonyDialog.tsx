@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from "react";
 import type { Testimony } from "@/domain/entities/Testimony";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface VideoTestimonyDialogProps {
   testimony: Testimony;
@@ -44,9 +45,11 @@ export function VideoTestimonyDialog({ testimony, onClose }: VideoTestimonyDialo
             onClick={() => setIsPlaying((current) => !current)}
             className="relative block h-[280px] w-full sm:h-[360px]"
           >
-            <img
+            <ImageWithSkeleton
               src={testimony.image}
               alt={testimony.title}
+              eager
+              fallbackLabel={testimony.title}
               className={`h-full w-full object-cover transition-[filter] duration-300 ${isPlaying ? "brightness-50" : "brightness-90"}`}
             />
             <span className="absolute inset-0 flex items-center justify-center">

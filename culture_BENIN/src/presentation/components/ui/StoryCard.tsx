@@ -1,29 +1,21 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Story } from "@/domain/entities/Story";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface StoryCardProps {
   story: Story;
 }
 
 export function StoryCard({ story }: StoryCardProps) {
-  const [imageErrored, setImageErrored] = useState(false);
-
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
       <div className="overflow-hidden">
-        {imageErrored ? (
-          <div className="flex h-[150px] items-center justify-center bg-gradient-to-br from-gray-100 to-[#e6e3da] text-xs text-gray-400">
-            photo à venir — {story.title}
-          </div>
-        ) : (
-          <img
-            src={story.image}
-            alt={story.title}
-            onError={() => setImageErrored(true)}
-            className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        )}
+        <ImageWithSkeleton
+          src={story.image}
+          alt={story.title}
+          fallbackLabel={`photo à venir — ${story.title}`}
+          className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
       </div>
       <div className="flex h-[200px] flex-col gap-2 p-[18px]">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-culture-terracotta">

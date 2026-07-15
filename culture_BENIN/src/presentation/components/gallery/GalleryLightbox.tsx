@@ -48,6 +48,8 @@ export function GalleryLightbox({ images, initialIndex, alt, onClose }: GalleryL
         <img
           src={images[index]}
           alt={alt}
+          loading="eager"
+          decoding="async"
           className="max-h-full max-w-full object-contain"
           onClick={(event) => event.stopPropagation()}
         />

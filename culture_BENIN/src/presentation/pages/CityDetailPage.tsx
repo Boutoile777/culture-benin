@@ -1,10 +1,18 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
 import { SiteCard } from "@/presentation/components/ui/SiteCard";
-import { ImmersiveTourViewer } from "@/presentation/components/immersive/ImmersiveTourViewer";
+import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
+import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites } from "@/presentation/hooks/useFavorites";
+
+const ImmersiveTourViewer = lazy(() =>
+  import("@/presentation/components/immersive/ImmersiveTourViewer").then((m) => ({
+    default: m.ImmersiveTourViewer,
+  })),
+);
 import type { City } from "@/domain/entities/City";
 import type { Story } from "@/domain/entities/Story";
 import type { Site } from "@/domain/entities/Site";
@@ -26,15 +34,19 @@ const OUIDAH_DEMO_TOUR = {
   caption: "Photographie sphérique 360° · Mapillary, CC BY-SA · anebophil, 2018",
 };
 
+const FEATURED_COUNT = 3;
+
 function NumberedSection({
   index,
   title,
   description,
+  action,
   children,
 }: {
   index: string;
   title: string;
   description?: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -46,12 +58,30 @@ function NumberedSection({
         {title}
       </div>
       <div>
-        {description && (
-          <p className="mb-5 text-[13px] text-gray-500">{description}</p>
+        {(description || action) && (
+          <div className="mb-5 flex items-end justify-between gap-3">
+            {description ? (
+              <p className="text-[13px] text-gray-500">{description}</p>
+            ) : (
+              <span />
+            )}
+            {action}
+          </div>
         )}
         {children}
       </div>
     </section>
+  );
+}
+
+function SeeAllLink({ to }: { to: string }) {
+  return (
+    <Link
+      to={to}
+      className="whitespace-nowrap text-[13px] font-semibold text-culture-green hover:text-culture-terracotta"
+    >
+      Voir tout →
+    </Link>
   );
 }
 
@@ -78,22 +108,27 @@ export function CityDetailPage() {
     if (!cityId) return;
     let cancelled = false;
     setCity(undefined);
-    Promise.all([
-      cityRepository.getById(cityId),
-      storyRepository.getAll(),
-      siteRepository.getByCityId(cityId),
-      culturalEventRepository.getByCityId(cityId),
-      traditionRepository.getByCityId(cityId),
-      historicalFigureRepository.getByCityId(cityId),
-    ]).then(([cityResult, stories, sites, events, traditions, figures]) => {
-      if (!cancelled) {
-        setCity(cityResult);
-        setRelatedStories(stories.filter((story) => story.cityId === cityId));
-        setCitySites(sites);
-        setCityEvents(events);
-        setCityTraditions(traditions);
-        setCityFigures(figures);
-      }
+    cityRepository.getById(cityId).then((cityResult) => {
+      if (cancelled) return;
+      setCity(cityResult);
+      if (!cityResult) return;
+      Promise.all([
+        storyRepository.getAll(),
+        siteRepository.getByCityId(cityId),
+        culturalEventRepository.getByCityName(cityResult.name),
+        traditionRepository.getByCityName(cityResult.name),
+        historicalFigureRepository.getByCityId(cityId),
+      ]).then(([stories, sites, events, traditions, figures]) => {
+        if (!cancelled) {
+          setRelatedStories(
+            stories.filter((story) => story.cityName === cityResult.name).slice(0, FEATURED_COUNT),
+          );
+          setCitySites(sites);
+          setCityEvents(events);
+          setCityTraditions(traditions);
+          setCityFigures(figures);
+        }
+      });
     });
     return () => {
       cancelled = true;
@@ -105,12 +140,25 @@ export function CityDetailPage() {
     [cityEvents],
   );
 
+  const cityGalleryImages = useMemo(() => {
+    const images = [
+      ...citySites.flatMap((site) =>
+        site.gallery?.length ? site.gallery : site.image ? [site.image] : [],
+      ),
+      ...cityFigures.flatMap((figure) =>
+        figure.gallery?.length ? figure.gallery : figure.portrait ? [figure.portrait] : [],
+      ),
+      ...cityTraditions.flatMap((tradition) => tradition.gallery ?? []),
+      ...sortedEvents.flatMap((event) => event.gallery ?? []),
+      ...relatedStories.flatMap((story) => (story.gallery?.length ? story.gallery : [story.image])),
+    ];
+    return Array.from(new Set(images)).slice(0, 12);
+  }, [citySites, cityFigures, cityTraditions, sortedEvents, relatedStories]);
+
   if (city === undefined) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement…
-        </div>
+        <DetailPageSkeleton />
       </MainLayout>
     );
   }
@@ -140,9 +188,11 @@ export function CityDetailPage() {
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="relative h-[320px] overflow-hidden sm:h-[440px]">
-          <img
+          <ImageWithSkeleton
             src={city.heroImage}
             alt={city.name}
+            eager
+            fallbackLabel={city.name}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -199,10 +249,13 @@ export function CityDetailPage() {
             </button>
           </div>
 
-          <NumberedSection index="01" title="Histoire & origine">
-            <p className="mb-4 font-display text-[17px] leading-relaxed text-culture-ink">
+          <NumberedSection index="01" title="Description">
+            <p className="font-display text-[17px] leading-relaxed text-culture-ink">
               {city.introduction}
             </p>
+          </NumberedSection>
+
+          <NumberedSection index="02" title="Historique">
             <p className="text-[14.5px] leading-relaxed text-gray-600 lg:columns-2 lg:gap-10">
               {city.history}
             </p>
@@ -210,12 +263,13 @@ export function CityDetailPage() {
 
           {citySites.length > 0 && (
             <NumberedSection
-              index="02"
+              index="03"
               title="Sites & lieux importants"
               description="Cliquez sur un lieu pour ouvrir sa fiche complète."
+              action={<SeeAllLink to={`/explorer/sites?city=${city.id}`} />}
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {citySites.map((site) => (
+                {citySites.slice(0, FEATURED_COUNT).map((site) => (
                   <SiteCard key={site.id} site={site} />
                 ))}
               </div>
@@ -223,9 +277,13 @@ export function CityDetailPage() {
           )}
 
           {cityFigures.length > 0 && (
-            <NumberedSection index="03" title="Personnalités historiques">
+            <NumberedSection
+              index="04"
+              title="Personnalités historiques"
+              action={<SeeAllLink to={`/explorer/personnalites?city=${city.id}`} />}
+            >
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                {cityFigures.map((figure) => (
+                {cityFigures.slice(0, FEATURED_COUNT).map((figure) => (
                   <Link
                     key={figure.id}
                     to={`/explorer/personnalites/${figure.id}`}
@@ -251,28 +309,53 @@ export function CityDetailPage() {
             </NumberedSection>
           )}
 
-          {(sortedEvents.length > 0 || cityTraditions.length > 0) && (
-            <NumberedSection index="04" title="Événements & traditions">
-              {cityTraditions.length > 0 && (
-                <div className="mb-6 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                  {cityTraditions.map((tradition) => (
-                    <Link
-                      key={tradition.id}
-                      to={`/explorer/traditions/${tradition.id}`}
-                      className="flex flex-col gap-1 rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(32,33,36,0.1)]"
-                    >
-                      <span className="font-display text-[16px] font-semibold text-culture-ink">
-                        {tradition.name}
-                      </span>
-                      <span className="text-[13px] leading-relaxed text-gray-500">
-                        {tradition.description}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              )}
+          {relatedStories.length > 0 && (
+            <NumberedSection
+              index="05"
+              title="Récits"
+              action={<SeeAllLink to={`/explorer/recits?city=${encodeURIComponent(city.name)}`} />}
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedStories.map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
+              </div>
+            </NumberedSection>
+          )}
+
+          {cityTraditions.length > 0 && (
+            <NumberedSection
+              index="06"
+              title="Traditions"
+              action={<SeeAllLink to={`/explorer/traditions?city=${encodeURIComponent(city.name)}`} />}
+            >
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                {cityTraditions.slice(0, FEATURED_COUNT).map((tradition) => (
+                  <Link
+                    key={tradition.id}
+                    to={`/explorer/traditions/${tradition.id}`}
+                    className="flex flex-col gap-1 rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(32,33,36,0.1)]"
+                  >
+                    <span className="font-display text-[16px] font-semibold text-culture-ink">
+                      {tradition.name}
+                    </span>
+                    <span className="text-[13px] leading-relaxed text-gray-500">
+                      {tradition.description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </NumberedSection>
+          )}
+
+          {sortedEvents.length > 0 && (
+            <NumberedSection
+              index="07"
+              title="Événements"
+              action={<SeeAllLink to={`/explorer/evenements?city=${encodeURIComponent(city.name)}`} />}
+            >
               <div className="flex flex-col gap-3">
-                {sortedEvents.map((event) => {
+                {sortedEvents.slice(0, FEATURED_COUNT).map((event) => {
                   const { day, month } = formatEventDate(event.date);
                   return (
                     <Link
@@ -306,25 +389,19 @@ export function CityDetailPage() {
             </NumberedSection>
           )}
 
-          {relatedStories.length > 0 && (
-            <NumberedSection index="05" title="Récits">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedStories.map((story) => (
-                  <StoryCard key={story.id} story={story} />
-                ))}
-              </div>
-            </NumberedSection>
-          )}
+          <PhotoGallery images={cityGalleryImages} alt={city.name} />
         </div>
       </main>
 
       {isTourOpen && (
-        <ImmersiveTourViewer
-          imageId={OUIDAH_DEMO_TOUR.imageId}
-          title={OUIDAH_DEMO_TOUR.title}
-          caption={OUIDAH_DEMO_TOUR.caption}
-          onClose={() => setIsTourOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <ImmersiveTourViewer
+            imageId={OUIDAH_DEMO_TOUR.imageId}
+            title={OUIDAH_DEMO_TOUR.title}
+            caption={OUIDAH_DEMO_TOUR.caption}
+            onClose={() => setIsTourOpen(false)}
+          />
+        </Suspense>
       )}
     </MainLayout>
   );

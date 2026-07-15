@@ -9,6 +9,7 @@ import { StoryCard } from "@/presentation/components/ui/StoryCard";
 import { QuickLinkCard } from "@/presentation/components/ui/QuickLinkCard";
 import { StatTile } from "@/presentation/components/ui/StatTile";
 import { ContributionRow } from "@/presentation/components/ui/ContributionRow";
+import { Skeleton, CardGridSkeleton } from "@/presentation/components/ui/Skeleton";
 import {
   QUICK_LINKS,
   COLLECTION_STATS,
@@ -28,8 +29,19 @@ export function HomePage() {
   if (isLoading || !content) {
     return (
       <MainLayout>
-        <div className="flex h-[400px] items-center justify-center text-gray-400">
-          Chargement du patrimoine béninois…
+        <div>
+          <Skeleton className="h-[420px] w-full rounded-none sm:h-[520px]" />
+          <section className="mx-auto max-w-7xl px-4 pb-4 pt-10 sm:px-6 lg:pt-14">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-[88px] w-full rounded-2xl" />
+              ))}
+            </div>
+          </section>
+          <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+            <Skeleton className="mb-6 h-8 w-64" />
+            <CardGridSkeleton />
+          </section>
         </div>
       </MainLayout>
     );

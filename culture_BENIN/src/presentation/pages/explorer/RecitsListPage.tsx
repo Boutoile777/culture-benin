@@ -20,6 +20,7 @@ export function RecitsListPage() {
   const [searchParams] = useSearchParams();
   const [stories, setStories] = useState<Story[]>([]);
   const activeCategory = searchParams.get("categorie") ?? ALL_CATEGORY;
+  const cityFilter = searchParams.get("city");
 
   useEffect(() => {
     let cancelled = false;
@@ -34,10 +35,14 @@ export function RecitsListPage() {
   const filteredStories = useMemo(
     () =>
       stories.filter(
-        (story) => activeCategory === ALL_CATEGORY || story.category === activeCategory,
+        (story) =>
+          (activeCategory === ALL_CATEGORY || story.category === activeCategory) &&
+          (!cityFilter || story.cityName === cityFilter),
       ),
-    [stories, activeCategory],
+    [stories, activeCategory, cityFilter],
   );
+
+  const filteredCityName = cityFilter ?? undefined;
 
   return (
     <MainLayout>
@@ -46,9 +51,11 @@ export function RecitsListPage() {
           <SectionHeading
             kicker="Explorer · Récits & transmission"
             title={
-              activeCategory === ALL_CATEGORY
-                ? "Récits historiques du Bénin"
-                : `Récits — ${activeCategory}`
+              filteredCityName
+                ? `Récits — ${filteredCityName}`
+                : activeCategory === ALL_CATEGORY
+                  ? "Récits historiques du Bénin"
+                  : `Récits — ${activeCategory}`
             }
           />
           <p className="mb-8 mt-3 max-w-[620px] text-[14.5px] leading-relaxed text-gray-500">

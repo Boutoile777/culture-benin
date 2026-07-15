@@ -3,9 +3,25 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "@/shared/constants/homeStaticContent";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { useAuth } from "@/presentation/contexts/AuthContext";
-import { cityRepository } from "@/infrastructure/config/repositories";
+import {
+  cityRepository,
+  siteRepository,
+  historicalFigureRepository,
+  storyRepository,
+  culturalEventRepository,
+  traditionRepository,
+} from "@/infrastructure/config/repositories";
 import { getFullName, getInitials } from "@/shared/utils/userDisplay";
-import type { City } from "@/domain/entities/City";
+
+type SearchResultType = "Ville" | "Site" | "Personnalité" | "Récit" | "Événement" | "Tradition";
+
+interface SearchResult {
+  id: string;
+  type: SearchResultType;
+  title: string;
+  subtitle: string;
+  to: string;
+}
 
 const ACCOUNT_MENU_LINKS = [
   { label: "Mon profil", path: "/compte" },
@@ -13,6 +29,37 @@ const ACCOUNT_MENU_LINKS = [
   { label: "Mes contributions", path: "/compte/contributions" },
   { label: "Paramètres", path: "/compte/parametres" },
 ];
+
+function SearchResultTypeIcon({ type }: { type: SearchResultType }) {
+  const paths: Record<SearchResultType, string> = {
+    Ville: "M12 21s7-7.2 7-12a7 7 0 10-14 0c0 4.8 7 12 7 12z M9.5 9a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z",
+    Site: "M3 10l9-6 9 6M5 10v10M19 10v10M3 20h18M9 20v-6h6v6",
+    Personnalité: "M12 12a3.5 3.5 0 100-7 3.5 3.5 0 000 7z M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5",
+    Récit: "M4 5.2C4 4.5 4.6 4 5.3 4H11v16H5.3A1.3 1.3 0 014 18.7V5.2z M20 5.2c0-.7-.6-1.2-1.3-1.2H13v16h5.7c.7 0 1.3-.5 1.3-1.3V5.2z",
+    Événement: "M4.5 5.5h15A1.5 1.5 0 0121 7v12a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 19V7a1.5 1.5 0 011.5-1.5z M3 10h18 M8 3v4 M16 3v4",
+    Tradition: "M12 3l1.9 5.3L19 10l-5.1 1.7L12 17l-1.9-5.3L5 10l5.1-1.7L12 3z",
+  };
+
+  return (
+    <span
+      title={type}
+      aria-label={type}
+      className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[#eef4ef] text-culture-green"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-4 w-4"
+      >
+        <path d={paths[type]} />
+      </svg>
+    </span>
+  );
+}
 
 function CitySearchIcon() {
   return (
@@ -30,16 +77,67 @@ function CitySearchIcon() {
   );
 }
 
-function CitySearch({ className = "" }: { className?: string }) {
+function PlatformSearch({ className = "" }: { className?: string }) {
   const navigate = useNavigate();
-  const [cities, setCities] = useState<City[]>([]);
+  const [index, setIndex] = useState<SearchResult[] | null>(null);
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    cityRepository.getAll().then((result) => {
-      if (!cancelled) setCities(result);
+    Promise.all([
+      cityRepository.getAll(),
+      siteRepository.getAll(),
+      historicalFigureRepository.getAll(),
+      storyRepository.getAll(),
+      culturalEventRepository.getAll(),
+      traditionRepository.getAll(),
+    ]).then(([cities, sites, figures, stories, events, traditions]) => {
+      if (cancelled) return;
+      setIndex([
+        ...cities.map((city): SearchResult => ({
+          id: `city-${city.id}`,
+          type: "Ville",
+          title: city.name,
+          subtitle: city.region,
+          to: `/explorer/${city.id}`,
+        })),
+        ...sites.map((site): SearchResult => ({
+          id: `site-${site.id}`,
+          type: "Site",
+          title: site.name,
+          subtitle: site.category || "Site historique",
+          to: `/explorer/sites/${site.id}`,
+        })),
+        ...figures.map((figure): SearchResult => ({
+          id: `figure-${figure.id}`,
+          type: "Personnalité",
+          title: figure.name,
+          subtitle: figure.role,
+          to: `/explorer/personnalites/${figure.id}`,
+        })),
+        ...stories.map((story): SearchResult => ({
+          id: `story-${story.id}`,
+          type: "Récit",
+          title: story.title,
+          subtitle: story.category,
+          to: `/explorer/recits/${story.id}`,
+        })),
+        ...events.map((event): SearchResult => ({
+          id: `event-${event.id}`,
+          type: "Événement",
+          title: event.name,
+          subtitle: event.description,
+          to: `/explorer/evenements/${event.id}`,
+        })),
+        ...traditions.map((tradition): SearchResult => ({
+          id: `tradition-${tradition.id}`,
+          type: "Tradition",
+          title: tradition.name,
+          subtitle: tradition.description,
+          to: `/explorer/traditions/${tradition.id}`,
+        })),
+      ]);
     });
     return () => {
       cancelled = true;
@@ -48,19 +146,22 @@ function CitySearch({ className = "" }: { className?: string }) {
 
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return [];
-    return cities
-      .filter(
-        (city) =>
-          city.name.toLowerCase().includes(normalized) ||
-          city.region.toLowerCase().includes(normalized) ||
-          city.theme.toLowerCase().includes(normalized),
-      )
-      .slice(0, 6);
-  }, [cities, query]);
+    if (!normalized || !index) return [];
+    const matches = index.filter(
+      (item) =>
+        item.title.toLowerCase().includes(normalized) ||
+        item.subtitle.toLowerCase().includes(normalized),
+    );
+    matches.sort((a, b) => {
+      const aStarts = a.title.toLowerCase().startsWith(normalized) ? 0 : 1;
+      const bStarts = b.title.toLowerCase().startsWith(normalized) ? 0 : 1;
+      return aStarts - bStarts;
+    });
+    return matches.slice(0, 8);
+  }, [index, query]);
 
-  const goToCity = (city: City) => {
-    navigate(`/explorer/${city.id}`);
+  const goToResult = (result: SearchResult) => {
+    navigate(result.to);
     setQuery("");
     setIsOpen(false);
   };
@@ -76,10 +177,10 @@ function CitySearch({ className = "" }: { className?: string }) {
         }}
         onFocus={() => setIsOpen(true)}
         onKeyDown={(event) => {
-          if (event.key === "Enter" && results[0]) goToCity(results[0]);
+          if (event.key === "Enter" && results[0]) goToResult(results[0]);
           if (event.key === "Escape") setIsOpen(false);
         }}
-        placeholder="Rechercher une ville…"
+        placeholder="Rechercher sur la plateforme…"
         className="w-full rounded-full border border-gray-300 bg-gray-50 py-2 pl-9 pr-4 text-[13px] text-culture-ink focus:outline-none focus:ring-2 focus:ring-culture-green"
       />
 
@@ -87,17 +188,22 @@ function CitySearch({ className = "" }: { className?: string }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
-            {results.map((city) => (
+            {results.map((result) => (
               <button
-                key={city.id}
+                key={result.id}
                 type="button"
-                onClick={() => goToCity(city)}
-                className="flex w-full flex-col items-start px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-50"
+                onClick={() => goToResult(result)}
+                className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-50"
               >
-                <span className="text-[13.5px] font-semibold text-culture-ink">
-                  {city.name}
+                <SearchResultTypeIcon type={result.type} />
+                <span className="flex min-w-0 flex-1 flex-col items-start">
+                  <span className="text-[13.5px] font-semibold leading-snug text-culture-ink">
+                    {result.title}
+                  </span>
+                  <span className="truncate text-[11.5px] text-gray-500">
+                    {result.subtitle}
+                  </span>
                 </span>
-                <span className="text-[11.5px] text-gray-500">{city.region}</span>
               </button>
             ))}
           </div>
@@ -154,7 +260,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center justify-end gap-3 lg:flex">
-          <CitySearch className="w-[210px]" />
+          <PlatformSearch className="w-[210px]" />
 
           {user ? (
             <div className="relative">
@@ -270,7 +376,7 @@ export function SiteHeader() {
             )}
           </nav>
 
-          <CitySearch className="mt-4" />
+          <PlatformSearch className="mt-4" />
 
           <div className="mt-4">
             {user ? (

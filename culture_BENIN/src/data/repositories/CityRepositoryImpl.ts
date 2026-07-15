@@ -1,6 +1,7 @@
 import type { City } from "@/domain/entities/City";
 import type { CityRepository } from "@/domain/repositories/CityRepository";
-import { apiFetch, ApiError } from "@/infrastructure/api/httpClient";
+import { apiFetch, apiFetchList, ApiError } from "@/infrastructure/api/httpClient";
+import { departementForCityName } from "@/shared/constants/departements";
 
 interface RawMedia {
   url: string;
@@ -31,6 +32,7 @@ function mapCity(raw: RawCity, order: number): City {
     id: raw.id,
     name: raw.name,
     region: raw.location?.address ?? "",
+    departement: departementForCityName(raw.name),
     theme: "",
     nickname: "",
     tagline: firstSentence(raw.description),
@@ -44,7 +46,7 @@ function mapCity(raw: RawCity, order: number): City {
 
 export class CityRepositoryImpl implements CityRepository {
   async getAll(): Promise<City[]> {
-    const raw = await apiFetch<RawCity[]>("/cities");
+    const raw = await apiFetchList<RawCity>("/cities");
     return raw.map((city, index) => mapCity(city, index));
   }
 

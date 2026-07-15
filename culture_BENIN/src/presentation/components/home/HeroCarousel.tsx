@@ -37,6 +37,8 @@ export function HeroCarousel({ slides, onExploreClick }: HeroCarouselProps) {
           key={slide.id}
           src={slide.image}
           alt={slide.title}
+          loading={i === 0 ? "eager" : "lazy"}
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
           style={{ opacity: i === index ? 1 : 0 }}
         />

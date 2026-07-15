@@ -3,6 +3,7 @@ import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { QuizQuestion } from "@/domain/entities/QuizQuestion";
 import { quizRepository } from "@/infrastructure/config/repositories";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { Skeleton } from "@/presentation/components/ui/Skeleton";
 
 interface QuizGameProps {
   difficulty: Difficulty;
@@ -29,7 +30,14 @@ export function QuizGame({ difficulty, onFinish }: QuizGameProps) {
   }, [token, difficulty]);
 
   if (questions.length === 0) {
-    return <p className="text-sm text-gray-400">Chargement du quiz…</p>;
+    return (
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-5 w-2/3" />
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-11 w-full" />
+        ))}
+      </div>
+    );
   }
 
   if (isDone) {

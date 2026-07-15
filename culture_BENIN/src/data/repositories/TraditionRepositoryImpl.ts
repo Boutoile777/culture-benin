@@ -7,8 +7,8 @@ export class TraditionRepositoryImpl implements TraditionRepository {
     return [...TRADITIONS_MOCK];
   }
 
-  async getByCityId(cityId: string): Promise<Tradition[]> {
-    return TRADITIONS_MOCK.filter((tradition) => tradition.cityId === cityId);
+  async getByCityName(cityName: string): Promise<Tradition[]> {
+    return TRADITIONS_MOCK.filter((tradition) => tradition.cityName === cityName);
   }
 
   async getById(id: string): Promise<Tradition | null> {

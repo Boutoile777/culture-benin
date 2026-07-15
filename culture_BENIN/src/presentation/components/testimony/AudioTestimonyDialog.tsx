@@ -1,5 +1,6 @@
 import { useRef, useState, type MouseEvent } from "react";
 import type { Testimony } from "@/domain/entities/Testimony";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface AudioTestimonyDialogProps {
   testimony: Testimony;
@@ -66,9 +67,11 @@ export function AudioTestimonyDialog({ testimony, onClose }: AudioTestimonyDialo
         </button>
 
         <div className="h-[220px] sm:h-full">
-          <img
+          <ImageWithSkeleton
             src={testimony.image}
             alt={testimony.title}
+            eager
+            fallbackLabel={testimony.title}
             className="h-full w-full object-cover"
           />
         </div>

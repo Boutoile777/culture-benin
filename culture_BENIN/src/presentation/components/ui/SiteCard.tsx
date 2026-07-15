@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Site } from "@/domain/entities/Site";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface SiteCardProps {
   site: Site;
@@ -8,20 +8,17 @@ interface SiteCardProps {
 }
 
 export function SiteCard({ site, cityName }: SiteCardProps) {
-  const [imageErrored, setImageErrored] = useState(false);
-  const showImage = site.image && !imageErrored;
-
   return (
     <Link
       to={`/explorer/sites/${site.id}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(32,33,36,0.16)]"
     >
       <div className="overflow-hidden">
-        {showImage ? (
-          <img
+        {site.image ? (
+          <ImageWithSkeleton
             src={site.image}
             alt={site.name}
-            onError={() => setImageErrored(true)}
+            fallbackLabel={`photo à venir — ${site.name}`}
             className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (

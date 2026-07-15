@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { City } from "@/domain/entities/City";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface CityCardProps {
   city: City;
@@ -9,23 +9,15 @@ interface CityCardProps {
 }
 
 export function CityCard({ city, isFavorite, onToggleFavorite }: CityCardProps) {
-  const [imageErrored, setImageErrored] = useState(false);
-
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
       <div className="relative overflow-hidden">
-        {imageErrored ? (
-          <div className="flex h-[210px] items-center justify-center bg-gradient-to-br from-gray-100 to-[#e6e3da] text-xs text-gray-400">
-            photo à venir — {city.name}
-          </div>
-        ) : (
-          <img
-            src={city.cardImage}
-            alt={city.name}
-            onError={() => setImageErrored(true)}
-            className="h-[210px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        )}
+        <ImageWithSkeleton
+          src={city.cardImage}
+          alt={city.name}
+          fallbackLabel={`photo à venir — ${city.name}`}
+          className="h-[210px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
         <button
           type="button"
           onClick={() => onToggleFavorite(city.id)}

@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
-import { ImmersiveTourViewer } from "@/presentation/components/immersive/ImmersiveTourViewer";
 import { wikimediaImage } from "@/shared/utils/wikimedia";
+
+const ImmersiveTourViewer = lazy(() =>
+  import("@/presentation/components/immersive/ImmersiveTourViewer").then((m) => ({
+    default: m.ImmersiveTourViewer,
+  })),
+);
 
 const DEMO_TOUR = {
   imageId: "888939035048535",
@@ -54,12 +59,14 @@ export function ImmersiveTestPage() {
       </main>
 
       {tourOpen && (
-        <ImmersiveTourViewer
-          imageId={DEMO_TOUR.imageId}
-          title={DEMO_TOUR.title}
-          caption={DEMO_TOUR.caption}
-          onClose={() => setTourOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <ImmersiveTourViewer
+            imageId={DEMO_TOUR.imageId}
+            title={DEMO_TOUR.title}
+            caption={DEMO_TOUR.caption}
+            onClose={() => setTourOpen(false)}
+          />
+        </Suspense>
       )}
     </MainLayout>
   );

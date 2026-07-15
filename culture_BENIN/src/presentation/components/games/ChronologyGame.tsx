@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ChronologyItem } from "@/domain/entities/ChronologyItem";
 import { chronologyRepository } from "@/infrastructure/config/repositories";
+import { Skeleton } from "@/presentation/components/ui/Skeleton";
 
 interface ChronologyGameProps {
   onFinish: (score: number, total: number) => void;
@@ -35,7 +36,13 @@ export function ChronologyGame({ onFinish }: ChronologyGameProps) {
   }, []);
 
   if (items.length === 0) {
-    return <p className="text-sm text-gray-400">Chargement…</p>;
+    return (
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-12 w-full" />
+        ))}
+      </div>
+    );
   }
 
   const correctOrder = [...items].sort((a, b) => a.year - b.year);

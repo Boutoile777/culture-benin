@@ -1,7 +1,7 @@
 import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
 import type { Testimony } from "@/domain/entities/Testimony";
 import type { HistoricalFigureRepository } from "@/domain/repositories/HistoricalFigureRepository";
-import { apiFetch, ApiError } from "@/infrastructure/api/httpClient";
+import { apiFetch, apiFetchList, ApiError } from "@/infrastructure/api/httpClient";
 
 interface RawMedia {
   url: string;
@@ -83,12 +83,12 @@ function mapHistoricalFigure(raw: RawHistoricalFigure): HistoricalFigure {
 
 export class HistoricalFigureRepositoryImpl implements HistoricalFigureRepository {
   async getAll(): Promise<HistoricalFigure[]> {
-    const raw = await apiFetch<RawHistoricalFigure[]>("/historical-figures");
+    const raw = await apiFetchList<RawHistoricalFigure>("/historical-figures");
     return raw.map(mapHistoricalFigure);
   }
 
   async getByCityId(cityId: string): Promise<HistoricalFigure[]> {
-    const raw = await apiFetch<RawHistoricalFigure[]>(
+    const raw = await apiFetchList<RawHistoricalFigure>(
       `/historical-figures?city=${encodeURIComponent(cityId)}`,
     );
     return raw.map(mapHistoricalFigure);

@@ -12,6 +12,7 @@ import { RecitsListPage } from "@/presentation/pages/explorer/RecitsListPage";
 import { StoryDetailPage } from "@/presentation/pages/explorer/StoryDetailPage";
 import { EvenementsListPage } from "@/presentation/pages/explorer/EvenementsListPage";
 import { EventDetailPage } from "@/presentation/pages/explorer/EventDetailPage";
+import { TraditionsListPage } from "@/presentation/pages/explorer/TraditionsListPage";
 import { TraditionDetailPage } from "@/presentation/pages/explorer/TraditionDetailPage";
 import { JouerPage } from "@/presentation/pages/JouerPage";
 import { ImmersiveTestPage } from "@/presentation/pages/ImmersiveTestPage";
@@ -43,6 +44,7 @@ function App() {
           <Route path="/explorer/recits/:storyId" element={<StoryDetailPage />} />
           <Route path="/explorer/evenements" element={<EvenementsListPage />} />
           <Route path="/explorer/evenements/:eventId" element={<EventDetailPage />} />
+          <Route path="/explorer/traditions" element={<TraditionsListPage />} />
           <Route path="/explorer/traditions/:traditionId" element={<TraditionDetailPage />} />
           <Route path="/explorer/:cityId" element={<CityDetailPage />} />
 

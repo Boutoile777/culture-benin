@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 import type { MapPoint } from "@/domain/entities/MapPoint";
 import type { Site } from "@/domain/entities/Site";
 import { mapRepository, siteRepository } from "@/infrastructure/config/repositories";
@@ -122,7 +123,7 @@ export function CartePage() {
                           isSelected ? "bg-[#eef4ef]" : "hover:bg-gray-50"
                         }`}
                       >
-                        <img
+                        <ImageWithSkeleton
                           src={point.image}
                           alt=""
                           className="h-11 w-11 flex-none rounded-lg object-cover"

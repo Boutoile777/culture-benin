@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { SiteCard } from "@/presentation/components/ui/SiteCard";
@@ -7,6 +8,8 @@ import type { Site } from "@/domain/entities/Site";
 import { cityRepository, siteRepository } from "@/infrastructure/config/repositories";
 
 export function SitesListPage() {
+  const [searchParams] = useSearchParams();
+  const cityFilter = searchParams.get("city");
   const [cities, setCities] = useState<City[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
 
@@ -31,13 +34,22 @@ export function SitesListPage() {
     return map;
   }, [cities]);
 
+  const filteredSites = useMemo(
+    () => (cityFilter ? sites.filter((site) => site.cityId === cityFilter) : sites),
+    [sites, cityFilter],
+  );
+
+  const filteredCityName = cityFilter ? cityNameById.get(cityFilter) : undefined;
+
   return (
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
           <SectionHeading
             kicker="Explorer · Patrimoine bâti"
-            title="Sites historiques en vedette"
+            title={
+              filteredCityName ? `Sites historiques — ${filteredCityName}` : "Sites historiques en vedette"
+            }
           />
           <p className="mb-8 mt-3 max-w-[620px] text-[14.5px] leading-relaxed text-gray-500">
             Palais royaux, temples, mémoriaux et musées — cliquez sur un lieu
@@ -46,7 +58,7 @@ export function SitesListPage() {
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {sites.map((site) => (
+            {filteredSites.map((site) => (
               <SiteCard key={site.id} site={site} cityName={cityNameById.get(site.cityId)} />
             ))}
           </div>

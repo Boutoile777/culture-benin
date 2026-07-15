@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Testimony } from "@/domain/entities/Testimony";
 import { AudioTestimonyDialog } from "@/presentation/components/testimony/AudioTestimonyDialog";
 import { VideoTestimonyDialog } from "@/presentation/components/testimony/VideoTestimonyDialog";
+import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
 interface TestimonySectionProps {
   testimonies: Testimony[];
@@ -27,9 +28,10 @@ export function TestimonySection({ testimonies, title = "Témoignages" }: Testim
             className="group flex items-center gap-3.5 overflow-hidden rounded-2xl border border-gray-200 bg-white p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(32,33,36,0.1)]"
           >
             <span className="relative h-14 w-14 flex-none overflow-hidden rounded-xl">
-              <img
+              <ImageWithSkeleton
                 src={testimony.image}
                 alt={testimony.title}
+                fallbackLabel={testimony.title}
                 className="h-full w-full object-cover"
               />
               <span className="absolute inset-0 flex items-center justify-center bg-black/25 text-white transition-colors group-hover:bg-black/40">

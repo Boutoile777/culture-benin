@@ -1,7 +1,7 @@
 import type { Site } from "@/domain/entities/Site";
 import type { Testimony } from "@/domain/entities/Testimony";
 import type { SiteRepository } from "@/domain/repositories/SiteRepository";
-import { apiFetch, ApiError } from "@/infrastructure/api/httpClient";
+import { apiFetch, apiFetchList, ApiError } from "@/infrastructure/api/httpClient";
 import { SITES_MOCK } from "@/data/datasources/local/sites.mock";
 
 interface RawMedia {
@@ -199,12 +199,12 @@ function mapSite(raw: RawSite): Site {
 
 export class SiteRepositoryImpl implements SiteRepository {
   async getAll(): Promise<Site[]> {
-    const raw = await apiFetch<RawSite[]>("/tourist-sites");
+    const raw = await apiFetchList<RawSite>("/tourist-sites");
     return raw.filter((site) => !EXCLUDED_SITE_NAMES.has(site.name)).map(mapSite);
   }
 
   async getByCityId(cityId: string): Promise<Site[]> {
-    const raw = await apiFetch<RawSite[]>(`/tourist-sites?city=${encodeURIComponent(cityId)}`);
+    const raw = await apiFetchList<RawSite>(`/tourist-sites?city=${encodeURIComponent(cityId)}`);
     return raw.filter((site) => !EXCLUDED_SITE_NAMES.has(site.name)).map(mapSite);
   }
 

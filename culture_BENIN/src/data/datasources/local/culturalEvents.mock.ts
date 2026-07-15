@@ -4,7 +4,7 @@ import { wikimediaImage } from "@/shared/utils/wikimedia";
 export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   {
     id: "journee-internationale-musees-abomey",
-    cityId: "abomey",
+    cityName: "Abomey",
     name: "Journée internationale des musées",
     description:
       "Les palais royaux d'Abomey ouvrent leurs portes gratuitement le temps d'une journée, avec visites guidées et démonstrations artisanales.",
@@ -28,7 +28,7 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   },
   {
     id: "nuit-patrimoine-ouidah",
-    cityId: "ouidah",
+    cityName: "Ouidah",
     name: "Nuit du patrimoine",
     description:
       "Soirée de contes, percussions et danses traditionnelles le long de la Route des Esclaves, à la tombée du jour.",
@@ -52,7 +52,7 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   },
   {
     id: "regate-lac-nokoue-ganvie",
-    cityId: "ganvie",
+    cityName: "Ganvié",
     name: "Régate traditionnelle du lac Nokoué",
     description:
       "Course de pirogues et démonstrations de pêche à l'acadja par les familles de pêcheurs de Ganvié.",
@@ -62,7 +62,7 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   },
   {
     id: "fete-masques-guelede-porto-novo",
-    cityId: "portonovo",
+    cityName: "Porto-Novo",
     name: "Fête des masques Guèlèdè",
     description:
       "Célébration du patrimoine oral et des masques Guèlèdè, inscrits au patrimoine immatériel de l'UNESCO, dans les quartiers yoruba de la ville.",
@@ -72,7 +72,7 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   },
   {
     id: "semaine-patrimoine-danxome-abomey",
-    cityId: "abomey",
+    cityName: "Abomey",
     name: "Semaine du patrimoine Danxomè",
     description:
       "Expositions de bas-reliefs et tentures royales, conférences et ateliers autour de l'histoire du royaume du Danxomè.",
@@ -83,7 +83,7 @@ export const CULTURAL_EVENTS_MOCK: CulturalEvent[] = [
   },
   {
     id: "vodun-days-ouidah",
-    cityId: "ouidah",
+    cityName: "Ouidah",
     name: "Vodun Days — Fête internationale du Vodoun",
     description:
       "Le grand rendez-vous annuel du culte vodoun : libations, danses de possession et sorties de masques Egungun et Zangbeto sur la plage de Ouidah.",

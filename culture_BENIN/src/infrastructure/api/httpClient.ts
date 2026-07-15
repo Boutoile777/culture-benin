@@ -48,6 +48,21 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   return (await response.json()) as T;
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+}
+
+function isPaginatedResponse<T>(value: T[] | PaginatedResponse<T>): value is PaginatedResponse<T> {
+  return !Array.isArray(value);
+}
+
+// Some collection endpoints (e.g. /cities, /tourist-sites, /historical-figures) wrap
+// results in a { data, page, limit, total } pagination envelope instead of a bare array.
+export async function apiFetchList<T>(path: string, options: ApiFetchOptions = {}): Promise<T[]> {
+  const result = await apiFetch<T[] | PaginatedResponse<T>>(path, options);
+  return isPaginatedResponse(result) ? result.data : result;
+}
+
 export function getErrorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.message;
   return "Une erreur est survenue. Réessayez.";

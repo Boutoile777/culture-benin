@@ -7,8 +7,8 @@ export class CulturalEventRepositoryImpl implements CulturalEventRepository {
     return [...CULTURAL_EVENTS_MOCK].sort((a, b) => a.date.localeCompare(b.date));
   }
 
-  async getByCityId(cityId: string): Promise<CulturalEvent[]> {
-    return CULTURAL_EVENTS_MOCK.filter((event) => event.cityId === cityId);
+  async getByCityName(cityName: string): Promise<CulturalEvent[]> {
+    return CULTURAL_EVENTS_MOCK.filter((event) => event.cityName === cityName);
   }
 
   async getById(id: string): Promise<CulturalEvent | null> {

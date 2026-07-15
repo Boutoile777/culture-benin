@@ -4,7 +4,7 @@ import { wikimediaImage } from "@/shared/utils/wikimedia";
 export const TRADITIONS_MOCK: Tradition[] = [
   {
     id: "peche-acadja-ganvie",
-    cityId: "ganvie",
+    cityName: "Ganvié",
     name: "La pêche à l'acadja",
     description:
       "Une technique d'élevage de poissons en enclos de branchages, transmise de génération en génération sur le lac Nokoué.",
@@ -29,7 +29,7 @@ export const TRADITIONS_MOCK: Tradition[] = [
   },
   {
     id: "tata-somba-natitingou",
-    cityId: "natitingou",
+    cityName: "Natitingou",
     name: "Les Tata Somba",
     description:
       "Des maisons-forteresses en terre à tourelles, uniques au monde, bâties par les Betammaribè de l'Atacora.",
@@ -51,7 +51,7 @@ export const TRADITIONS_MOCK: Tradition[] = [
   },
   {
     id: "tentures-appliquees-abomey",
-    cityId: "abomey",
+    cityName: "Abomey",
     name: "Les tentures appliquées d'Abomey",
     description:
       "Un artisanat royal du Danxomè, où chaque scène cousue raconte un épisode de l'histoire du royaume.",
@@ -76,7 +76,7 @@ export const TRADITIONS_MOCK: Tradition[] = [
   },
   {
     id: "architecture-aguda-porto-novo",
-    cityId: "portonovo",
+    cityName: "Porto-Novo",
     name: "L'héritage architectural aguda",
     description:
       "Le style afro-brésilien rapporté par les familles aguda de retour d'exil, qui a redessiné Porto-Novo.",

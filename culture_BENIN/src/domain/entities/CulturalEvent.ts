@@ -2,7 +2,7 @@ import type { Testimony } from "@/domain/entities/Testimony";
 
 export interface CulturalEvent {
   id: string;
-  cityId: string;
+  cityName: string;
   name: string;
   description: string;
   date: string;

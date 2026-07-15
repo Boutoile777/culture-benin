@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import type { City } from "@/domain/entities/City";
@@ -7,6 +7,8 @@ import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
 import { cityRepository, historicalFigureRepository } from "@/infrastructure/config/repositories";
 
 export function PersonalitiesListPage() {
+  const [searchParams] = useSearchParams();
+  const cityFilter = searchParams.get("city");
   const [cities, setCities] = useState<City[]>([]);
   const [figures, setFigures] = useState<HistoricalFigure[]>([]);
 
@@ -31,13 +33,22 @@ export function PersonalitiesListPage() {
     return map;
   }, [cities]);
 
+  const filteredFigures = useMemo(
+    () => (cityFilter ? figures.filter((figure) => figure.cityId === cityFilter) : figures),
+    [figures, cityFilter],
+  );
+
+  const filteredCityName = cityFilter ? cityNameById.get(cityFilter) : undefined;
+
   return (
     <MainLayout>
       <main className="animate-[fadeUp_0.4s_ease_both]">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
           <SectionHeading
             kicker="Explorer · Mémoire vivante"
-            title="Personnalités historiques"
+            title={
+              filteredCityName ? `Personnalités historiques — ${filteredCityName}` : "Personnalités historiques"
+            }
           />
           <p className="mb-8 mt-3 max-w-[620px] text-[14.5px] leading-relaxed text-gray-500">
             Rois, reines et figures marquantes qui ont façonné l'histoire du
@@ -45,7 +56,7 @@ export function PersonalitiesListPage() {
           </p>
 
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-            {figures.map((figure) => (
+            {filteredFigures.map((figure) => (
               <Link
                 key={figure.id}
                 to={`/explorer/personnalites/${figure.id}`}
