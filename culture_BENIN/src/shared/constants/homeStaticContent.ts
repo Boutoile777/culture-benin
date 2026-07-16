@@ -44,34 +44,13 @@ export const QUICK_LINKS: QuickLink[] = [
   },
 ];
 
+// Les valeurs des tuiles "Collections multimédias" viennent du backend
+// (GET /stats, cf. usePlatformStats) — seul le type de tuile vit encore ici.
 export interface CollectionStat {
   value: string;
   label: string;
   description: string;
 }
-
-export const COLLECTION_STATS: CollectionStat[] = [
-  {
-    value: "1 240",
-    label: "Photographies",
-    description: "Sites, rites et vie quotidienne",
-  },
-  {
-    value: "186",
-    label: "Vidéos & visites 360°",
-    description: "Immersions et documentaires",
-  },
-  {
-    value: "312",
-    label: "Archives sonores",
-    description: "Chants, contes et récits oraux",
-  },
-  {
-    value: "95",
-    label: "Documents historiques",
-    description: "Cartes, traités et manuscrits",
-  },
-];
 
 export interface NavItem {
   label: string;

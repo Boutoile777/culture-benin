@@ -9,14 +9,45 @@ import { QuickLinkCard } from "@/presentation/components/ui/QuickLinkCard";
 import { StatTile } from "@/presentation/components/ui/StatTile";
 import { ContributionRow } from "@/presentation/components/ui/ContributionRow";
 import { Skeleton, CardGridSkeleton } from "@/presentation/components/ui/Skeleton";
+import { usePlatformStats } from "@/presentation/queries";
 import {
   QUICK_LINKS,
-  COLLECTION_STATS,
+  type CollectionStat,
 } from "@/shared/constants/homeStaticContent";
 
 export function HomePage() {
   const { content, isLoading } = useHomeContent();
+  const { data: stats } = usePlatformStats();
   const citiesSectionRef = useRef<HTMLDivElement>(null);
+
+  const collectionStats = useMemo<CollectionStat[]>(() => {
+    const format = (count: number | undefined) =>
+      count === undefined ? "—" : count.toLocaleString("fr-FR");
+    return [
+      {
+        value: format(stats?.media.image),
+        label: "Photographies",
+        description: "Sites, rites et vie quotidienne",
+      },
+      {
+        value: format(stats?.media.video),
+        label: "Vidéos & visites 360°",
+        description: "Immersions et documentaires",
+      },
+      {
+        value: format(stats?.media.audio),
+        label: "Archives sonores",
+        description: "Chants, contes et récits oraux",
+      },
+      {
+        value: format(
+          stats ? stats.content.stories + stats.content.testimonials : undefined,
+        ),
+        label: "Récits & témoignages",
+        description: "Mémoires écrites et orales",
+      },
+    ];
+  }, [stats]);
 
   const cityNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -97,7 +128,7 @@ export function HomePage() {
                 <SectionHeading kicker="Archives vivantes" title="Collections multimédias" />
               </div>
               <div className="grid grid-cols-2 gap-3.5">
-                {COLLECTION_STATS.map((stat) => (
+                {collectionStats.map((stat) => (
                   <StatTile key={stat.label} stat={stat} />
                 ))}
               </div>

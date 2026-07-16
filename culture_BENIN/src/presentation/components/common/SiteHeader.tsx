@@ -1,27 +1,41 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "@/shared/constants/homeStaticContent";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import type { SearchResult } from "@/domain/entities/SearchResult";
+import { useDebouncedValue } from "@/presentation/hooks/useDebouncedValue";
 import {
-  useCities,
-  useSites,
-  useHistoricalFigures,
-  useStories,
-  useCulturalEvents,
-  useTraditions,
+  SEARCH_MIN_QUERY_LENGTH,
+  useGlobalSearch,
 } from "@/presentation/queries";
 import { getFullName, getInitials } from "@/shared/utils/userDisplay";
 
-type SearchResultType = "Ville" | "Site" | "Personnalité" | "Récit" | "Événement" | "Tradition";
+type SearchResultLabel =
+  | "Ville"
+  | "Site"
+  | "Personnalité"
+  | "Récit"
+  | "Événement"
+  | "Tradition";
 
-interface SearchResult {
-  id: string;
-  type: SearchResultType;
-  title: string;
-  subtitle: string;
-  to: string;
-}
+const RESULT_TYPE_LABELS: Record<SearchResult["type"], SearchResultLabel> = {
+  city: "Ville",
+  touristSite: "Site",
+  historicalFigure: "Personnalité",
+  story: "Récit",
+  event: "Événement",
+  tradition: "Tradition",
+};
+
+const RESULT_ROUTES: Record<SearchResult["type"], (id: string) => string> = {
+  city: (id) => `/explorer/${id}`,
+  touristSite: (id) => `/explorer/sites/${id}`,
+  historicalFigure: (id) => `/explorer/personnalites/${id}`,
+  story: (id) => `/explorer/recits/${id}`,
+  event: (id) => `/explorer/evenements/${id}`,
+  tradition: (id) => `/explorer/traditions/${id}`,
+};
 
 const ACCOUNT_MENU_LINKS = [
   { label: "Mon profil", path: "/compte" },
@@ -30,8 +44,8 @@ const ACCOUNT_MENU_LINKS = [
   { label: "Paramètres", path: "/compte/parametres" },
 ];
 
-function SearchResultTypeIcon({ type }: { type: SearchResultType }) {
-  const paths: Record<SearchResultType, string> = {
+function SearchResultTypeIcon({ type }: { type: SearchResultLabel }) {
+  const paths: Record<SearchResultLabel, string> = {
     Ville: "M12 21s7-7.2 7-12a7 7 0 10-14 0c0 4.8 7 12 7 12z M9.5 9a2.5 2.5 0 105 0 2.5 2.5 0 00-5 0z",
     Site: "M3 10l9-6 9 6M5 10v10M19 10v10M3 20h18M9 20v-6h6v6",
     Personnalité: "M12 12a3.5 3.5 0 100-7 3.5 3.5 0 000 7z M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5",
@@ -82,79 +96,13 @@ function PlatformSearch({ className = "" }: { className?: string }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const { data: cities } = useCities();
-  const { data: sites } = useSites();
-  const { data: figures } = useHistoricalFigures();
-  const { data: stories } = useStories();
-  const { data: events } = useCulturalEvents();
-  const { data: traditions } = useTraditions();
-
-  const index = useMemo<SearchResult[]>(
-    () => [
-      ...(cities ?? []).map((city): SearchResult => ({
-        id: `city-${city.id}`,
-        type: "Ville",
-        title: city.name,
-        subtitle: city.region,
-        to: `/explorer/${city.id}`,
-      })),
-      ...(sites ?? []).map((site): SearchResult => ({
-        id: `site-${site.id}`,
-        type: "Site",
-        title: site.name,
-        subtitle: site.category || "Site historique",
-        to: `/explorer/sites/${site.id}`,
-      })),
-      ...(figures ?? []).map((figure): SearchResult => ({
-        id: `figure-${figure.id}`,
-        type: "Personnalité",
-        title: figure.name,
-        subtitle: figure.role,
-        to: `/explorer/personnalites/${figure.id}`,
-      })),
-      ...(stories ?? []).map((story): SearchResult => ({
-        id: `story-${story.id}`,
-        type: "Récit",
-        title: story.title,
-        subtitle: story.category,
-        to: `/explorer/recits/${story.id}`,
-      })),
-      ...(events ?? []).map((event): SearchResult => ({
-        id: `event-${event.id}`,
-        type: "Événement",
-        title: event.name,
-        subtitle: event.description,
-        to: `/explorer/evenements/${event.id}`,
-      })),
-      ...(traditions ?? []).map((tradition): SearchResult => ({
-        id: `tradition-${tradition.id}`,
-        type: "Tradition",
-        title: tradition.name,
-        subtitle: tradition.description,
-        to: `/explorer/traditions/${tradition.id}`,
-      })),
-    ],
-    [cities, sites, figures, stories, events, traditions],
-  );
-
-  const results = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return [];
-    const matches = index.filter(
-      (item) =>
-        item.title.toLowerCase().includes(normalized) ||
-        item.subtitle.toLowerCase().includes(normalized),
-    );
-    matches.sort((a, b) => {
-      const aStarts = a.title.toLowerCase().startsWith(normalized) ? 0 : 1;
-      const bStarts = b.title.toLowerCase().startsWith(normalized) ? 0 : 1;
-      return aStarts - bStarts;
-    });
-    return matches.slice(0, 8);
-  }, [index, query]);
+  const debouncedQuery = useDebouncedValue(query, 250);
+  const hasQuery = debouncedQuery.trim().length >= SEARCH_MIN_QUERY_LENGTH;
+  const { data, isFetching } = useGlobalSearch(debouncedQuery, 8);
+  const results = hasQuery ? (data ?? []) : [];
 
   const goToResult = (result: SearchResult) => {
-    navigate(result.to);
+    navigate(RESULT_ROUTES[result.type](result.id));
     setQuery("");
     setIsOpen(false);
   };
@@ -177,28 +125,35 @@ function PlatformSearch({ className = "" }: { className?: string }) {
         className="w-full rounded-full border border-gray-300 bg-gray-50 py-2 pl-9 pr-4 text-[13px] text-culture-ink focus:outline-none focus:ring-2 focus:ring-culture-green"
       />
 
-      {isOpen && results.length > 0 && (
+      {isOpen && hasQuery && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-gray-200 bg-white py-1.5 shadow-[0_16px_36px_rgba(32,33,36,0.16)]">
             {results.map((result) => (
               <button
-                key={result.id}
+                key={`${result.type}-${result.id}`}
                 type="button"
                 onClick={() => goToResult(result)}
                 className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-50"
               >
-                <SearchResultTypeIcon type={result.type} />
+                <SearchResultTypeIcon type={RESULT_TYPE_LABELS[result.type]} />
                 <span className="flex min-w-0 flex-1 flex-col items-start">
                   <span className="text-[13.5px] font-semibold leading-snug text-culture-ink">
                     {result.title}
                   </span>
                   <span className="truncate text-[11.5px] text-gray-500">
-                    {result.subtitle}
+                    {result.category || result.description}
                   </span>
                 </span>
               </button>
             ))}
+            {results.length === 0 && (
+              <p className="px-4 py-2.5 text-[12.5px] text-gray-500">
+                {isFetching
+                  ? "Recherche…"
+                  : `Aucun résultat pour « ${debouncedQuery.trim()} »`}
+              </p>
+            )}
           </div>
         </>
       )}

@@ -7,3 +7,5 @@ export * from "./traditionQueries";
 export * from "./historicalFigureQueries";
 export * from "./mapQueries";
 export * from "./gameQueries";
+export * from "./searchQueries";
+export * from "./statsQueries";
