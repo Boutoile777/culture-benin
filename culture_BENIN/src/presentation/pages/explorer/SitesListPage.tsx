@@ -1,44 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
 import { SiteCard } from "@/presentation/components/ui/SiteCard";
-import type { City } from "@/domain/entities/City";
-import type { Site } from "@/domain/entities/Site";
-import { cityRepository, siteRepository } from "@/infrastructure/config/repositories";
+import { useCities, useSites } from "@/presentation/queries";
 
 export function SitesListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
-  const [cities, setCities] = useState<City[]>([]);
-  const [sites, setSites] = useState<Site[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([cityRepository.getAll(), siteRepository.getAll()]).then(
-      ([cityResult, siteResult]) => {
-        if (!cancelled) {
-          setCities(cityResult);
-          setSites(siteResult);
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: cities } = useCities();
+  const { data: sites } = useSites();
 
   const cityNameById = useMemo(() => {
     const map = new Map<string, string>();
-    cities.forEach((city) => map.set(city.id, city.name));
+    (cities ?? []).forEach((city) => map.set(city.id, city.name));
     return map;
   }, [cities]);
 
-  const filteredSites = useMemo(
-    () => (cityFilter ? sites.filter((site) => site.cityId === cityFilter) : sites),
-    [sites, cityFilter],
-  );
+  const filteredSites = useMemo(() => {
+    const allSites = sites ?? [];
+    return cityFilter ? allSites.filter((site) => site.cityId === cityFilter) : allSites;
+  }, [sites, cityFilter]);
 
   const filteredCityName = cityFilter ? cityNameById.get(cityFilter) : undefined;
 

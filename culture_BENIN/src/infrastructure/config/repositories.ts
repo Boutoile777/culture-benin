@@ -11,6 +11,8 @@ import type { TraditionRepository } from "@/domain/repositories/TraditionReposit
 import type { ChronologyRepository } from "@/domain/repositories/ChronologyRepository";
 import type { MemoryRepository } from "@/domain/repositories/MemoryRepository";
 import type { AuthRepository } from "@/domain/repositories/AuthRepository";
+import type { SearchRepository } from "@/domain/repositories/SearchRepository";
+import type { StatsRepository } from "@/domain/repositories/StatsRepository";
 import { CityRepositoryImpl } from "@/data/repositories/CityRepositoryImpl";
 import { StoryRepositoryImpl } from "@/data/repositories/StoryRepositoryImpl";
 import { ContributionRepositoryImpl } from "@/data/repositories/ContributionRepositoryImpl";
@@ -24,6 +26,8 @@ import { TraditionRepositoryImpl } from "@/data/repositories/TraditionRepository
 import { ChronologyRepositoryImpl } from "@/data/repositories/ChronologyRepositoryImpl";
 import { MemoryRepositoryImpl } from "@/data/repositories/MemoryRepositoryImpl";
 import { AuthRepositoryImpl } from "@/data/repositories/AuthRepositoryImpl";
+import { SearchRepositoryImpl } from "@/data/repositories/SearchRepositoryImpl";
+import { StatsRepositoryImpl } from "@/data/repositories/StatsRepositoryImpl";
 
 export const cityRepository: CityRepository = new CityRepositoryImpl();
 export const storyRepository: StoryRepository = new StoryRepositoryImpl();
@@ -41,3 +45,5 @@ export const traditionRepository: TraditionRepository = new TraditionRepositoryI
 export const chronologyRepository: ChronologyRepository = new ChronologyRepositoryImpl();
 export const memoryRepository: MemoryRepository = new MemoryRepositoryImpl();
 export const authRepository: AuthRepository = new AuthRepositoryImpl();
+export const searchRepository: SearchRepository = new SearchRepositoryImpl();
+export const statsRepository: StatsRepository = new StatsRepositoryImpl();

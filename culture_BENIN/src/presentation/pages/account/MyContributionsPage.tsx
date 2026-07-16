@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import type { City } from "@/domain/entities/City";
-import type { Contribution, ContributionStatus } from "@/domain/entities/Contribution";
+import { useMemo } from "react";
+import type { ContributionStatus } from "@/domain/entities/Contribution";
 import { CONTRIBUTION_TYPE_LABELS } from "@/shared/constants/contributionLabels";
 import { useAuth } from "@/presentation/contexts/AuthContext";
-import { cityRepository, contributionRepository } from "@/infrastructure/config/repositories";
+import { useCities, useUserContributions } from "@/presentation/queries";
 
 const STATUS_LABELS: Record<ContributionStatus, string> = {
   pending: "En attente de modération",
@@ -19,29 +18,13 @@ const STATUS_STYLES: Record<ContributionStatus, string> = {
 
 export function MyContributionsPage() {
   const { user } = useAuth();
-  const [cities, setCities] = useState<City[]>([]);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    Promise.all([
-      cityRepository.getAll(),
-      contributionRepository.getByUserId(user.id),
-    ]).then(([cityResult, contributionResult]) => {
-      if (!cancelled) {
-        setCities(cityResult);
-        setContributions(contributionResult);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  const { data: cities } = useCities();
+  const { data: contributionData } = useUserContributions(user?.id);
+  const contributions = contributionData ?? [];
 
   const cityNameById = useMemo(() => {
     const map = new Map<string, string>();
-    cities.forEach((city) => map.set(city.id, city.name));
+    (cities ?? []).forEach((city) => map.set(city.id, city.name));
     return map;
   }, [cities]);
 

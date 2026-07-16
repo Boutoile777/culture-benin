@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
 import type { Tradition } from "@/domain/entities/Tradition";
-import { traditionRepository } from "@/infrastructure/config/repositories";
+import { useTraditions } from "@/presentation/queries";
 
 function TraditionCard({ tradition }: { tradition: Tradition }) {
   return (
@@ -31,23 +31,14 @@ function TraditionCard({ tradition }: { tradition: Tradition }) {
 export function TraditionsListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
-  const [traditions, setTraditions] = useState<Tradition[]>([]);
+  const { data: traditions } = useTraditions();
 
-  useEffect(() => {
-    let cancelled = false;
-    traditionRepository.getAll().then((result) => {
-      if (!cancelled) setTraditions(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const filteredTraditions = useMemo(
-    () =>
-      cityFilter ? traditions.filter((tradition) => tradition.cityName === cityFilter) : traditions,
-    [traditions, cityFilter],
-  );
+  const filteredTraditions = useMemo(() => {
+    const allTraditions = traditions ?? [];
+    return cityFilter
+      ? allTraditions.filter((tradition) => tradition.cityName === cityFilter)
+      : allTraditions;
+  }, [traditions, cityFilter]);
 
   return (
     <MainLayout>

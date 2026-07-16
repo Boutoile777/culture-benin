@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Difficulty } from "@/domain/entities/Difficulty";
-import type { QuizQuestion } from "@/domain/entities/QuizQuestion";
-import { quizRepository } from "@/infrastructure/config/repositories";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { useQuizQuestions } from "@/presentation/queries";
 import { Skeleton } from "@/presentation/components/ui/Skeleton";
 
 interface QuizGameProps {
@@ -12,22 +11,12 @@ interface QuizGameProps {
 
 export function QuizGame({ difficulty, onFinish }: QuizGameProps) {
   const { token } = useAuth();
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const { data } = useQuizQuestions(token, difficulty);
+  const questions = data ?? [];
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    quizRepository.getQuestions(token, difficulty).then((result) => {
-      if (!cancelled) setQuestions(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [token, difficulty]);
 
   if (questions.length === 0) {
     return (

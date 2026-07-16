@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
@@ -6,9 +6,7 @@ import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
-import type { City } from "@/domain/entities/City";
-import type { Site } from "@/domain/entities/Site";
-import { cityRepository, siteRepository } from "@/infrastructure/config/repositories";
+import { useCity, useSite } from "@/presentation/queries";
 
 const ImmersiveTourViewer = lazy(() =>
   import("@/presentation/components/immersive/ImmersiveTourViewer").then((m) => ({
@@ -35,28 +33,14 @@ const ABOMEY_DEMO_3D_TOUR = {
 
 export function SiteDetailPage() {
   const { siteId } = useParams<{ siteId: string }>();
-  const [site, setSite] = useState<Site | null | undefined>(undefined);
-  const [city, setCity] = useState<City | null>(null);
+  const siteQuery = useSite(siteId);
+  const cityQuery = useCity(siteQuery.data?.cityId);
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [is3DTourOpen, setIs3DTourOpen] = useState(false);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.sites);
 
-  useEffect(() => {
-    if (!siteId) return;
-    let cancelled = false;
-    setSite(undefined);
-    siteRepository.getById(siteId).then(async (result) => {
-      if (cancelled) return;
-      setSite(result);
-      if (result?.cityId) {
-        const relatedCity = await cityRepository.getById(result.cityId);
-        if (!cancelled) setCity(relatedCity);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [siteId]);
+  const site = siteQuery.data;
+  const city = cityQuery.data ?? null;
 
   if (site === undefined) {
     return (

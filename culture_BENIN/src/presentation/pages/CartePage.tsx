@@ -1,49 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
-import type { MapPoint } from "@/domain/entities/MapPoint";
 import type { Site } from "@/domain/entities/Site";
-import { mapRepository, siteRepository } from "@/infrastructure/config/repositories";
+import { useMapPoints, useSites } from "@/presentation/queries";
 
 type GeoStatus = "idle" | "locating" | "error";
 
 export function CartePage() {
   const [searchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState("");
-  const [points, setPoints] = useState<MapPoint[]>([]);
-  const [sites, setSites] = useState<Site[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get("point"),
   );
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<GeoStatus>("idle");
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([mapRepository.getPoints(), siteRepository.getAll()]).then(
-      ([pointResult, siteResult]) => {
-        if (!cancelled) {
-          setPoints(pointResult);
-          setSites(siteResult);
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: pointsData } = useMapPoints({ query: searchValue });
+  const { data: sitesData } = useSites();
 
-  useEffect(() => {
-    let cancelled = false;
-    mapRepository.getPoints({ query: searchValue }).then((result) => {
-      if (!cancelled) setPoints(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [searchValue]);
+  const points = pointsData ?? [];
+  const sites = sitesData ?? [];
 
   const siteByName = useMemo(() => {
     const map = new Map<string, Site>();

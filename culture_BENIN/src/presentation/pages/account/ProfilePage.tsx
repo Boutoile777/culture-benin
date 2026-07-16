@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { useFavorites } from "@/presentation/hooks/useFavorites";
-import { contributionRepository } from "@/infrastructure/config/repositories";
+import { useUserContributions } from "@/presentation/queries";
 import { getFullName, getInitials } from "@/shared/utils/userDisplay";
 
 const QUICK_LINKS = [
@@ -26,18 +25,8 @@ const QUICK_LINKS = [
 export function ProfilePage() {
   const { user } = useAuth();
   const { favoriteIds } = useFavorites();
-  const [contributionCount, setContributionCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    contributionRepository.getByUserId(user.id).then((result) => {
-      if (!cancelled) setContributionCount(result.length);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  const { data: contributions } = useUserContributions(user?.id);
+  const contributionCount = contributions?.length ?? null;
 
   if (!user) return null;
 

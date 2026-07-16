@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
@@ -13,20 +13,14 @@ const ImmersiveTourViewer = lazy(() =>
     default: m.ImmersiveTourViewer,
   })),
 );
-import type { City } from "@/domain/entities/City";
-import type { Story } from "@/domain/entities/Story";
-import type { Site } from "@/domain/entities/Site";
-import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
-import type { Tradition } from "@/domain/entities/Tradition";
-import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
 import {
-  cityRepository,
-  storyRepository,
-  siteRepository,
-  culturalEventRepository,
-  traditionRepository,
-  historicalFigureRepository,
-} from "@/infrastructure/config/repositories";
+  useCity,
+  useCulturalEventsByCity,
+  useHistoricalFiguresByCity,
+  useSitesByCity,
+  useStories,
+  useTraditionsByCity,
+} from "@/presentation/queries";
 
 const OUIDAH_DEMO_TOUR = {
   imageId: "888939035048535",
@@ -95,49 +89,35 @@ function formatEventDate(isoDate: string) {
 
 export function CityDetailPage() {
   const { cityId } = useParams<{ cityId: string }>();
-  const [city, setCity] = useState<City | null | undefined>(undefined);
-  const [relatedStories, setRelatedStories] = useState<Story[]>([]);
-  const [citySites, setCitySites] = useState<Site[]>([]);
-  const [cityEvents, setCityEvents] = useState<CulturalEvent[]>([]);
-  const [cityTraditions, setCityTraditions] = useState<Tradition[]>([]);
-  const [cityFigures, setCityFigures] = useState<HistoricalFigure[]>([]);
+  const cityQuery = useCity(cityId);
+  const city = cityQuery.data;
+
+  // Requêtes dépendantes : ne partent qu'une fois la ville trouvée.
+  const storiesQuery = useStories();
+  const sitesQuery = useSitesByCity(city?.id);
+  const eventsQuery = useCulturalEventsByCity(city?.name);
+  const traditionsQuery = useTraditionsByCity(city?.name);
+  const figuresQuery = useHistoricalFiguresByCity(city?.id);
+
   const [isTourOpen, setIsTourOpen] = useState(false);
   const { favoriteIds, toggleFavorite } = useFavorites();
 
-  useEffect(() => {
-    if (!cityId) return;
-    let cancelled = false;
-    setCity(undefined);
-    cityRepository.getById(cityId).then((cityResult) => {
-      if (cancelled) return;
-      setCity(cityResult);
-      if (!cityResult) return;
-      Promise.all([
-        storyRepository.getAll(),
-        siteRepository.getByCityId(cityId),
-        culturalEventRepository.getByCityName(cityResult.name),
-        traditionRepository.getByCityName(cityResult.name),
-        historicalFigureRepository.getByCityId(cityId),
-      ]).then(([stories, sites, events, traditions, figures]) => {
-        if (!cancelled) {
-          setRelatedStories(
-            stories.filter((story) => story.cityName === cityResult.name).slice(0, FEATURED_COUNT),
-          );
-          setCitySites(sites);
-          setCityEvents(events);
-          setCityTraditions(traditions);
-          setCityFigures(figures);
-        }
-      });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [cityId]);
+  const relatedStories = useMemo(
+    () =>
+      city && storiesQuery.data
+        ? storiesQuery.data
+            .filter((story) => story.cityName === city.name)
+            .slice(0, FEATURED_COUNT)
+        : [],
+    [storiesQuery.data, city],
+  );
+  const citySites = sitesQuery.data ?? [];
+  const cityTraditions = traditionsQuery.data ?? [];
+  const cityFigures = figuresQuery.data ?? [];
 
   const sortedEvents = useMemo(
-    () => [...cityEvents].sort((a, b) => a.date.localeCompare(b.date)),
-    [cityEvents],
+    () => [...(eventsQuery.data ?? [])].sort((a, b) => a.date.localeCompare(b.date)),
+    [eventsQuery.data],
   );
 
   const cityGalleryImages = useMemo(() => {

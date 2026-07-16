@@ -1,37 +1,18 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
 import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
-import type { City } from "@/domain/entities/City";
-import type { Tradition } from "@/domain/entities/Tradition";
-import { cityRepository, traditionRepository } from "@/infrastructure/config/repositories";
+import { useCityByName, useTradition } from "@/presentation/queries";
 
 export function TraditionDetailPage() {
   const { traditionId } = useParams<{ traditionId: string }>();
-  const [tradition, setTradition] = useState<Tradition | null | undefined>(undefined);
-  const [city, setCity] = useState<City | null>(null);
+  const traditionQuery = useTradition(traditionId);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.traditions);
 
-  useEffect(() => {
-    if (!traditionId) return;
-    let cancelled = false;
-    setTradition(undefined);
-    traditionRepository.getById(traditionId).then(async (result) => {
-      if (cancelled) return;
-      setTradition(result);
-      if (result?.cityName) {
-        const matches = await cityRepository.search(result.cityName);
-        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
-        if (!cancelled) setCity(relatedCity);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [traditionId]);
+  const tradition = traditionQuery.data;
+  const city = useCityByName(tradition?.cityName);
 
   if (tradition === undefined) {
     return (

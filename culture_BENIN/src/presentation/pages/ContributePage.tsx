@@ -2,12 +2,11 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { FormField, formInputClass } from "@/presentation/components/ui/FormField";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
-import type { City } from "@/domain/entities/City";
 import type { Contribution, ContributionType } from "@/domain/entities/Contribution";
 import type { ContentCategory } from "@/domain/entities/ContentCategory";
 import { CONTRIBUTION_TYPE_LABELS } from "@/shared/constants/contributionLabels";
 import { CONTENT_CATEGORY_LABELS } from "@/shared/constants/contentCategoryLabels";
-import { cityRepository, contributionRepository } from "@/infrastructure/config/repositories";
+import { useCities, useCreateContribution } from "@/presentation/queries";
 import { wikimediaImage } from "@/shared/utils/wikimedia";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { getFullName } from "@/shared/utils/userDisplay";
@@ -39,7 +38,9 @@ interface SelectedFile {
 
 export function ContributePage() {
   const { user, openLogin } = useAuth();
-  const [cities, setCities] = useState<City[]>([]);
+  const { data: citiesData } = useCities();
+  const cities = citiesData ?? [];
+  const createContribution = useCreateContribution();
 
   const [authorName, setAuthorName] = useState(user ? getFullName(user) : "");
   const [contentType, setContentType] = useState<ContributionType>("historical_text");
@@ -52,17 +53,9 @@ export function ContributePage() {
   const [submittedTitle, setSubmittedTitle] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    cityRepository.getAll().then((result) => {
-      if (!cancelled) {
-        setCities(result);
-        setCityId(result[0]?.id ?? "");
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (!citiesData) return;
+    setCityId((current) => current || (citiesData[0]?.id ?? ""));
+  }, [citiesData]);
 
   const cityOptions = useMemo(
     () => [...cities.map((c) => ({ id: c.id, name: c.name })), { id: OTHER_PLACE_ID, name: "Autre lieu au Bénin" }],
@@ -110,7 +103,7 @@ export function ContributePage() {
       attachmentUrls: files.map((f) => f.previewUrl).filter((url): url is string => Boolean(url)),
     };
 
-    await contributionRepository.create(contribution);
+    await createContribution.mutateAsync(contribution);
     setSubmittedTitle(title.trim());
   };
 

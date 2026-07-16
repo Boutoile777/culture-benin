@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
 import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
-import { culturalEventRepository } from "@/infrastructure/config/repositories";
+import { useCulturalEvents } from "@/presentation/queries";
 
 function formatEventDate(isoDate: string) {
   return new Date(`${isoDate}T00:00:00`).toLocaleDateString("fr-FR", {
@@ -55,22 +55,12 @@ function EventRow({ event, isPast }: EventRowProps) {
 export function EvenementsListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
-  const [events, setEvents] = useState<CulturalEvent[]>([]);
+  const { data: events } = useCulturalEvents();
 
-  useEffect(() => {
-    let cancelled = false;
-    culturalEventRepository.getAll().then((result) => {
-      if (!cancelled) setEvents(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const filteredEvents = useMemo(
-    () => (cityFilter ? events.filter((event) => event.cityName === cityFilter) : events),
-    [events, cityFilter],
-  );
+  const filteredEvents = useMemo(() => {
+    const allEvents = events ?? [];
+    return cityFilter ? allEvents.filter((event) => event.cityName === cityFilter) : allEvents;
+  }, [events, cityFilter]);
 
   const { upcoming, past } = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
