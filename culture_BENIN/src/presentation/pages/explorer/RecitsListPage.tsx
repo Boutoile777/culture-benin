@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
-import type { Story } from "@/domain/entities/Story";
-import { storyRepository } from "@/infrastructure/config/repositories";
+import { useStories } from "@/presentation/queries";
 
 const ALL_CATEGORY = "Tout";
 
@@ -19,23 +18,13 @@ const RECIT_TABS: { label: string; value: string }[] = [
 
 export function RecitsListPage() {
   const [searchParams] = useSearchParams();
-  const [stories, setStories] = useState<Story[]>([]);
+  const { data: stories } = useStories();
   const activeCategory = searchParams.get("categorie") ?? ALL_CATEGORY;
   const cityFilter = searchParams.get("city");
 
-  useEffect(() => {
-    let cancelled = false;
-    storyRepository.getAll().then((result) => {
-      if (!cancelled) setStories(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const filteredStories = useMemo(
     () =>
-      stories.filter(
+      (stories ?? []).filter(
         (story) =>
           (activeCategory === ALL_CATEGORY || story.category === activeCategory) &&
           (!cityFilter || story.cityName === cityFilter),

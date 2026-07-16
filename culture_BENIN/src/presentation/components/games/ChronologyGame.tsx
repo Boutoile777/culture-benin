@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ChronologyItem } from "@/domain/entities/ChronologyItem";
-import { chronologyRepository } from "@/infrastructure/config/repositories";
+import { useChronologyItems } from "@/presentation/queries";
 import { Skeleton } from "@/presentation/components/ui/Skeleton";
 
 interface ChronologyGameProps {
@@ -17,25 +17,17 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 export function ChronologyGame({ onFinish }: ChronologyGameProps) {
-  const [items, setItems] = useState<ChronologyItem[]>([]);
+  const { data } = useChronologyItems();
+  const items = data ?? [];
   const [order, setOrder] = useState<ChronologyItem[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    let cancelled = false;
-    chronologyRepository.getItems().then((result) => {
-      if (!cancelled) {
-        setItems(result);
-        setOrder(shuffle(result));
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (data) setOrder(shuffle(data));
+  }, [data]);
 
-  if (items.length === 0) {
+  if (items.length === 0 || order.length === 0) {
     return (
       <div className="flex flex-col gap-3">
         {Array.from({ length: 4 }).map((_, index) => (

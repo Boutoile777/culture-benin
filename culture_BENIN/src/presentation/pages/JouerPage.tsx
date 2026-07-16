@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { QuizGame } from "@/presentation/components/games/QuizGame";
@@ -6,9 +6,9 @@ import { ChronologyGame } from "@/presentation/components/games/ChronologyGame";
 import { MemoryGame } from "@/presentation/components/games/MemoryGame";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import { useGameScores } from "@/presentation/hooks/useGameScores";
-import type { GameType, LeaderboardEntry } from "@/domain/entities/LeaderboardEntry";
+import { useLeaderboard } from "@/presentation/queries";
+import type { GameType } from "@/domain/entities/LeaderboardEntry";
 import { DIFFICULTY_LEVELS, type Difficulty } from "@/domain/entities/Difficulty";
-import { leaderboardRepository } from "@/infrastructure/config/repositories";
 
 const GAME_TABS: { key: GameType; label: string }[] = [
   { key: "quiz", label: "Quiz historique" },
@@ -29,19 +29,10 @@ export function JouerPage() {
   const { user, token, openLogin } = useAuth();
   const [activeGame, setActiveGame] = useState<GameType>("quiz");
   const [difficulty, setDifficulty] = useState<Difficulty>("facile");
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const { data: leaderboardData } = useLeaderboard(activeGame, 5, token);
+  const leaderboard = leaderboardData ?? [];
   const { scores, recordScore, getScore } = useGameScores();
   const hasLevels = GAMES_WITH_LEVELS.includes(activeGame);
-
-  useEffect(() => {
-    let cancelled = false;
-    leaderboardRepository.getTop(activeGame, 5, token ?? undefined).then((result) => {
-      if (!cancelled) setLeaderboard(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [activeGame, token]);
 
   return (
     <MainLayout>

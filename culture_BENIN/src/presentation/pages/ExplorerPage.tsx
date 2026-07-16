@@ -1,28 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { FormField, formInputClass } from "@/presentation/components/ui/FormField";
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 import { Skeleton } from "@/presentation/components/ui/Skeleton";
-import type { City } from "@/domain/entities/City";
-import { cityRepository } from "@/infrastructure/config/repositories";
+import { useCities } from "@/presentation/queries";
 import { getFeaturedCity } from "@/shared/utils/featuredCity";
 
 export function ExplorerPage() {
   const navigate = useNavigate();
-  const [cities, setCities] = useState<City[] | null>(null);
+  const { data: cities, isPending } = useCities();
   const [selectedDepartement, setSelectedDepartement] = useState("");
   const [selectedCityId, setSelectedCityId] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    cityRepository.getAll().then((result) => {
-      if (!cancelled) setCities(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const featuredCity = useMemo(() => getFeaturedCity(cities ?? []), [cities]);
 
@@ -121,7 +110,7 @@ export function ExplorerPage() {
               Ville en vedette du jour
             </div>
 
-            {cities === null ? (
+            {isPending ? (
               <Skeleton className="h-[280px] w-full rounded-[24px] sm:h-[360px]" />
             ) : featuredCity ? (
               <Link

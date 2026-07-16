@@ -1,43 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
-import type { City } from "@/domain/entities/City";
-import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
-import { cityRepository, historicalFigureRepository } from "@/infrastructure/config/repositories";
+import { useCities, useHistoricalFigures } from "@/presentation/queries";
 
 export function PersonalitiesListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
-  const [cities, setCities] = useState<City[]>([]);
-  const [figures, setFigures] = useState<HistoricalFigure[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([cityRepository.getAll(), historicalFigureRepository.getAll()]).then(
-      ([cityResult, figureResult]) => {
-        if (!cancelled) {
-          setCities(cityResult);
-          setFigures(figureResult);
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: cities } = useCities();
+  const { data: figures } = useHistoricalFigures();
 
   const cityNameById = useMemo(() => {
     const map = new Map<string, string>();
-    cities.forEach((city) => map.set(city.id, city.name));
+    (cities ?? []).forEach((city) => map.set(city.id, city.name));
     return map;
   }, [cities]);
 
-  const filteredFigures = useMemo(
-    () => (cityFilter ? figures.filter((figure) => figure.cityId === cityFilter) : figures),
-    [figures, cityFilter],
-  );
+  const filteredFigures = useMemo(() => {
+    const allFigures = figures ?? [];
+    return cityFilter ? allFigures.filter((figure) => figure.cityId === cityFilter) : allFigures;
+  }, [figures, cityFilter]);
 
   const filteredCityName = cityFilter ? cityNameById.get(cityFilter) : undefined;
 

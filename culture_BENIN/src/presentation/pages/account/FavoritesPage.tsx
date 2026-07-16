@@ -1,24 +1,12 @@
-import { useEffect, useState } from "react";
-import type { City } from "@/domain/entities/City";
 import { CityCard } from "@/presentation/components/ui/CityCard";
 import { useFavorites } from "@/presentation/hooks/useFavorites";
-import { cityRepository } from "@/infrastructure/config/repositories";
+import { useCities } from "@/presentation/queries";
 
 export function FavoritesPage() {
-  const [cities, setCities] = useState<City[]>([]);
+  const { data: cities } = useCities();
   const { favoriteIds, toggleFavorite } = useFavorites();
 
-  useEffect(() => {
-    let cancelled = false;
-    cityRepository.getAll().then((result) => {
-      if (!cancelled) setCities(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const favoriteCities = cities.filter((city) => favoriteIds.has(city.id));
+  const favoriteCities = (cities ?? []).filter((city) => favoriteIds.has(city.id));
 
   return (
     <div className="flex flex-col gap-5">

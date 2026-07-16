@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Difficulty } from "@/domain/entities/Difficulty";
 import type { MemoryItem } from "@/domain/entities/MemoryItem";
-import { memoryRepository } from "@/infrastructure/config/repositories";
 import { useAuth } from "@/presentation/contexts/AuthContext";
+import { useMemoryItems } from "@/presentation/queries";
 import { Skeleton } from "@/presentation/components/ui/Skeleton";
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 
@@ -32,7 +32,8 @@ function buildShuffledDeck(items: MemoryItem[]): MemoryCard[] {
 
 export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
   const { token } = useAuth();
-  const [items, setItems] = useState<MemoryItem[]>([]);
+  const { data } = useMemoryItems(token, difficulty);
+  const items = data ?? [];
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
   const [matchedPairIds, setMatchedPairIds] = useState<Set<string>>(new Set());
@@ -41,18 +42,8 @@ export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
   const [hasFinished, setHasFinished] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    memoryRepository.getItems(token, difficulty).then((result) => {
-      if (!cancelled) {
-        setItems(result);
-        setCards(buildShuffledDeck(result));
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [token, difficulty]);
+    if (data) setCards(buildShuffledDeck(data));
+  }, [data]);
 
   const totalPairs = items.length;
   const isComplete = totalPairs > 0 && matchedPairIds.size === totalPairs;
@@ -65,7 +56,7 @@ export function MemoryGame({ difficulty, onFinish }: MemoryGameProps) {
     }
   }, [isComplete, hasFinished, flips, totalPairs, onFinish]);
 
-  if (items.length === 0) {
+  if (items.length === 0 || cards.length === 0) {
     return (
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
         {Array.from({ length: 12 }).map((_, index) => (

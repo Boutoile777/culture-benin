@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
@@ -6,33 +6,17 @@ import { GalleryLightbox } from "@/presentation/components/gallery/GalleryLightb
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
-import type { City } from "@/domain/entities/City";
-import type { HistoricalFigure } from "@/domain/entities/HistoricalFigure";
-import { cityRepository, historicalFigureRepository } from "@/infrastructure/config/repositories";
+import { useCity, useHistoricalFigure } from "@/presentation/queries";
 
 export function HistoricalFigureDetailPage() {
   const { figureId } = useParams<{ figureId: string }>();
-  const [figure, setFigure] = useState<HistoricalFigure | null | undefined>(undefined);
-  const [city, setCity] = useState<City | null>(null);
+  const figureQuery = useHistoricalFigure(figureId);
+  const cityQuery = useCity(figureQuery.data?.cityId);
   const [openGalleryIndex, setOpenGalleryIndex] = useState<number | null>(null);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.figures);
 
-  useEffect(() => {
-    if (!figureId) return;
-    let cancelled = false;
-    setFigure(undefined);
-    historicalFigureRepository.getById(figureId).then(async (result) => {
-      if (cancelled) return;
-      setFigure(result);
-      if (result?.cityId) {
-        const relatedCity = await cityRepository.getById(result.cityId);
-        if (!cancelled) setCity(relatedCity);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [figureId]);
+  const figure = figureQuery.data;
+  const city = cityQuery.data ?? null;
 
   if (figure === undefined) {
     return (

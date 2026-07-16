@@ -4,13 +4,13 @@ import { NAV_ITEMS } from "@/shared/constants/homeStaticContent";
 import { BrandLogo } from "@/presentation/components/common/BrandLogo";
 import { useAuth } from "@/presentation/contexts/AuthContext";
 import {
-  cityRepository,
-  siteRepository,
-  historicalFigureRepository,
-  storyRepository,
-  culturalEventRepository,
-  traditionRepository,
-} from "@/infrastructure/config/repositories";
+  useCities,
+  useSites,
+  useHistoricalFigures,
+  useStories,
+  useCulturalEvents,
+  useTraditions,
+} from "@/presentation/queries";
 import { getFullName, getInitials } from "@/shared/utils/userDisplay";
 
 type SearchResultType = "Ville" | "Site" | "Personnalité" | "Récit" | "Événement" | "Tradition";
@@ -79,74 +79,67 @@ function CitySearchIcon() {
 
 function PlatformSearch({ className = "" }: { className?: string }) {
   const navigate = useNavigate();
-  const [index, setIndex] = useState<SearchResult[] | null>(null);
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
-      cityRepository.getAll(),
-      siteRepository.getAll(),
-      historicalFigureRepository.getAll(),
-      storyRepository.getAll(),
-      culturalEventRepository.getAll(),
-      traditionRepository.getAll(),
-    ]).then(([cities, sites, figures, stories, events, traditions]) => {
-      if (cancelled) return;
-      setIndex([
-        ...cities.map((city): SearchResult => ({
-          id: `city-${city.id}`,
-          type: "Ville",
-          title: city.name,
-          subtitle: city.region,
-          to: `/explorer/${city.id}`,
-        })),
-        ...sites.map((site): SearchResult => ({
-          id: `site-${site.id}`,
-          type: "Site",
-          title: site.name,
-          subtitle: site.category || "Site historique",
-          to: `/explorer/sites/${site.id}`,
-        })),
-        ...figures.map((figure): SearchResult => ({
-          id: `figure-${figure.id}`,
-          type: "Personnalité",
-          title: figure.name,
-          subtitle: figure.role,
-          to: `/explorer/personnalites/${figure.id}`,
-        })),
-        ...stories.map((story): SearchResult => ({
-          id: `story-${story.id}`,
-          type: "Récit",
-          title: story.title,
-          subtitle: story.category,
-          to: `/explorer/recits/${story.id}`,
-        })),
-        ...events.map((event): SearchResult => ({
-          id: `event-${event.id}`,
-          type: "Événement",
-          title: event.name,
-          subtitle: event.description,
-          to: `/explorer/evenements/${event.id}`,
-        })),
-        ...traditions.map((tradition): SearchResult => ({
-          id: `tradition-${tradition.id}`,
-          type: "Tradition",
-          title: tradition.name,
-          subtitle: tradition.description,
-          to: `/explorer/traditions/${tradition.id}`,
-        })),
-      ]);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: cities } = useCities();
+  const { data: sites } = useSites();
+  const { data: figures } = useHistoricalFigures();
+  const { data: stories } = useStories();
+  const { data: events } = useCulturalEvents();
+  const { data: traditions } = useTraditions();
+
+  const index = useMemo<SearchResult[]>(
+    () => [
+      ...(cities ?? []).map((city): SearchResult => ({
+        id: `city-${city.id}`,
+        type: "Ville",
+        title: city.name,
+        subtitle: city.region,
+        to: `/explorer/${city.id}`,
+      })),
+      ...(sites ?? []).map((site): SearchResult => ({
+        id: `site-${site.id}`,
+        type: "Site",
+        title: site.name,
+        subtitle: site.category || "Site historique",
+        to: `/explorer/sites/${site.id}`,
+      })),
+      ...(figures ?? []).map((figure): SearchResult => ({
+        id: `figure-${figure.id}`,
+        type: "Personnalité",
+        title: figure.name,
+        subtitle: figure.role,
+        to: `/explorer/personnalites/${figure.id}`,
+      })),
+      ...(stories ?? []).map((story): SearchResult => ({
+        id: `story-${story.id}`,
+        type: "Récit",
+        title: story.title,
+        subtitle: story.category,
+        to: `/explorer/recits/${story.id}`,
+      })),
+      ...(events ?? []).map((event): SearchResult => ({
+        id: `event-${event.id}`,
+        type: "Événement",
+        title: event.name,
+        subtitle: event.description,
+        to: `/explorer/evenements/${event.id}`,
+      })),
+      ...(traditions ?? []).map((tradition): SearchResult => ({
+        id: `tradition-${tradition.id}`,
+        type: "Tradition",
+        title: tradition.name,
+        subtitle: tradition.description,
+        to: `/explorer/traditions/${tradition.id}`,
+      })),
+    ],
+    [cities, sites, figures, stories, events, traditions],
+  );
 
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized || !index) return [];
+    if (!normalized) return [];
     const matches = index.filter(
       (item) =>
         item.title.toLowerCase().includes(normalized) ||

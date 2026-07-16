@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { TestimonySection } from "@/presentation/components/testimony/TestimonySection";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
 import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
-import type { City } from "@/domain/entities/City";
-import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
-import { cityRepository, culturalEventRepository } from "@/infrastructure/config/repositories";
+import { useCityByName, useCulturalEvent } from "@/presentation/queries";
 
 function formatEventDate(isoDate: string) {
   return new Date(`${isoDate}T00:00:00`).toLocaleDateString("fr-FR", {
@@ -19,27 +16,11 @@ function formatEventDate(isoDate: string) {
 
 export function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
-  const [event, setEvent] = useState<CulturalEvent | null | undefined>(undefined);
-  const [city, setCity] = useState<City | null>(null);
+  const eventQuery = useCulturalEvent(eventId);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.events);
 
-  useEffect(() => {
-    if (!eventId) return;
-    let cancelled = false;
-    setEvent(undefined);
-    culturalEventRepository.getById(eventId).then(async (result) => {
-      if (cancelled) return;
-      setEvent(result);
-      if (result?.cityName) {
-        const matches = await cityRepository.search(result.cityName);
-        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
-        if (!cancelled) setCity(relatedCity);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [eventId]);
+  const event = eventQuery.data;
+  const city = useCityByName(event?.cityName);
 
   if (event === undefined) {
     return (

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { PhotoGallery } from "@/presentation/components/gallery/PhotoGallery";
@@ -6,9 +5,7 @@ import { TestimonySection } from "@/presentation/components/testimony/TestimonyS
 import { ImageWithSkeleton } from "@/presentation/components/ui/ImageWithSkeleton";
 import { DetailPageSkeleton } from "@/presentation/components/ui/Skeleton";
 import { useFavorites, FAVORITES_STORAGE_KEYS } from "@/presentation/hooks/useFavorites";
-import type { City } from "@/domain/entities/City";
-import type { Story } from "@/domain/entities/Story";
-import { cityRepository, storyRepository } from "@/infrastructure/config/repositories";
+import { useCityByName, useStory } from "@/presentation/queries";
 
 // Résistance & Spiritualité racontent surtout par l'image (galerie) ; les
 // contes et les récits plus factuels (mémoire, ingéniosité...) racontent
@@ -17,29 +14,11 @@ const GALLERY_CATEGORIES = new Set(["Résistance", "Spiritualité"]);
 
 export function StoryDetailPage() {
   const { storyId } = useParams<{ storyId: string }>();
-  const [story, setStory] = useState<Story | null | undefined>(undefined);
-  const [city, setCity] = useState<City | null>(null);
+  const storyQuery = useStory(storyId);
   const { favoriteIds, toggleFavorite } = useFavorites(FAVORITES_STORAGE_KEYS.stories);
 
-  useEffect(() => {
-    if (!storyId) return;
-    let cancelled = false;
-    setStory(undefined);
-    storyRepository.getById(storyId).then(async (result) => {
-      if (cancelled) return;
-      setStory(result);
-      if (result?.cityName) {
-        const matches = await cityRepository.search(result.cityName);
-        const relatedCity = matches.find((c) => c.name === result.cityName) ?? matches[0] ?? null;
-        if (!cancelled) setCity(relatedCity);
-      } else {
-        setCity(null);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [storyId]);
+  const story = storyQuery.data;
+  const city = useCityByName(story?.cityName);
 
   if (story === undefined) {
     return (
