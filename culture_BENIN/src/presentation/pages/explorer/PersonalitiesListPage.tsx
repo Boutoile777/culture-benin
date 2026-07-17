@@ -1,13 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
+import { GlobalSearchField } from "@/presentation/components/common/GlobalSearchField";
 import { useCities, useHistoricalFigures } from "@/presentation/queries";
+import { matchesQuery } from "@/shared/utils/matchesQuery";
 
 export function PersonalitiesListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: cities } = useCities();
   const { data: figures } = useHistoricalFigures();
 
@@ -19,8 +22,17 @@ export function PersonalitiesListPage() {
 
   const filteredFigures = useMemo(() => {
     const allFigures = figures ?? [];
-    return cityFilter ? allFigures.filter((figure) => figure.cityId === cityFilter) : allFigures;
-  }, [figures, cityFilter]);
+    return allFigures.filter(
+      (figure) =>
+        (!cityFilter || figure.cityId === cityFilter) &&
+        matchesQuery(
+          searchQuery,
+          figure.name,
+          figure.role,
+          cityNameById.get(figure.cityId),
+        ),
+    );
+  }, [figures, cityFilter, searchQuery, cityNameById]);
 
   const filteredCityName = cityFilter ? cityNameById.get(cityFilter) : undefined;
 
@@ -43,6 +55,19 @@ export function PersonalitiesListPage() {
             Rois, reines et figures marquantes qui ont façonné l'histoire du
             Bénin — cliquez sur un nom pour découvrir sa biographie.
           </p>
+
+          <GlobalSearchField
+            dropdown={false}
+            onQueryChange={setSearchQuery}
+            placeholder="Filtrer les personnalités…"
+            className="mb-8 w-full max-w-[340px]"
+          />
+
+          {filteredFigures.length === 0 && (
+            <p className="text-sm text-gray-500">
+              Aucune personnalité ne correspond à « {searchQuery.trim()} ».
+            </p>
+          )}
 
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
             {filteredFigures.map((figure) => (

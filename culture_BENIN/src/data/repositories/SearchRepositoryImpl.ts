@@ -20,8 +20,13 @@ interface RawSearchResponse {
 }
 
 export class SearchRepositoryImpl implements SearchRepository {
-  async search(query: string, limit = 8): Promise<SearchResult[]> {
+  async search(
+    query: string,
+    limit = 8,
+    types?: SearchResultType[],
+  ): Promise<SearchResult[]> {
     const params = new URLSearchParams({ q: query, limit: String(limit) });
+    if (types?.length) params.set("types", types.join(","));
     const response = await apiFetch<RawSearchResponse>(`/search?${params}`);
     return response.results.map((raw) => ({
       type: raw.type,
