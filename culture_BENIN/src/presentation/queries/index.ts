@@ -9,3 +9,4 @@ export * from "./mapQueries";
 export * from "./gameQueries";
 export * from "./searchQueries";
 export * from "./statsQueries";
+export * from "./testimonialQueries";

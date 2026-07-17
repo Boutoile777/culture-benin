@@ -4,16 +4,8 @@ import { contributionRepository } from "@/infrastructure/config/repositories";
 
 export const contributionKeys = {
   all: ["contributions"] as const,
-  recent: (limit: number) => ["contributions", "recent", limit] as const,
   byUser: (userId: string) => ["contributions", "user", userId] as const,
 };
-
-export function useRecentContributions(limit: number) {
-  return useQuery({
-    queryKey: contributionKeys.recent(limit),
-    queryFn: () => contributionRepository.getRecent(limit),
-  });
-}
 
 export function useUserContributions(userId: string | undefined) {
   return useQuery({
