@@ -14,6 +14,7 @@ import type { AuthRepository } from "@/domain/repositories/AuthRepository";
 import type { SearchRepository } from "@/domain/repositories/SearchRepository";
 import type { StatsRepository } from "@/domain/repositories/StatsRepository";
 import type { TestimonialRepository } from "@/domain/repositories/TestimonialRepository";
+import type { ChatRepository } from "@/domain/repositories/ChatRepository";
 import { CityRepositoryImpl } from "@/data/repositories/CityRepositoryImpl";
 import { StoryRepositoryImpl } from "@/data/repositories/StoryRepositoryImpl";
 import { ContributionRepositoryImpl } from "@/data/repositories/ContributionRepositoryImpl";
@@ -30,6 +31,7 @@ import { AuthRepositoryImpl } from "@/data/repositories/AuthRepositoryImpl";
 import { SearchRepositoryImpl } from "@/data/repositories/SearchRepositoryImpl";
 import { StatsRepositoryImpl } from "@/data/repositories/StatsRepositoryImpl";
 import { TestimonialRepositoryImpl } from "@/data/repositories/TestimonialRepositoryImpl";
+import { ChatRepositoryImpl } from "@/data/repositories/ChatRepositoryImpl";
 
 export const cityRepository: CityRepository = new CityRepositoryImpl();
 export const storyRepository: StoryRepository = new StoryRepositoryImpl();
@@ -51,3 +53,4 @@ export const searchRepository: SearchRepository = new SearchRepositoryImpl();
 export const statsRepository: StatsRepository = new StatsRepositoryImpl();
 export const testimonialRepository: TestimonialRepository =
   new TestimonialRepositoryImpl();
+export const chatRepository: ChatRepository = new ChatRepositoryImpl();

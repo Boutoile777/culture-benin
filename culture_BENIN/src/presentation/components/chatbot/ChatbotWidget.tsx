@@ -1,22 +1,44 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
+import type { ChatSource, ChatSourceType } from "@/domain/entities/Chat";
+import { useChatbot } from "@/presentation/hooks/useChatbot";
 
-interface ChatMessage {
-  id: string;
-  author: "bot" | "user";
-  text: string;
+const SOURCE_ROUTES: Partial<Record<ChatSourceType, (id: string) => string>> = {
+  TouristSite: (id) => `/explorer/sites/${id}`,
+  HistoricalFigure: (id) => `/explorer/personnalites/${id}`,
+  City: (id) => `/explorer/${id}`,
+};
+
+function ChatMessageSources({ sources }: { sources: ChatSource[] }) {
+  if (sources.length === 0) return null;
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {sources.map((source) => {
+        const toRoute = SOURCE_ROUTES[source.sourceType]?.(source.sourceId);
+        const chipClassName =
+          "rounded-full border border-culture-green/25 bg-white px-2.5 py-1 text-[11px] font-medium text-culture-green-dark transition-colors";
+
+        return toRoute ? (
+          <Link
+            key={`${source.sourceType}-${source.sourceId}`}
+            to={toRoute}
+            className={`${chipClassName} hover:bg-culture-green hover:text-white`}
+          >
+            {source.sourceTitle}
+          </Link>
+        ) : (
+          <span
+            key={`${source.sourceType}-${source.sourceId}`}
+            className={chipClassName}
+          >
+            {source.sourceTitle}
+          </span>
+        );
+      })}
+    </div>
+  );
 }
-
-const WELCOME_MESSAGE: ChatMessage = {
-  id: "welcome",
-  author: "bot",
-  text: "👋 Bonjour ! Je suis l'assistant Culture+ Bénin. Posez-moi une question sur les villes, récits ou événements — cette fonctionnalité arrive bientôt.",
-};
-
-const CANNED_REPLY: ChatMessage = {
-  id: "canned-reply",
-  author: "bot",
-  text: "Merci pour votre message ! Je ne suis pas encore connecté à une vraie intelligence — revenez bientôt pour des réponses complètes.",
-};
 
 const sharedIconProps = {
   viewBox: "0 0 24 24",
@@ -53,18 +75,18 @@ function SendIcon() {
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState("");
+  const { messages, sendMessage, isSending } = useChatbot();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isOpen, isSending]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const trimmed = draft.trim();
-    if (!trimmed) return;
-    setMessages((current) => [
-      ...current,
-      { id: crypto.randomUUID(), author: "user", text: trimmed },
-      { ...CANNED_REPLY, id: crypto.randomUUID() },
-    ]);
+    if (!draft.trim() || isSending) return;
+    void sendMessage(draft);
     setDraft("");
   };
 
@@ -101,13 +123,22 @@ export function ChatbotWidget() {
                 key={message.id}
                 className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
                   message.author === "bot"
-                    ? "self-start bg-gray-100 text-culture-ink"
+                    ? `self-start ${message.isError ? "bg-red-50 text-red-700" : "bg-gray-100 text-culture-ink"}`
                     : "self-end bg-culture-green text-white"
                 }`}
               >
                 {message.text}
+                {message.sources && <ChatMessageSources sources={message.sources} />}
               </div>
             ))}
+            {isSending && (
+              <div className="flex max-w-[85%] items-center gap-1 self-start rounded-2xl bg-gray-100 px-3.5 py-2.5">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-culture-ink/50 [animation-delay:-0.3s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-culture-ink/50 [animation-delay:-0.15s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-culture-ink/50" />
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           <form
@@ -118,12 +149,14 @@ export function ChatbotWidget() {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               placeholder="Écrivez votre question…"
-              className="flex-1 rounded-full border border-gray-300 bg-gray-50 px-3.5 py-2 text-[13px] text-culture-ink focus:outline-none focus:ring-2 focus:ring-culture-green"
+              disabled={isSending}
+              className="flex-1 rounded-full border border-gray-300 bg-gray-50 px-3.5 py-2 text-[13px] text-culture-ink focus:outline-none focus:ring-2 focus:ring-culture-green disabled:opacity-60"
             />
             <button
               type="submit"
               aria-label="Envoyer"
-              className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-culture-green text-white transition-colors duration-200 hover:bg-culture-green-dark"
+              disabled={isSending || !draft.trim()}
+              className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-culture-green text-white transition-colors duration-200 hover:bg-culture-green-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               <SendIcon />
             </button>
