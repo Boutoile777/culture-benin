@@ -13,6 +13,7 @@ import type { MemoryRepository } from "@/domain/repositories/MemoryRepository";
 import type { AuthRepository } from "@/domain/repositories/AuthRepository";
 import type { SearchRepository } from "@/domain/repositories/SearchRepository";
 import type { StatsRepository } from "@/domain/repositories/StatsRepository";
+import type { TestimonialRepository } from "@/domain/repositories/TestimonialRepository";
 import { CityRepositoryImpl } from "@/data/repositories/CityRepositoryImpl";
 import { StoryRepositoryImpl } from "@/data/repositories/StoryRepositoryImpl";
 import { ContributionRepositoryImpl } from "@/data/repositories/ContributionRepositoryImpl";
@@ -28,6 +29,7 @@ import { MemoryRepositoryImpl } from "@/data/repositories/MemoryRepositoryImpl";
 import { AuthRepositoryImpl } from "@/data/repositories/AuthRepositoryImpl";
 import { SearchRepositoryImpl } from "@/data/repositories/SearchRepositoryImpl";
 import { StatsRepositoryImpl } from "@/data/repositories/StatsRepositoryImpl";
+import { TestimonialRepositoryImpl } from "@/data/repositories/TestimonialRepositoryImpl";
 
 export const cityRepository: CityRepository = new CityRepositoryImpl();
 export const storyRepository: StoryRepository = new StoryRepositoryImpl();
@@ -47,3 +49,5 @@ export const memoryRepository: MemoryRepository = new MemoryRepositoryImpl();
 export const authRepository: AuthRepository = new AuthRepositoryImpl();
 export const searchRepository: SearchRepository = new SearchRepositoryImpl();
 export const statsRepository: StatsRepository = new StatsRepositoryImpl();
+export const testimonialRepository: TestimonialRepository =
+  new TestimonialRepositoryImpl();

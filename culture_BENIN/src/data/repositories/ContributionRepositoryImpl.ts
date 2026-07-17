@@ -9,12 +9,6 @@ export class ContributionRepositoryImpl implements ContributionRepository {
     return contributions.filter((c) => c.authorId === userId);
   }
 
-  async getRecent(limit: number): Promise<Contribution[]> {
-    return [...contributions]
-      .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
-      .slice(0, limit);
-  }
-
   async create(
     contribution: Omit<Contribution, "id" | "status" | "submittedAt">,
   ): Promise<Contribution> {
