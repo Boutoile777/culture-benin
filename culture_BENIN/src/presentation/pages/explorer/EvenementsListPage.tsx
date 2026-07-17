@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
+import { GlobalSearchField } from "@/presentation/components/common/GlobalSearchField";
 import type { CulturalEvent } from "@/domain/entities/CulturalEvent";
 import { useCulturalEvents } from "@/presentation/queries";
+import { matchesQuery } from "@/shared/utils/matchesQuery";
 
 function formatEventDate(isoDate: string) {
   return new Date(`${isoDate}T00:00:00`).toLocaleDateString("fr-FR", {
@@ -55,12 +57,17 @@ function EventRow({ event, isPast }: EventRowProps) {
 export function EvenementsListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: events } = useCulturalEvents();
 
   const filteredEvents = useMemo(() => {
     const allEvents = events ?? [];
-    return cityFilter ? allEvents.filter((event) => event.cityName === cityFilter) : allEvents;
-  }, [events, cityFilter]);
+    return allEvents.filter(
+      (event) =>
+        (!cityFilter || event.cityName === cityFilter) &&
+        matchesQuery(searchQuery, event.name, event.description, event.cityName),
+    );
+  }, [events, cityFilter, searchQuery]);
 
   const { upcoming, past } = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -83,6 +90,13 @@ export function EvenementsListPage() {
             Festivals et rendez-vous culturels datés du Bénin — chaque fiche
             détaille son origine et sa galerie.
           </p>
+
+          <GlobalSearchField
+            dropdown={false}
+            onQueryChange={setSearchQuery}
+            placeholder="Filtrer les événements…"
+            className="-mt-5 mb-10 w-full max-w-[340px]"
+          />
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
             <div>

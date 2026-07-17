@@ -7,6 +7,7 @@ export interface QuickLink {
   kicker: string;
   title: string;
   description: string;
+  path: string;
 }
 
 export const QUICK_LINKS: QuickLink[] = [
@@ -17,6 +18,7 @@ export const QUICK_LINKS: QuickLink[] = [
     title: "Explorer une ville",
     description:
       "Ouidah, Abomey, Porto-Novo, Ganvié — plongez dans des visites guidées virtuelles, quartier par quartier, récit par récit.",
+    path: "/explorer",
   },
   {
     icon: "mapPin",
@@ -25,6 +27,7 @@ export const QUICK_LINKS: QuickLink[] = [
     title: "La carte culturelle",
     description:
       "Repérez chaque site sacré, musée ou monument sur Google Maps et lancez l'itinéraire depuis votre position en un clic.",
+    path: "/carte",
   },
   {
     icon: "bookOpen",
@@ -33,6 +36,7 @@ export const QUICK_LINKS: QuickLink[] = [
     title: "Les jeux culturels",
     description:
       "Quiz, devinettes, vrai ou faux, reconnaissance de lieux — testez et affûtez votre culture béninoise en vous amusant.",
+    path: "/jouer",
   },
   {
     icon: "uploadCloud",
@@ -41,6 +45,7 @@ export const QUICK_LINKS: QuickLink[] = [
     title: "Contribuer",
     description:
       "Partagez récits, images, sons et témoignages : chaque contribution enrichit la mémoire collective du Bénin.",
+    path: "/contribuer",
   },
 ];
 

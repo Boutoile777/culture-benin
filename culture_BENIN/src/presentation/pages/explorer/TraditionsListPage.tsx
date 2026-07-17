@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
+import { GlobalSearchField } from "@/presentation/components/common/GlobalSearchField";
 import type { Tradition } from "@/domain/entities/Tradition";
 import { useTraditions } from "@/presentation/queries";
+import { matchesQuery } from "@/shared/utils/matchesQuery";
 
 function TraditionCard({ tradition }: { tradition: Tradition }) {
   return (
@@ -31,14 +33,22 @@ function TraditionCard({ tradition }: { tradition: Tradition }) {
 export function TraditionsListPage() {
   const [searchParams] = useSearchParams();
   const cityFilter = searchParams.get("city");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: traditions } = useTraditions();
 
   const filteredTraditions = useMemo(() => {
     const allTraditions = traditions ?? [];
-    return cityFilter
-      ? allTraditions.filter((tradition) => tradition.cityName === cityFilter)
-      : allTraditions;
-  }, [traditions, cityFilter]);
+    return allTraditions.filter(
+      (tradition) =>
+        (!cityFilter || tradition.cityName === cityFilter) &&
+        matchesQuery(
+          searchQuery,
+          tradition.name,
+          tradition.description,
+          tradition.cityName,
+        ),
+    );
+  }, [traditions, cityFilter, searchQuery]);
 
   return (
     <MainLayout>
@@ -54,8 +64,19 @@ export function TraditionsListPage() {
             génération à travers le Bénin.
           </p>
 
+          <GlobalSearchField
+            dropdown={false}
+            onQueryChange={setSearchQuery}
+            placeholder="Filtrer les traditions…"
+            className="-mt-4 mb-8 w-full max-w-[340px]"
+          />
+
           {filteredTraditions.length === 0 ? (
-            <p className="text-sm text-gray-500">Aucune tradition dans cette rubrique pour le moment.</p>
+            <p className="text-sm text-gray-500">
+              {searchQuery.trim()
+                ? `Aucune tradition ne correspond à « ${searchQuery.trim()} ».`
+                : "Aucune tradition dans cette rubrique pour le moment."}
+            </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {filteredTraditions.map((tradition) => (

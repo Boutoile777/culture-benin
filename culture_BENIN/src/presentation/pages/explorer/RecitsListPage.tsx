@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/presentation/layouts/MainLayout";
 import { SectionHeading } from "@/presentation/components/common/SectionHeading";
 import { BackLink } from "@/presentation/components/common/BackLink";
+import { GlobalSearchField } from "@/presentation/components/common/GlobalSearchField";
 import { StoryCard } from "@/presentation/components/ui/StoryCard";
 import { useStories } from "@/presentation/queries";
+import { matchesQuery } from "@/shared/utils/matchesQuery";
 
 const ALL_CATEGORY = "Tout";
 
@@ -21,15 +23,23 @@ export function RecitsListPage() {
   const { data: stories } = useStories();
   const activeCategory = searchParams.get("categorie") ?? ALL_CATEGORY;
   const cityFilter = searchParams.get("city");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredStories = useMemo(
     () =>
       (stories ?? []).filter(
         (story) =>
           (activeCategory === ALL_CATEGORY || story.category === activeCategory) &&
-          (!cityFilter || story.cityName === cityFilter),
+          (!cityFilter || story.cityName === cityFilter) &&
+          matchesQuery(
+            searchQuery,
+            story.title,
+            story.excerpt,
+            story.category,
+            story.cityName,
+          ),
       ),
-    [stories, activeCategory, cityFilter],
+    [stories, activeCategory, cityFilter, searchQuery],
   );
 
   const filteredCityName = cityFilter ?? undefined;
@@ -77,9 +87,18 @@ export function RecitsListPage() {
             })}
           </nav>
 
+          <GlobalSearchField
+            dropdown={false}
+            onQueryChange={setSearchQuery}
+            placeholder="Filtrer les récits…"
+            className="-mt-4 mb-8 w-full max-w-[340px]"
+          />
+
           {filteredStories.length === 0 ? (
             <p className="text-sm text-gray-500">
-              Aucun récit dans cette rubrique pour le moment.
+              {searchQuery.trim()
+                ? `Aucun récit ne correspond à « ${searchQuery.trim()} ».`
+                : "Aucun récit dans cette rubrique pour le moment."}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

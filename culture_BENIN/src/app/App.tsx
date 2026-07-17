@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ScrollToTop } from "@/app/ScrollToTop";
 import { HomePage } from "@/presentation/pages/HomePage";
 import { ContributePage } from "@/presentation/pages/ContributePage";
 import { CartePage } from "@/presentation/pages/CartePage";
@@ -27,6 +28,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/contribuer" element={<ContributePage />} />
