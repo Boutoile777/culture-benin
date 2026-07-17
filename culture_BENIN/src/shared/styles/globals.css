@@ -15,6 +15,11 @@ body {
   color: var(--color-culture-ink);
 }
 
+/* Évite le flash gris/bleu par défaut au tap sur Android Chrome */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 ::selection {
   background: #e9e4d8;
 }

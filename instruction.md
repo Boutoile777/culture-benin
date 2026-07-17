@@ -1,1 +1,2 @@
-sur la page d'acceuil, dont la rubrique Lieux culturels à tu exposes 9 villes. Je veux plutot qu'a ce niveau tu exposes 8 sites historiques qu'on a. 
+parcours l'appli en général, et détectes les erreurs. 
+surtout le rendu en responsivité : par exemple le menu dans la navbar, j'aime pas le rendu sur android. 
